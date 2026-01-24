@@ -124,3 +124,17 @@ openspec archive add-mvp-specs --yes
 - **tasks.md 동기화**: PR 완료 시 체크박스 반드시 업데이트
 - **단일 archive**: 모든 섹션 완료 후 마지막에 한 번만 archive
 - **테스트 필수**: 모든 태스크에 테스트 작성 (testing.md 참조)
+
+## CLAUDE.md 갱신
+
+작업 완료 후 다음 변경이 있으면 `CLAUDE.md`를 업데이트:
+
+| 변경 유형 | 갱신 내용 |
+|----------|----------|
+| 새 빌드/테스트 명령어 추가 | Build & Test Commands 섹션 |
+| 아키텍처 변경 | Architecture 섹션 |
+| 새 라이브러리 도입 | Tech Stack 섹션 |
+| 코드 컨벤션 변경 | Code Conventions 섹션 |
+| 새 커스텀 커맨드 추가 | 필요시 섹션 추가 |
+
+**갱신 시점**: PR 생성 전, 해당 섹션이 outdated 되었는지 확인
