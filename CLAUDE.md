@@ -34,6 +34,16 @@ Claude Code CLI
 - **Tree-sitter** (신택스 하이라이팅)
 - **MarkdownUI** (마크다운 렌더링)
 
+## Design Resources
+
+UI 작업 시 반드시 `ui-design/` 디렉토리의 디자인 파일을 먼저 확인할 것.
+
+| 파일 | 설명 |
+|------|------|
+| `ui-design/chat-interface.png` | 채팅 인터페이스 디자인 |
+| `ui-design/file-explorer.png` | 파일 탐색기 디자인 |
+| `ui-design/session-management.png` | 세션 관리 UI 디자인 |
+
 ## Build & Test Commands
 
 ```bash

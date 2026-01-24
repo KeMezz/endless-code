@@ -58,6 +58,29 @@ Task 2: "FileTreeViewModel 구현" (subagent_type: general-purpose)
 
 **IMPORTANT**: 병렬 가능한 작업은 반드시 **한 번의 응답에서 여러 Task tool을 동시에 호출**해야 합니다.
 
+## UI 작업 시 디자인 참조 (필수)
+
+UI 관련 작업(Section 2-7) 시작 전, **반드시** `ui-design/` 디렉토리의 샘플 디자인을 확인해야 합니다.
+
+### 디자인 파일 목록
+
+| 파일 | 설명 | 관련 섹션 |
+|------|------|----------|
+| `ui-design/chat-interface.png` | 채팅 인터페이스 디자인 | Section 3, 7 |
+| `ui-design/file-explorer.png` | 파일 탐색기 디자인 | Section 4 |
+| `ui-design/session-management.png` | 세션 관리 UI 디자인 | Section 2, 7 |
+
+### 디자인 확인 워크플로우
+
+```bash
+# UI 작업 시작 전 필수 확인
+Read: ui-design/{관련-화면}.png
+```
+
+**IMPORTANT**: 디자인 파일을 확인하지 않고 UI 구현을 시작하지 마세요. 디자인과 구현의 일관성이 최우선입니다.
+
+---
+
 ## 구현 워크플로우
 
 ### 1. 섹션 시작 전
@@ -67,7 +90,10 @@ Task 2: "FileTreeViewModel 구현" (subagent_type: general-purpose)
 Read: openspec/changes/add-mvp-specs/tasks.md
 Read: openspec/changes/add-mvp-specs/specs/{capability}/spec.md
 
-# 2. 브랜치 생성
+# 2. UI 작업인 경우, 디자인 파일 확인 (필수)
+Read: ui-design/{관련-화면}.png
+
+# 3. 브랜치 생성
 git checkout -b feat/section-N-name
 ```
 
@@ -119,6 +145,7 @@ openspec archive add-mvp-specs --yes
 
 ## 주의사항
 
+- **디자인 우선**: UI 작업 시 `ui-design/` 디렉토리의 디자인 파일을 먼저 확인
 - **의존성 그래프 준수**: PR 머지 순서는 반드시 의존성을 따름
 - **Spec 일관성**: 구현이 spec의 Scenario와 일치하는지 검증
 - **tasks.md 동기화**: PR 완료 시 체크박스 반드시 업데이트
