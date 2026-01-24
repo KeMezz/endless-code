@@ -1,13 +1,13 @@
 //
-//  cc_wrapperUITestsLaunchTests.swift
-//  cc-wrapperUITests
+//  EndlessCodeUITestsLaunchTests.swift
+//  EndlessCodeUITests
 //
 //  Created by hyeongjin on 2026/01/25.
 //
 
 import XCTest
 
-final class cc_wrapperUITestsLaunchTests: XCTestCase {
+final class EndlessCodeUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

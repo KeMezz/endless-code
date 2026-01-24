@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  cc-wrapper
+//  EndlessCode
 //
 //  Created by hyeongjin on 2026/01/25.
 //

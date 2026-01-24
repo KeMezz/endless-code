@@ -12,37 +12,37 @@
 			containerPortal = C0359F362F2529B00073D287 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = C0359F3D2F2529B00073D287;
-			remoteInfo = "cc-wrapper";
+			remoteInfo = "EndlessCode";
 		};
 		C0359F562F2529B40073D287 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C0359F362F2529B00073D287 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = C0359F3D2F2529B00073D287;
-			remoteInfo = "cc-wrapper";
+			remoteInfo = "EndlessCode";
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		C0359F3E2F2529B00073D287 /* cc-wrapper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "cc-wrapper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C0359F4B2F2529B40073D287 /* cc-wrapperTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "cc-wrapperTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C0359F552F2529B40073D287 /* cc-wrapperUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "cc-wrapperUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0359F3E2F2529B00073D287 /* EndlessCode.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "EndlessCode.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0359F4B2F2529B40073D287 /* EndlessCodeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "EndlessCodeTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0359F552F2529B40073D287 /* EndlessCodeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "EndlessCodeUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		C0359F402F2529B00073D287 /* cc-wrapper */ = {
+		C0359F402F2529B00073D287 /* EndlessCode */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "cc-wrapper";
+			path = "EndlessCode";
 			sourceTree = "<group>";
 		};
-		C0359F4E2F2529B40073D287 /* cc-wrapperTests */ = {
+		C0359F4E2F2529B40073D287 /* EndlessCodeTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "cc-wrapperTests";
+			path = "EndlessCodeTests";
 			sourceTree = "<group>";
 		};
-		C0359F582F2529B40073D287 /* cc-wrapperUITests */ = {
+		C0359F582F2529B40073D287 /* EndlessCodeUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "cc-wrapperUITests";
+			path = "EndlessCodeUITests";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -75,9 +75,9 @@
 		C0359F352F2529B00073D287 = {
 			isa = PBXGroup;
 			children = (
-				C0359F402F2529B00073D287 /* cc-wrapper */,
-				C0359F4E2F2529B40073D287 /* cc-wrapperTests */,
-				C0359F582F2529B40073D287 /* cc-wrapperUITests */,
+				C0359F402F2529B00073D287 /* EndlessCode */,
+				C0359F4E2F2529B40073D287 /* EndlessCodeTests */,
+				C0359F582F2529B40073D287 /* EndlessCodeUITests */,
 				C0359F3F2F2529B00073D287 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -85,9 +85,9 @@
 		C0359F3F2F2529B00073D287 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				C0359F3E2F2529B00073D287 /* cc-wrapper.app */,
-				C0359F4B2F2529B40073D287 /* cc-wrapperTests.xctest */,
-				C0359F552F2529B40073D287 /* cc-wrapperUITests.xctest */,
+				C0359F3E2F2529B00073D287 /* EndlessCode.app */,
+				C0359F4B2F2529B40073D287 /* EndlessCodeTests.xctest */,
+				C0359F552F2529B40073D287 /* EndlessCodeUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -95,9 +95,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		C0359F3D2F2529B00073D287 /* cc-wrapper */ = {
+		C0359F3D2F2529B00073D287 /* EndlessCode */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C0359F5F2F2529B40073D287 /* Build configuration list for PBXNativeTarget "cc-wrapper" */;
+			buildConfigurationList = C0359F5F2F2529B40073D287 /* Build configuration list for PBXNativeTarget "EndlessCode" */;
 			buildPhases = (
 				C0359F3A2F2529B00073D287 /* Sources */,
 				C0359F3B2F2529B00073D287 /* Frameworks */,
@@ -108,18 +108,18 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				C0359F402F2529B00073D287 /* cc-wrapper */,
+				C0359F402F2529B00073D287 /* EndlessCode */,
 			);
-			name = "cc-wrapper";
+			name = "EndlessCode";
 			packageProductDependencies = (
 			);
-			productName = "cc-wrapper";
-			productReference = C0359F3E2F2529B00073D287 /* cc-wrapper.app */;
+			productName = "EndlessCode";
+			productReference = C0359F3E2F2529B00073D287 /* EndlessCode.app */;
 			productType = "com.apple.product-type.application";
 		};
-		C0359F4A2F2529B40073D287 /* cc-wrapperTests */ = {
+		C0359F4A2F2529B40073D287 /* EndlessCodeTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C0359F622F2529B40073D287 /* Build configuration list for PBXNativeTarget "cc-wrapperTests" */;
+			buildConfigurationList = C0359F622F2529B40073D287 /* Build configuration list for PBXNativeTarget "EndlessCodeTests" */;
 			buildPhases = (
 				C0359F472F2529B40073D287 /* Sources */,
 				C0359F482F2529B40073D287 /* Frameworks */,
@@ -131,18 +131,18 @@
 				C0359F4D2F2529B40073D287 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				C0359F4E2F2529B40073D287 /* cc-wrapperTests */,
+				C0359F4E2F2529B40073D287 /* EndlessCodeTests */,
 			);
-			name = "cc-wrapperTests";
+			name = "EndlessCodeTests";
 			packageProductDependencies = (
 			);
-			productName = "cc-wrapperTests";
-			productReference = C0359F4B2F2529B40073D287 /* cc-wrapperTests.xctest */;
+			productName = "EndlessCodeTests";
+			productReference = C0359F4B2F2529B40073D287 /* EndlessCodeTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		C0359F542F2529B40073D287 /* cc-wrapperUITests */ = {
+		C0359F542F2529B40073D287 /* EndlessCodeUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C0359F652F2529B40073D287 /* Build configuration list for PBXNativeTarget "cc-wrapperUITests" */;
+			buildConfigurationList = C0359F652F2529B40073D287 /* Build configuration list for PBXNativeTarget "EndlessCodeUITests" */;
 			buildPhases = (
 				C0359F512F2529B40073D287 /* Sources */,
 				C0359F522F2529B40073D287 /* Frameworks */,
@@ -154,13 +154,13 @@
 				C0359F572F2529B40073D287 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				C0359F582F2529B40073D287 /* cc-wrapperUITests */,
+				C0359F582F2529B40073D287 /* EndlessCodeUITests */,
 			);
-			name = "cc-wrapperUITests";
+			name = "EndlessCodeUITests";
 			packageProductDependencies = (
 			);
-			productName = "cc-wrapperUITests";
-			productReference = C0359F552F2529B40073D287 /* cc-wrapperUITests.xctest */;
+			productName = "EndlessCodeUITests";
+			productReference = C0359F552F2529B40073D287 /* EndlessCodeUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -186,7 +186,7 @@
 					};
 				};
 			};
-			buildConfigurationList = C0359F392F2529B00073D287 /* Build configuration list for PBXProject "cc-wrapper" */;
+			buildConfigurationList = C0359F392F2529B00073D287 /* Build configuration list for PBXProject "EndlessCode" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -200,9 +200,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				C0359F3D2F2529B00073D287 /* cc-wrapper */,
-				C0359F4A2F2529B40073D287 /* cc-wrapperTests */,
-				C0359F542F2529B40073D287 /* cc-wrapperUITests */,
+				C0359F3D2F2529B00073D287 /* EndlessCode */,
+				C0359F4A2F2529B40073D287 /* EndlessCodeTests */,
+				C0359F542F2529B40073D287 /* EndlessCodeUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -258,12 +258,12 @@
 /* Begin PBXTargetDependency section */
 		C0359F4D2F2529B40073D287 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = C0359F3D2F2529B00073D287 /* cc-wrapper */;
+			target = C0359F3D2F2529B00073D287 /* EndlessCode */;
 			targetProxy = C0359F4C2F2529B40073D287 /* PBXContainerItemProxy */;
 		};
 		C0359F572F2529B40073D287 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = C0359F3D2F2529B00073D287 /* cc-wrapper */;
+			target = C0359F3D2F2529B00073D287 /* EndlessCode */;
 			targetProxy = C0359F562F2529B40073D287 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -413,7 +413,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "kemezz.cc-wrapper";
+				PRODUCT_BUNDLE_IDENTIFIER = "kemezz.EndlessCode";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -457,7 +457,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "kemezz.cc-wrapper";
+				PRODUCT_BUNDLE_IDENTIFIER = "kemezz.EndlessCode";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -484,7 +484,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "kemezz.cc-wrapperTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "kemezz.EndlessCodeTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -494,7 +494,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/cc-wrapper.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/cc-wrapper";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EndlessCode.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/EndlessCode";
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Debug;
@@ -510,7 +510,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "kemezz.cc-wrapperTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "kemezz.EndlessCodeTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -520,7 +520,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/cc-wrapper.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/cc-wrapper";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EndlessCode.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/EndlessCode";
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Release;
@@ -535,7 +535,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "kemezz.cc-wrapperUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = "kemezz.EndlessCodeUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -545,7 +545,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_TARGET_NAME = "cc-wrapper";
+				TEST_TARGET_NAME = "EndlessCode";
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Debug;
@@ -560,7 +560,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "kemezz.cc-wrapperUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = "kemezz.EndlessCodeUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -570,7 +570,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_TARGET_NAME = "cc-wrapper";
+				TEST_TARGET_NAME = "EndlessCode";
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Release;
@@ -578,7 +578,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		C0359F392F2529B00073D287 /* Build configuration list for PBXProject "cc-wrapper" */ = {
+		C0359F392F2529B00073D287 /* Build configuration list for PBXProject "EndlessCode" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C0359F5D2F2529B40073D287 /* Debug */,
@@ -587,7 +587,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C0359F5F2F2529B40073D287 /* Build configuration list for PBXNativeTarget "cc-wrapper" */ = {
+		C0359F5F2F2529B40073D287 /* Build configuration list for PBXNativeTarget "EndlessCode" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C0359F602F2529B40073D287 /* Debug */,
@@ -596,7 +596,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C0359F622F2529B40073D287 /* Build configuration list for PBXNativeTarget "cc-wrapperTests" */ = {
+		C0359F622F2529B40073D287 /* Build configuration list for PBXNativeTarget "EndlessCodeTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C0359F632F2529B40073D287 /* Debug */,
@@ -605,7 +605,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C0359F652F2529B40073D287 /* Build configuration list for PBXNativeTarget "cc-wrapperUITests" */ = {
+		C0359F652F2529B40073D287 /* Build configuration list for PBXNativeTarget "EndlessCodeUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C0359F662F2529B40073D287 /* Debug */,
