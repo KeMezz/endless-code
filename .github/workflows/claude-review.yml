@@ -1,0 +1,93 @@
+name: Claude Review
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  review:
+    if: |
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+      actions: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Claude Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          # Opus 4.5 모델 사용
+          model: claude-opus-4-5-20251101
+
+          # Claude가 CI 결과 읽기 허용
+          additional_permissions: |
+            actions: read
+
+          # 커스텀 리뷰 프롬프트
+          prompt: |
+            PR의 변경사항을 리뷰하세요.
+
+            ## 리뷰 방법
+
+            1. `git diff origin/main...HEAD`로 변경사항 확인
+            2. 변경된 파일 분석
+            3. 문제 발견 시 피드백 제공
+
+            ## 피드백 형식
+
+            ### 인라인 코멘트 (특정 라인에 문제가 있는 경우)
+            해당 파일의 특정 라인에 인라인 코멘트를 작성하세요.
+
+            ### 일반 코멘트 (전체적인 피드백)
+            - 아키텍처 관련 의견
+            - 여러 파일에 걸친 패턴 문제
+            - 테스트 커버리지 전반
+            - 인라인으로 표현하기 어려운 내용
+
+            ## 심각도
+
+            🔴 **Critical**: 버그, 보안, 크래시 - 반드시 수정 필요
+            🟡 **Warning**: 에러핸들링, 성능 - 수정 권장
+            🟢 **Suggestion**: 가독성, 네이밍 - 선택적
+
+            ## 인라인 코멘트 형식
+
+            ```
+            🔴 **Critical**: <요약>
+
+            **문제**: <설명>
+            **해결**: <방법>
+
+            ```suggestion
+            <수정 코드>
+            ```
+            ```
+
+            ## 프로젝트 컨텍스트
+
+            - Swift 6.2+ / SwiftUI (Strict Concurrency)
+            - Vapor 4 서버
+            - 80% 테스트 커버리지 요구
+            - Actor 기반 동시성
+
+            ## 주의
+
+            - 변경되지 않은 코드에는 코멘트 금지
+            - 구체적이고 실행 가능한 피드백만 제공
