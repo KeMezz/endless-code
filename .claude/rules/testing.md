@@ -1,0 +1,327 @@
+# Testing Rules
+
+엄격한 테스트 정책입니다. 모든 태스크에 테스트 필수.
+
+## 필수 요구사항
+
+### 커버리지 기준
+
+| 메트릭 | 최소 기준 |
+|--------|----------|
+| Line Coverage | 80% |
+| Branch Coverage | 75% |
+| Function Coverage | 85% |
+
+### 테스트 필수 조건
+
+1. **모든 태스크에 테스트 필수**: 구현 코드 없이 테스트만 있어도 안됨, 반대도 안됨
+2. **PR 전 테스트 통과 필수**: 실패하는 테스트가 있으면 PR 생성 불가
+3. **TDD 권장**: 가능하면 테스트 먼저 작성
+
+## Unit Test 규칙
+
+### 파일 구조
+
+```
+EndlessCodeTests/
+├── Server/
+│   ├── CLIProcessManagerTests.swift
+│   ├── JSONLParserTests.swift
+│   ├── SessionManagerTests.swift
+│   └── WebSocketHandlerTests.swift
+├── Shared/
+│   ├── Models/
+│   │   └── MessageTests.swift
+│   └── ViewModels/
+│       └── ChatViewModelTests.swift
+└── Mocks/
+    ├── MockCLIProcess.swift
+    └── MockWebSocketClient.swift
+```
+
+### 네이밍 컨벤션
+
+```swift
+// 테스트 클래스: {테스트대상}Tests
+final class JSONLParserTests: XCTestCase {
+
+    // 테스트 메서드: test_{조건}_{기대결과}
+    func test_parseValidJSONL_returnsMessages() async throws {
+        // ...
+    }
+
+    func test_parseInvalidJSON_throwsError() async throws {
+        // ...
+    }
+
+    func test_parseEmptyInput_returnsEmptyArray() async throws {
+        // ...
+    }
+}
+```
+
+### 테스트 구조 (Given-When-Then)
+
+```swift
+func test_sendMessage_updatesConversationHistory() async throws {
+    // Given: 초기 상태 설정
+    let sut = ChatViewModel()
+    let message = "Hello, Claude"
+
+    // When: 테스트 대상 동작 실행
+    await sut.sendMessage(message)
+
+    // Then: 결과 검증
+    XCTAssertEqual(sut.messages.count, 1)
+    XCTAssertEqual(sut.messages.first?.content, message)
+}
+```
+
+### Mock 사용 규칙
+
+```swift
+// Protocol 기반 의존성 주입
+protocol CLIProcessProtocol: Sendable {
+    func start() async throws
+    func send(_ input: String) async throws
+    var outputStream: AsyncStream<String> { get }
+}
+
+// Production 구현
+actor CLIProcess: CLIProcessProtocol {
+    // 실제 구현
+}
+
+// Test Mock
+final class MockCLIProcess: CLIProcessProtocol, @unchecked Sendable {
+    var startCalled = false
+    var sentInputs: [String] = []
+    private let continuation: AsyncStream<String>.Continuation
+    let outputStream: AsyncStream<String>
+
+    init() {
+        (outputStream, continuation) = AsyncStream.makeStream()
+    }
+
+    func start() async throws {
+        startCalled = true
+    }
+
+    func send(_ input: String) async throws {
+        sentInputs.append(input)
+    }
+
+    func emit(_ output: String) {
+        continuation.yield(output)
+    }
+}
+```
+
+### Async 테스트
+
+```swift
+func test_streamMessages_receivesAllMessages() async throws {
+    // Given
+    let mockProcess = MockCLIProcess()
+    let parser = JSONLParser(process: mockProcess)
+
+    // When
+    let task = Task {
+        var messages: [Message] = []
+        for await message in parser.messages {
+            messages.append(message)
+            if messages.count == 3 { break }
+        }
+        return messages
+    }
+
+    mockProcess.emit(#"{"type":"message","content":"Hello"}"#)
+    mockProcess.emit(#"{"type":"message","content":"World"}"#)
+    mockProcess.emit(#"{"type":"message","content":"!"}"#)
+
+    // Then
+    let messages = await task.value
+    XCTAssertEqual(messages.count, 3)
+}
+```
+
+## E2E Test (UI Test) 규칙
+
+### 파일 구조
+
+```
+EndlessCodeUITests/
+├── Flows/
+│   ├── ChatFlowTests.swift
+│   ├── SessionFlowTests.swift
+│   └── FileExplorerFlowTests.swift
+├── Pages/
+│   ├── ChatPage.swift
+│   ├── SessionListPage.swift
+│   └── SettingsPage.swift
+└── Helpers/
+    └── XCUIElementExtensions.swift
+```
+
+### Page Object 패턴
+
+```swift
+// Page Object
+struct ChatPage {
+    let app: XCUIApplication
+
+    var messageInput: XCUIElement {
+        app.textFields["messageInput"]
+    }
+
+    var sendButton: XCUIElement {
+        app.buttons["sendButton"]
+    }
+
+    var messageList: XCUIElement {
+        app.scrollViews["messageList"]
+    }
+
+    func sendMessage(_ text: String) {
+        messageInput.tap()
+        messageInput.typeText(text)
+        sendButton.tap()
+    }
+
+    func waitForResponse(timeout: TimeInterval = 10) -> Bool {
+        let predicate = NSPredicate(format: "count > 1")
+        let expectation = XCTNSPredicateExpectation(
+            predicate: predicate,
+            object: messageList.staticTexts
+        )
+        return XCTWaiter.wait(for: [expectation], timeout: timeout) == .completed
+    }
+}
+```
+
+### E2E 테스트 작성
+
+```swift
+final class ChatFlowTests: XCTestCase {
+    var app: XCUIApplication!
+    var chatPage: ChatPage!
+
+    override func setUpWithError() throws {
+        continueAfterFailure = false
+        app = XCUIApplication()
+        app.launchArguments = ["--uitesting"]
+        app.launch()
+        chatPage = ChatPage(app: app)
+    }
+
+    func test_sendMessage_receivesResponse() throws {
+        // Given: 채팅 화면
+
+        // When: 메시지 전송
+        chatPage.sendMessage("Hello, Claude")
+
+        // Then: 응답 수신
+        XCTAssertTrue(chatPage.waitForResponse())
+    }
+}
+```
+
+### Accessibility Identifier 규칙
+
+SwiftUI 뷰에 반드시 `accessibilityIdentifier` 설정:
+
+```swift
+struct ChatView: View {
+    var body: some View {
+        VStack {
+            ScrollView {
+                // ...
+            }
+            .accessibilityIdentifier("messageList")
+
+            HStack {
+                TextField("메시지 입력", text: $input)
+                    .accessibilityIdentifier("messageInput")
+
+                Button("전송") {
+                    // ...
+                }
+                .accessibilityIdentifier("sendButton")
+            }
+        }
+    }
+}
+```
+
+## 테스트 실행 명령어
+
+### Unit Test
+
+```bash
+# 전체 테스트
+xcodebuild test \
+  -scheme EndlessCode \
+  -destination 'platform=macOS'
+
+# 특정 테스트 클래스
+xcodebuild test \
+  -scheme EndlessCode \
+  -destination 'platform=macOS' \
+  -only-testing:EndlessCodeTests/JSONLParserTests
+
+# 특정 테스트 메서드
+xcodebuild test \
+  -scheme EndlessCode \
+  -destination 'platform=macOS' \
+  -only-testing:EndlessCodeTests/JSONLParserTests/test_parseValidJSONL_returnsMessages
+```
+
+### UI Test
+
+```bash
+# macOS UI 테스트
+xcodebuild test \
+  -scheme EndlessCode \
+  -destination 'platform=macOS' \
+  -only-testing:EndlessCodeUITests
+
+# iOS UI 테스트
+xcodebuild test \
+  -scheme EndlessCode \
+  -destination 'platform=iOS Simulator,name=iPhone 16'
+```
+
+### 커버리지 리포트
+
+```bash
+# 커버리지 포함 테스트 실행
+xcodebuild test \
+  -scheme EndlessCode \
+  -destination 'platform=macOS' \
+  -enableCodeCoverage YES \
+  -resultBundlePath TestResults.xcresult
+
+# 커버리지 리포트 확인
+xcrun xccov view --report TestResults.xcresult
+```
+
+## 테스트 체크리스트
+
+PR 생성 전 반드시 확인:
+
+- [ ] 모든 Unit 테스트 통과
+- [ ] 모든 UI 테스트 통과
+- [ ] Line Coverage 80% 이상
+- [ ] 신규 코드에 대한 테스트 작성됨
+- [ ] Mock 객체 적절히 사용됨
+- [ ] Async 코드 테스트 시 Task 적절히 처리됨
+- [ ] Accessibility Identifier 설정됨 (UI 컴포넌트)
+
+## 테스트 제외 항목
+
+다음 항목은 테스트 커버리지에서 제외 가능:
+
+- `@main` 앱 엔트리 포인트
+- SwiftUI Preview 코드
+- 단순 데이터 모델 (computed property 없는 struct)
+- 외부 라이브러리 래퍼 (Tree-sitter 바인딩 등)
