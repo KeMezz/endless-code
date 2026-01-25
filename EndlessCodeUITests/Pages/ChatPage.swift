@@ -12,39 +12,49 @@ struct ChatPage {
     let app: XCUIApplication
 
     // MARK: - Elements
+    // Note: SwiftUI의 accessibilityIdentifier는 XCUITest에서 항상 예상대로 노출되지 않을 수 있음
+    // 따라서 staticTexts, buttons 등 실제 내용을 기반으로 요소를 찾음
 
-    /// 채팅 뷰 (특정 세션)
+    /// 채팅 뷰 확인 - 헤더의 "Session" 텍스트로 확인
     func chatView(sessionId: String) -> XCUIElement {
-        app.descendants(matching: .any)["chatView-\(sessionId)"]
+        // ChatView 헤더의 "Session" 텍스트로 확인
+        app.staticTexts["Session"]
     }
 
-    /// 채팅 헤더
+    /// 채팅 헤더 - "Session" 텍스트로 확인
     var chatHeader: XCUIElement {
-        app.descendants(matching: .any)["chatHeader"]
+        app.staticTexts["Session"]
     }
 
-    /// 메시지 목록
+    /// 메시지 목록 - identifier로 검색 (ScrollView 또는 Group)
     var messageList: XCUIElement {
         app.descendants(matching: .any)["messageList"]
     }
 
-    /// 빈 메시지 목록
+    /// 빈 메시지 목록 - "Start a conversation" 텍스트로 확인
     var emptyMessageList: XCUIElement {
-        app.descendants(matching: .any)["emptyMessageList"]
+        app.staticTexts["Start a conversation"]
     }
 
-    /// 메시지 입력 뷰
+    /// 메시지 입력 뷰 - placeholder 텍스트로 확인
     var messageInputView: XCUIElement {
-        app.descendants(matching: .any)["messageInputView"]
+        app.staticTexts["Ask Claude to write code..."]
     }
 
-    /// 메시지 입력 필드
+    /// 메시지 입력 필드 - TextEditor
+    /// Note: accessibilityIdentifier "messageTextEditor"를 사용
     var messageInput: XCUIElement {
-        app.descendants(matching: .any)["messageInput"]
+        // TextEditor는 textViews로 탐색, 명시적 identifier 우선
+        let textEditor = app.textViews["messageTextEditor"]
+        if textEditor.exists {
+            return textEditor
+        }
+        return app.textViews.firstMatch
     }
 
-    /// 전송 버튼
+    /// 전송 버튼 - image로 찾기 (arrow.up 아이콘)
     var sendButton: XCUIElement {
+        // Button 내부의 이미지나 identifier로 찾기
         app.descendants(matching: .any)["sendButton"]
     }
 
@@ -53,9 +63,9 @@ struct ChatPage {
         app.descendants(matching: .any)["attachmentButton"]
     }
 
-    /// 로딩 뷰
+    /// 로딩 뷰 - "Loading messages..." 텍스트로 확인
     var loadingView: XCUIElement {
-        app.descendants(matching: .any)["chatLoadingView"]
+        app.staticTexts["Loading messages..."]
     }
 
     /// 스트리밍 인디케이터
@@ -103,9 +113,21 @@ struct ChatPage {
     // MARK: - Actions
 
     /// 메시지 입력
+    /// Note: SwiftUI TextEditor는 XCUITest에서 직접 타이핑이 어려울 수 있음
+    /// 클릭 후 짧은 대기가 필요할 수 있음
     func typeMessage(_ text: String) {
         guard messageInput.waitForExistence(timeout: 5) else { return }
-        messageInput.click()
+
+        // TextEditor에 포커스 시도 - 여러 번 클릭
+        for _ in 0..<3 {
+            messageInput.click()
+            usleep(100_000) // 0.1초 대기
+        }
+
+        // 타이핑 가능 상태 대기
+        usleep(300_000) // 0.3초 대기
+
+        // 타이핑 시도
         messageInput.typeText(text)
     }
 

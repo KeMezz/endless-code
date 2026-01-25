@@ -2,16 +2,21 @@
 //  EndlessCodeUITestHostApp.swift
 //  EndlessCodeUITestHost
 //
-//  Created by 정형진 on 1/25/26.
+//  UI 테스트용 호스트 앱 - Vapor 의존성 없이 UI만 빌드
 //
 
 import SwiftUI
 
 @main
 struct EndlessCodeUITestHostApp: App {
+    @State private var appState = AppState()
+    @State private var router = AppRouter()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainView()
+                .environment(appState)
+                .environment(router)
         }
     }
 }
