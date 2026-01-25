@@ -162,9 +162,18 @@ struct MessageTextContent: View {
     let text: String
     let onCopyCode: ((String) -> Void)?
 
+    // 파싱 결과를 init에서 미리 계산 (성능 최적화)
+    private let parsedBlocks: [ContentBlock]
+
+    init(text: String, onCopyCode: ((String) -> Void)? = nil) {
+        self.text = text
+        self.onCopyCode = onCopyCode
+        self.parsedBlocks = Self.parseContent(text)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            ForEach(Array(parseContent().enumerated()), id: \.offset) { _, block in
+            ForEach(Array(parsedBlocks.enumerated()), id: \.offset) { _, block in
                 switch block {
                 case .text(let content):
                     Text(content)
@@ -182,10 +191,10 @@ struct MessageTextContent: View {
         }
     }
 
-    private func parseContent() -> [ContentBlock] {
+    private static func parseContent(_ text: String) -> [ContentBlock] {
         var blocks: [ContentBlock] = []
 
-        guard let regex = Self.codeBlockRegex else {
+        guard let regex = codeBlockRegex else {
             return [.text(text)]
         }
 
