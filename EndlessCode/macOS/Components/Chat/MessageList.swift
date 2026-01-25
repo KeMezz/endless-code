@@ -16,6 +16,7 @@ struct MessageList: View {
     let onCopyCode: ((String) -> Void)?
 
     @State private var scrollPosition: String?
+    @State private var cachedGroups: [MessageGroup] = []
 
     init(
         messages: [ChatMessageItem],
@@ -31,7 +32,7 @@ struct MessageList: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(spacing: 0) {
-                    ForEach(groupedMessages) { group in
+                    ForEach(cachedGroups) { group in
                         DateSeparator(date: group.date)
                             .id("date-\(group.id)")
 
@@ -53,6 +54,12 @@ struct MessageList: View {
                 .padding(.top, 16)
             }
             .scrollPosition(id: $scrollPosition, anchor: .bottom)
+            .onAppear {
+                cachedGroups = computeGroupedMessages(messages)
+            }
+            .onChange(of: messages) { _, newMessages in
+                cachedGroups = computeGroupedMessages(newMessages)
+            }
             .onChange(of: messages.count) { _, _ in
                 scrollToBottom(proxy: proxy)
             }
@@ -99,7 +106,8 @@ struct MessageList: View {
 
     // MARK: - Helpers
 
-    private var groupedMessages: [MessageGroup] {
+    /// 메시지를 날짜별로 그룹화 (메모이제이션을 위한 별도 함수)
+    private func computeGroupedMessages(_ messages: [ChatMessageItem]) -> [MessageGroup] {
         let calendar = Calendar.current
         var groups: [MessageGroup] = []
         var currentGroup: MessageGroup?
@@ -139,9 +147,18 @@ struct MessageList: View {
 
 /// 날짜별 메시지 그룹
 struct MessageGroup: Identifiable {
-    let id = UUID()
+    private static let dateFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        return formatter
+    }()
+
     let date: Date
     var messages: [ChatMessageItem]
+
+    /// date 기반의 안정적인 ID (SwiftUI 재렌더링 최적화)
+    var id: String {
+        Self.dateFormatter.string(from: date)
+    }
 }
 
 // MARK: - DateSeparator
