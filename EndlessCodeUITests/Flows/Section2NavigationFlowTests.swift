@@ -57,12 +57,10 @@ final class Section2NavigationFlowTests: XCTestCase {
     /// 2.1.2 사이드바 탭 전환 테스트 - Projects → Sessions
     func test_sidebarNavigation_projectsToSessions() throws {
         // Given: 앱이 실행되고 Projects 탭이 기본 선택됨
-        sleep(1)
         XCTAssertTrue(sidebarPage.projectsTab.waitForExistence(timeout: 5))
 
         // When: Sessions 탭 클릭
         sidebarPage.selectSessionsTab()
-        sleep(2)
 
         // Then: Sessions 목록이 표시되어야 함
         XCTAssertTrue(sessionListPage.sessionList.waitForExistence(timeout: 10),
@@ -79,13 +77,11 @@ final class Section2NavigationFlowTests: XCTestCase {
     /// 2.1.3 사이드바 탭 전환 테스트 - Sessions → Settings
     func test_sidebarNavigation_sessionsToSettings() throws {
         // Given: Sessions 탭으로 이동
-        sleep(1)
         sidebarPage.selectSessionsTab()
-        sleep(2)
+        XCTAssertTrue(sessionListPage.sessionList.waitForExistence(timeout: 10))
 
         // When: Settings 탭 클릭
         sidebarPage.selectSettingsTab()
-        sleep(1)
 
         // Then: Settings 뷰가 표시되어야 함
         XCTAssertTrue(detailPage.isSettingsListVisible(timeout: 5),
@@ -102,13 +98,11 @@ final class Section2NavigationFlowTests: XCTestCase {
     /// 2.1.4 사이드바 탭 전환 테스트 - Settings → Projects
     func test_sidebarNavigation_settingsToProjects() throws {
         // Given: Settings 탭으로 이동
-        sleep(1)
         sidebarPage.selectSettingsTab()
-        sleep(1)
+        XCTAssertTrue(detailPage.isSettingsListVisible(timeout: 5))
 
         // When: Projects 탭 클릭
         sidebarPage.selectProjectsTab()
-        sleep(2)
 
         // Then: Projects 목록이 표시되어야 함
         XCTAssertTrue(projectBrowserPage.projectList.waitForExistence(timeout: 10),
@@ -127,15 +121,11 @@ final class Section2NavigationFlowTests: XCTestCase {
     /// 2.2.1 프로젝트 목록 표시 테스트
     func test_projectBrowser_showsProjectList() throws {
         // Given: Projects 탭이 선택됨 (기본값)
-        // 데이터 로딩 대기
-        sleep(2)
-
         // Then: 프로젝트 목록이 표시되어야 함
         XCTAssertTrue(projectBrowserPage.projectList.waitForExistence(timeout: 10),
                       "프로젝트 목록이 표시되어야 합니다")
 
-        // Then: 샘플 프로젝트가 표시되어야 함 (4개)
-        sleep(1)
+        // Then: 샘플 프로젝트가 표시되어야 함 (최소 1개)
         XCTAssertGreaterThanOrEqual(projectBrowserPage.projectCount, 1,
                                     "최소 1개 이상의 프로젝트가 표시되어야 합니다")
 
@@ -150,13 +140,11 @@ final class Section2NavigationFlowTests: XCTestCase {
     /// 2.2.2 프로젝트 검색 테스트
     func test_projectBrowser_searchFiltersProjects() throws {
         // Given: 프로젝트 목록이 표시됨
-        sleep(2)
         XCTAssertTrue(projectBrowserPage.projectList.waitForExistence(timeout: 10))
 
         // When: 검색어 입력
         if projectBrowserPage.searchField.waitForExistence(timeout: 5) {
             projectBrowserPage.searchProjects("Endless")
-            sleep(1)
 
             // 스크린샷 저장
             let screenshot = app.screenshot()
@@ -170,14 +158,12 @@ final class Section2NavigationFlowTests: XCTestCase {
     /// 2.2.3 프로젝트 선택 시 상세 뷰 표시 테스트
     func test_projectBrowser_selectProject_showsDetail() throws {
         // Given: 프로젝트 목록이 표시됨
-        sleep(2)
         XCTAssertTrue(projectBrowserPage.projectList.waitForExistence(timeout: 10))
 
         // When: 첫 번째 프로젝트 선택
         let firstProject = projectBrowserPage.projectCard(id: "project-1")
         if firstProject.waitForExistence(timeout: 5) {
             firstProject.click()
-            sleep(1)
 
             // Then: 프로젝트 상세 뷰가 표시되어야 함
             XCTAssertTrue(detailPage.isProjectDetailVisible(id: "project-1", timeout: 5),
@@ -197,9 +183,7 @@ final class Section2NavigationFlowTests: XCTestCase {
     /// 2.3.1 세션 목록 표시 테스트
     func test_sessionList_showsSessionList() throws {
         // Given: Sessions 탭으로 이동
-        sleep(1)
         sidebarPage.selectSessionsTab()
-        sleep(2)
 
         // Then: 세션 목록이 표시되어야 함
         XCTAssertTrue(sessionListPage.sessionList.waitForExistence(timeout: 10),
@@ -216,9 +200,8 @@ final class Section2NavigationFlowTests: XCTestCase {
     /// 2.3.2 세션 검색 필드 존재 테스트
     func test_sessionList_hasSearchField() throws {
         // Given: Sessions 탭으로 이동
-        sleep(1)
         sidebarPage.selectSessionsTab()
-        sleep(2)
+        XCTAssertTrue(sessionListPage.sessionList.waitForExistence(timeout: 10))
 
         // Then: 검색 필드가 존재해야 함
         XCTAssertTrue(sessionListPage.searchField.waitForExistence(timeout: 5),
@@ -228,9 +211,8 @@ final class Section2NavigationFlowTests: XCTestCase {
     /// 2.3.3 세션 상태 필터 존재 테스트
     func test_sessionList_hasStateFilter() throws {
         // Given: Sessions 탭으로 이동
-        sleep(1)
         sidebarPage.selectSessionsTab()
-        sleep(2)
+        XCTAssertTrue(sessionListPage.sessionList.waitForExistence(timeout: 10))
 
         // Then: 상태 필터가 존재해야 함
         XCTAssertTrue(sessionListPage.stateFilter.waitForExistence(timeout: 5),
@@ -243,25 +225,20 @@ final class Section2NavigationFlowTests: XCTestCase {
     func test_fullNavigationFlow() throws {
         // 1. 앱 실행 확인
         XCTAssertTrue(sidebarPage.sidebar.waitForExistence(timeout: 10))
-        sleep(1)
 
         // 2. Projects 탭 확인
         XCTAssertTrue(projectBrowserPage.projectList.waitForExistence(timeout: 10))
-        sleep(1)
 
         // 3. Sessions 탭으로 이동
         sidebarPage.selectSessionsTab()
-        sleep(2)
         XCTAssertTrue(sessionListPage.sessionList.waitForExistence(timeout: 10))
 
         // 4. Settings 탭으로 이동
         sidebarPage.selectSettingsTab()
-        sleep(1)
         XCTAssertTrue(detailPage.isSettingsListVisible(timeout: 5))
 
         // 5. Projects 탭으로 복귀
         sidebarPage.selectProjectsTab()
-        sleep(2)
         XCTAssertTrue(projectBrowserPage.projectList.waitForExistence(timeout: 10))
 
         // 최종 스크린샷

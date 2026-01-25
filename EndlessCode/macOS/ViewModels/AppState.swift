@@ -11,8 +11,8 @@ import SwiftUI
 // MARK: - AppState
 
 /// 앱 전역 상태
-@Observable
-final class AppState: @unchecked Sendable {
+@Observable @MainActor
+final class AppState {
     // MARK: - Properties
 
     /// 현재 선택된 탭
@@ -140,8 +140,8 @@ enum NavigationDestination: Hashable {
 // MARK: - AppRouter
 
 /// 앱 라우터 - 화면 전환, 딥링크 처리
-@Observable
-final class AppRouter: @unchecked Sendable {
+@Observable @MainActor
+final class AppRouter {
     // MARK: - Properties
 
     /// 현재 네비게이션 경로
