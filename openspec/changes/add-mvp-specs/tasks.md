@@ -86,9 +86,9 @@
 ### 2.5 리팩토링 (PR #4 리뷰 피드백)
 > Section 3 시작 전 처리 권장
 
-- [ ] 2.5.1 ConnectionManager actor 변환 - class → actor, NSLock 제거
-- [ ] 2.5.2 ConnectionManager 이벤트 기반 상태 변경 - polling(100ms) → stateChanges 스트림
-- [ ] 2.5.3 ConnectionManagerProtocol 재설계 - actor 기반 인터페이스
+- [x] 2.5.1 ConnectionManager actor 변환 - class → actor, NSLock 제거
+- [x] 2.5.2 ConnectionManager 이벤트 기반 상태 변경 - polling(100ms) → stateChanges 스트림
+- [x] 2.5.3 ConnectionManagerProtocol 재설계 - actor 기반 인터페이스
 
 ## 3. macOS App - 채팅
 

@@ -13,9 +13,18 @@ import Testing
 
 /// 테스트용 Mock WebSocket 클라이언트
 actor MockWebSocketClient: WebSocketClientProtocol {
-    private var _connectionState: ConnectionState = .disconnected
+    private var _connectionState: ConnectionState = .disconnected {
+        didSet {
+            if _connectionState != oldValue {
+                stateContinuation.yield(_connectionState)
+            }
+        }
+    }
     private let messageContinuation: AsyncStream<ServerMessage>.Continuation
     private let _messages: AsyncStream<ServerMessage>
+
+    private let stateContinuation: AsyncStream<ConnectionState>.Continuation
+    private let _stateChanges: AsyncStream<ConnectionState>
 
     var connectCalled = false
     var disconnectCalled = false
@@ -24,19 +33,30 @@ actor MockWebSocketClient: WebSocketClientProtocol {
     var shouldFailSend = false
 
     init() {
-        var continuation: AsyncStream<ServerMessage>.Continuation!
+        var msgContinuation: AsyncStream<ServerMessage>.Continuation!
         self._messages = AsyncStream { cont in
-            continuation = cont
+            msgContinuation = cont
         }
-        self.messageContinuation = continuation
+        self.messageContinuation = msgContinuation
+
+        var stateCont: AsyncStream<ConnectionState>.Continuation!
+        self._stateChanges = AsyncStream { cont in
+            stateCont = cont
+        }
+        self.stateContinuation = stateCont
     }
 
     deinit {
         messageContinuation.finish()
+        stateContinuation.finish()
     }
 
     nonisolated var messages: AsyncStream<ServerMessage> {
         _messages
+    }
+
+    nonisolated var stateChanges: AsyncStream<ConnectionState> {
+        _stateChanges
     }
 
     var connectionState: ConnectionState {

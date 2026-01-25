@@ -21,6 +21,10 @@ private actor StateCollector {
     var count: Int {
         states.count
     }
+
+    var allStates: [ConnectionState] {
+        states
+    }
 }
 
 private actor MessageCollector {
@@ -41,7 +45,7 @@ struct ConnectionManagerTests {
     // MARK: - Initialization Tests
 
     @Test("Init with configuration creates manager")
-    func initWithConfigurationCreatesManager() {
+    func initWithConfigurationCreatesManager() async {
         // Given
         let url = URL(string: "ws://localhost:8080/ws")!
         let config = WebSocketClientConfiguration(serverURL: url, authToken: "token")
@@ -50,7 +54,8 @@ struct ConnectionManagerTests {
         let manager = ConnectionManager(configuration: config)
 
         // Then
-        #expect(manager.currentState == .disconnected)
+        let state = await manager.state
+        #expect(state == .disconnected)
     }
 
     @Test("Init with mock client creates manager")
@@ -62,7 +67,8 @@ struct ConnectionManagerTests {
         let manager = ConnectionManager(client: mockClient)
 
         // Then
-        #expect(manager.currentState == .disconnected)
+        let state = await manager.state
+        #expect(state == .disconnected)
     }
 
     // MARK: - Connection Tests
@@ -119,73 +125,42 @@ struct ConnectionManagerTests {
 
     // MARK: - State Tests
 
-    @Test("IsConnected returns true when connected")
-    func isConnectedReturnsTrueWhenConnected() async throws {
+    @Test("State reflects connected after connect")
+    func stateReflectsConnectedAfterConnect() async throws {
+        // Given
+        let mockClient = await MockWebSocketClient()
+        let manager = ConnectionManager(client: mockClient)
+
+        // When
+        try await manager.connect()
+
+        // Give time for state to propagate
+        try await Task.sleep(for: .milliseconds(50))
+
+        // Then
+        let state = await manager.state
+        #expect(state == .connected)
+    }
+
+    @Test("State reflects disconnected after disconnect")
+    func stateReflectsDisconnectedAfterDisconnect() async throws {
         // Given
         let mockClient = await MockWebSocketClient()
         let manager = ConnectionManager(client: mockClient)
         try await manager.connect()
 
-        // Give time for state to update
-        try await Task.sleep(for: .milliseconds(150))
+        // When
+        await manager.disconnect()
 
         // Then
-        #expect(manager.isConnected)
-    }
-
-    @Test("IsConnected returns false when disconnected")
-    func isConnectedReturnsFalseWhenDisconnected() async {
-        // Given
-        let mockClient = await MockWebSocketClient()
-        let manager = ConnectionManager(client: mockClient)
-
-        // Then
-        #expect(!manager.isConnected)
-    }
-
-    @Test("IsReconnecting returns correct value for reconnecting state")
-    func isReconnectingReturnsCorrectValue() {
-        // Given/When/Then - test the property logic directly
-        // ConnectionManager.isReconnecting checks if currentState matches .reconnecting pattern
-        // This verifies the pattern matching works correctly
-        let state = ConnectionState.reconnecting(attempt: 1)
-        if case .reconnecting = state {
-            #expect(Bool(true))
-        } else {
-            Issue.record("Expected reconnecting state")
-        }
-    }
-
-    @Test("ErrorMessage returns correct value for failed state")
-    func errorMessageReturnsCorrectValue() {
-        // Given/When/Then - test the logic directly
-        // ConnectionManager.errorMessage extracts error from .failed state
-        let state = ConnectionState.failed(error: "Test error")
-        if case .failed(let error) = state {
-            #expect(error == "Test error")
-        } else {
-            Issue.record("Expected failed state")
-        }
-    }
-
-    @Test("ErrorMessage returns nil when not failed")
-    func errorMessageReturnsNilWhenNotFailed() async throws {
-        // Given
-        let mockClient = await MockWebSocketClient()
-        let manager = ConnectionManager(client: mockClient)
-        try await manager.connect()
-
-        // Give time for state to update
-        try await Task.sleep(for: .milliseconds(150))
-
-        // Then
-        #expect(manager.errorMessage == nil)
+        let state = await manager.state
+        #expect(state == .disconnected)
     }
 
     // MARK: - State Changes Stream Tests
 
-    @Test("StateChanges emits state changes")
-    func stateChangesEmitsStateChanges() async throws {
+    @Test("StateChanges emits state changes via event stream")
+    func stateChangesEmitsStateChangesViaEventStream() async throws {
         // Given
         let mockClient = await MockWebSocketClient()
         let manager = ConnectionManager(client: mockClient)
@@ -205,15 +180,19 @@ struct ConnectionManagerTests {
 
         // When
         try await manager.connect()
-        try await Task.sleep(for: .milliseconds(150))
+        try await Task.sleep(for: .milliseconds(50))
         await manager.disconnect()
-        try await Task.sleep(for: .milliseconds(150))
+        try await Task.sleep(for: .milliseconds(50))
 
         collectTask.cancel()
 
         // Then
         let count = await collector.count
-        #expect(count >= 1)
+        #expect(count >= 2)
+
+        let states = await collector.allStates
+        #expect(states.contains(.connected))
+        #expect(states.contains(.disconnected))
     }
 
     // MARK: - Messages Stream Tests
@@ -247,11 +226,79 @@ struct ConnectionManagerTests {
         await mockClient.emitMessage(testMessage)
 
         // Wait for message to be processed
-        try await Task.sleep(for: .milliseconds(200))
+        try await Task.sleep(for: .milliseconds(100))
         collectTask.cancel()
 
         // Then
         let count = await collector.count
         #expect(count == 1)
+    }
+
+    // MARK: - Observable State Tests
+
+    @Test("Observable state reflects connection changes")
+    @MainActor
+    func observableStateReflectsConnectionChanges() async throws {
+        // Given
+        let mockClient = await MockWebSocketClient()
+        let manager = ConnectionManager(client: mockClient)
+        let observableState = ConnectionManagerObservableState()
+
+        // When
+        observableState.observe(manager)
+        try await manager.connect()
+
+        // Wait for state to propagate
+        try await Task.sleep(for: .milliseconds(100))
+
+        // Then
+        #expect(observableState.isConnected)
+        #expect(!observableState.isReconnecting)
+        #expect(observableState.errorMessage == nil)
+    }
+
+    @Test("Observable state stops observing correctly")
+    @MainActor
+    func observableStateStopsObservingCorrectly() async throws {
+        // Given
+        let mockClient = await MockWebSocketClient()
+        let manager = ConnectionManager(client: mockClient)
+        let observableState = ConnectionManagerObservableState()
+
+        observableState.observe(manager)
+        try await manager.connect()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // When
+        observableState.stopObserving()
+        await manager.disconnect()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // Then - state should still be connected because we stopped observing
+        #expect(observableState.isConnected)
+    }
+
+    // MARK: - ConnectionState Pattern Matching Tests
+
+    @Test("IsReconnecting returns correct value for reconnecting state")
+    func isReconnectingReturnsCorrectValue() {
+        // Given/When/Then - test the pattern matching works correctly
+        let state = ConnectionState.reconnecting(attempt: 1)
+        if case .reconnecting = state {
+            #expect(Bool(true))
+        } else {
+            Issue.record("Expected reconnecting state")
+        }
+    }
+
+    @Test("ErrorMessage returns correct value for failed state")
+    func errorMessageReturnsCorrectValue() {
+        // Given/When/Then - test the logic directly
+        let state = ConnectionState.failed(error: "Test error")
+        if case .failed(let error) = state {
+            #expect(error == "Test error")
+        } else {
+            Issue.record("Expected failed state")
+        }
     }
 }
