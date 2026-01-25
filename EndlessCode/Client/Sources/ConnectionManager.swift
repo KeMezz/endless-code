@@ -34,26 +34,24 @@ protocol ConnectionManagerProtocol: Sendable {
 
 /// 연결 관리자 구현
 /// WebSocketClient를 래핑하여 연결 상태 모니터링 및 이벤트 발행
-@Observable
-final class ConnectionManager: ConnectionManagerProtocol, @unchecked Sendable {
+actor ConnectionManager: ConnectionManagerProtocol {
     // MARK: - Properties
 
     private let client: any WebSocketClientProtocol
+    private var stateMonitorTask: Task<Void, Never>?
+    private var messageForwardTask: Task<Void, Never>?
+
     private let stateContinuation: AsyncStream<ConnectionState>.Continuation
     private let _stateChanges: AsyncStream<ConnectionState>
-
-    private var monitorTask: Task<Void, Never>?
-    private var messageForwardTask: Task<Void, Never>?
 
     private let messageContinuation: AsyncStream<ServerMessage>.Continuation
     private let _messages: AsyncStream<ServerMessage>
 
-    private var _state: ConnectionState = .disconnected
-    private let lock = NSLock()
+    private var _currentState: ConnectionState = .disconnected
 
     // MARK: - Initialization
 
-    nonisolated init(client: any WebSocketClientProtocol) {
+    init(client: any WebSocketClientProtocol) {
         self.client = client
 
         var stateCont: AsyncStream<ConnectionState>.Continuation!
@@ -69,13 +67,25 @@ final class ConnectionManager: ConnectionManagerProtocol, @unchecked Sendable {
         self.messageContinuation = msgCont
     }
 
-    convenience init(configuration: WebSocketClientConfiguration) {
+    init(configuration: WebSocketClientConfiguration) {
         let client = WebSocketClient(configuration: configuration)
-        self.init(client: client)
+        self.client = client
+
+        var stateCont: AsyncStream<ConnectionState>.Continuation!
+        self._stateChanges = AsyncStream { cont in
+            stateCont = cont
+        }
+        self.stateContinuation = stateCont
+
+        var msgCont: AsyncStream<ServerMessage>.Continuation!
+        self._messages = AsyncStream { cont in
+            msgCont = cont
+        }
+        self.messageContinuation = msgCont
     }
 
     deinit {
-        monitorTask?.cancel()
+        stateMonitorTask?.cancel()
         messageForwardTask?.cancel()
         stateContinuation.finish()
         messageContinuation.finish()
@@ -84,9 +94,7 @@ final class ConnectionManager: ConnectionManagerProtocol, @unchecked Sendable {
     // MARK: - ConnectionManagerProtocol
 
     var state: ConnectionState {
-        get async {
-            await client.connectionState
-        }
+        _currentState
     }
 
     nonisolated var stateChanges: AsyncStream<ConnectionState> {
@@ -98,14 +106,14 @@ final class ConnectionManager: ConnectionManagerProtocol, @unchecked Sendable {
     }
 
     func connect() async throws {
-        startMonitoring()
+        startStateMonitoring()
         startForwardingMessages()
         try await client.connect()
     }
 
     func disconnect() async {
-        monitorTask?.cancel()
-        monitorTask = nil
+        stateMonitorTask?.cancel()
+        stateMonitorTask = nil
 
         messageForwardTask?.cancel()
         messageForwardTask = nil
@@ -120,22 +128,14 @@ final class ConnectionManager: ConnectionManagerProtocol, @unchecked Sendable {
 
     // MARK: - Private Methods
 
-    private func startMonitoring() {
-        monitorTask?.cancel()
-        monitorTask = Task { [weak self] in
+    private func startStateMonitoring() {
+        stateMonitorTask?.cancel()
+        stateMonitorTask = Task { [weak self] in
             guard let self = self else { return }
 
-            var previousState: ConnectionState?
-
-            while !Task.isCancelled {
-                let currentState = await self.client.connectionState
-
-                if currentState != previousState {
-                    self.updateState(currentState)
-                    previousState = currentState
-                }
-
-                try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
+            for await newState in self.client.stateChanges {
+                guard !Task.isCancelled else { break }
+                await self.updateState(newState)
             }
         }
     }
@@ -153,23 +153,48 @@ final class ConnectionManager: ConnectionManagerProtocol, @unchecked Sendable {
     }
 
     private func updateState(_ newState: ConnectionState) {
-        lock.lock()
-        _state = newState
-        lock.unlock()
-
+        guard _currentState != newState else { return }
+        _currentState = newState
         stateContinuation.yield(newState)
     }
 }
 
-// MARK: - ConnectionManager Observable Properties
+// MARK: - ConnectionManagerObservableState
 
-extension ConnectionManager {
-    /// 현재 연결 상태 (동기 접근)
-    var currentState: ConnectionState {
-        lock.lock()
-        defer { lock.unlock() }
-        return _state
+/// SwiftUI 연동을 위한 Observable 상태 래퍼
+/// ConnectionManager actor의 상태를 MainActor에서 관찰 가능하게 제공
+@MainActor
+@Observable
+final class ConnectionManagerObservableState {
+    // MARK: - Properties
+
+    private(set) var currentState: ConnectionState = .disconnected
+    private var stateTask: Task<Void, Never>?
+
+    // MARK: - Initialization
+
+    init() {}
+
+    // MARK: - Public Methods
+
+    /// ConnectionManager의 상태 변경 감시 시작
+    func observe(_ manager: ConnectionManager) {
+        stateTask?.cancel()
+        stateTask = Task { [weak self] in
+            for await state in manager.stateChanges {
+                guard !Task.isCancelled else { break }
+                self?.currentState = state
+            }
+        }
     }
+
+    /// 감시 중지
+    func stopObserving() {
+        stateTask?.cancel()
+        stateTask = nil
+    }
+
+    // MARK: - Computed Properties
 
     /// 연결 여부
     var isConnected: Bool {
