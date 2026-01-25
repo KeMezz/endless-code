@@ -9,7 +9,7 @@ OpenSpec change의 proposal, design, tasks, specs를 서브에이전트를 활�
 ## 실행 방법
 
 ```
-/review-spec add-mvp-specs
+/openspec:review add-mvp-specs
 ```
 
 ## 검증 항목
