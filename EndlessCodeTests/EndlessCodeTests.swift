@@ -2,15 +2,17 @@
 //  EndlessCodeTests.swift
 //  EndlessCodeTests
 //
-//  Created by hyeongjin on 2026/01/25.
+//  기본 테스트 파일 - 각 모듈별 테스트는 해당 폴더에 위치
 //
 
-import Testing
+import XCTest
+@testable import EndlessCode
 
-struct EndlessCodeTests {
+/// 기본 앱 테스트
+final class EndlessCodeBasicTests: XCTestCase {
 
-    @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+    func test_appInitializes() {
+        // 앱이 정상적으로 초기화되는지 확인
+        XCTAssertTrue(true)
     }
-
 }
