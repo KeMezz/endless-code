@@ -119,11 +119,14 @@
 - [x] 3.5.3 ConnectionStatusBar - 연결 상태, 재연결 진행률
 
 ### 3.6 Section 3 E2E 테스트
-> Note: 테스트 코드 작성 완료. 세션 선택 → ChatView 표시 플로우의 accessibilityIdentifier 전파 문제로 일부 테스트 실패 중. 추후 디버깅 필요.
-- [x] 3.6.1 메시지 전송 및 표시 테스트 (코드 작성 완료, 테스트 실패 - accessibilityIdentifier 문제)
-- [x] 3.6.2 코드 블록 렌더링 테스트 (코드 작성 완료, 테스트 실패 - accessibilityIdentifier 문제)
-- [x] 3.6.3 스트리밍 메시지 표시 테스트 (코드 작성 완료, 테스트 실패 - accessibilityIdentifier 문제)
-- [x] 3.6.4 도구 사용 표시 테스트 (코드 작성 완료, 테스트 실패 - accessibilityIdentifier 문제)
+> 모든 테스트 통과 (7개). accessibilityIdentifier 문제 해결됨:
+> - SidebarPage: SwiftUI List(.sidebar)는 XCUITest에서 Outline 타입으로 렌더링
+> - ChatPage: NavigationSplitView detail의 accessibilityIdentifier 전파 이슈 → text-based detection으로 우회
+> - MessageInputView: TextEditor에 명시적 accessibilityIdentifier 추가
+- [x] 3.6.1 메시지 전송 및 표시 테스트 ✅
+- [x] 3.6.2 코드 블록 렌더링 테스트 ✅
+- [x] 3.6.3 스트리밍 메시지 표시 테스트 ✅
+- [x] 3.6.4 도구 사용 표시 테스트 ✅
 
 ## 4. macOS App - 파일 탐색기
 
