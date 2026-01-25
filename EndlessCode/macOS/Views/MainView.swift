@@ -66,7 +66,7 @@ struct MainView: View {
                 title: Text("End Session"),
                 message: Text("Are you sure you want to end session '\(session.id)'?"),
                 primaryButton: .destructive(Text("End")) {
-                    // TODO: End session
+                    // TODO(Section-2.3): End session - SessionListViewModel.terminateSession() 호출
                 },
                 secondaryButton: .cancel()
             )
@@ -75,7 +75,7 @@ struct MainView: View {
                 title: Text("Delete Project"),
                 message: Text("Are you sure you want to remove project '\(project.name)'?"),
                 primaryButton: .destructive(Text("Delete")) {
-                    // TODO: Delete project
+                    // TODO(Section-2.2): Delete project - ProjectBrowserViewModel에서 프로젝트 제거
                 },
                 secondaryButton: .cancel()
             )

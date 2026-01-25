@@ -71,19 +71,19 @@ struct ChatView: View {
 
             Menu {
                 Button("Pause Session", systemImage: "pause.fill") {
-                    // TODO: Pause session
+                    // TODO(Section-3.4): Pause session - WebSocket을 통해 세션 일시정지 요청
                 }
                 .disabled(session.state != .active)
 
                 Button("Resume Session", systemImage: "play.fill") {
-                    // TODO: Resume session
+                    // TODO(Section-3.4): Resume session - WebSocket을 통해 세션 재개 요청
                 }
                 .disabled(session.state != .paused)
 
                 Divider()
 
                 Button("End Session", systemImage: "xmark.circle", role: .destructive) {
-                    // TODO: End session
+                    // TODO(Section-3.4): End session - WebSocket을 통해 세션 종료 요청
                 }
             } label: {
                 Image(systemName: "ellipsis.circle")
@@ -93,6 +93,7 @@ struct ChatView: View {
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
             .frame(width: 32)
+            .accessibilityLabel("Session options")
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
