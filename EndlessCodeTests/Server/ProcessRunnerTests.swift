@@ -5,8 +5,27 @@
 //  ProcessRunner 단위 테스트 (Swift Testing)
 //
 
+import Foundation
 import Testing
 @testable import EndlessCode
+
+// MARK: - Helper Actor for Thread-Safe Output Collection
+
+private actor OutputCollector {
+    private var output: String = ""
+
+    func append(_ chunk: String) {
+        output += chunk
+    }
+
+    func get() -> String {
+        output
+    }
+
+    func contains(_ substring: String) -> Bool {
+        output.contains(substring)
+    }
+}
 
 @Suite("ProcessRunner Tests")
 struct ProcessRunnerTests {
@@ -126,12 +145,11 @@ struct ProcessRunnerTests {
             executablePath: "/bin/cat"
         )
 
-        // Start collecting output first
-        var output = ""
+        let collector = OutputCollector()
         let collectTask = Task {
             for await chunk in runner.stdout {
-                output += chunk
-                if output.contains("hello") {
+                await collector.append(chunk)
+                if await collector.contains("hello") {
                     break
                 }
             }
@@ -149,7 +167,8 @@ struct ProcessRunnerTests {
         collectTask.cancel()
 
         // Then
-        #expect(output.contains("hello"))
+        let hasHello = await collector.contains("hello")
+        #expect(hasHello)
 
         // Cleanup
         await runner.terminate()
@@ -178,11 +197,10 @@ struct ProcessRunnerTests {
             arguments: ["hello", "world"]
         )
 
-        // Prepare to collect output before starting
-        var collectedOutput = ""
+        let collector = OutputCollector()
         let collectTask = Task {
             for await chunk in runner.stdout {
-                collectedOutput += chunk
+                await collector.append(chunk)
             }
         }
 
@@ -197,8 +215,10 @@ struct ProcessRunnerTests {
         collectTask.cancel()
 
         // Then
-        #expect(collectedOutput.contains("hello"))
-        #expect(collectedOutput.contains("world"))
+        let hasHello = await collector.contains("hello")
+        let hasWorld = await collector.contains("world")
+        #expect(hasHello)
+        #expect(hasWorld)
     }
 
     // MARK: - Factory Tests

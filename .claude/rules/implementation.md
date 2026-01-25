@@ -107,8 +107,8 @@ git checkout -b feat/section-N-name
 ### 3. 섹션 완료 후
 
 ```bash
-# 테스트 실행
-xcodebuild test -scheme EndlessCode -destination 'platform=macOS'
+# Unit 테스트 실행 (swift test 필수)
+swift test
 
 # 검증
 openspec validate add-mvp-specs --strict --no-interactive

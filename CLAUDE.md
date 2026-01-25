@@ -46,28 +46,47 @@ UI 작업 시 반드시 `ui-design/` 디렉토리의 디자인 파일을 먼저 
 
 ## Build & Test Commands
 
+### Unit Test (Swift Package Manager 사용)
+
+> **중요**: Xcode 26.x SPM 빌드 버그로 인해 `xcodebuild test` 대신 `swift test` 사용 필수
+
 ```bash
-# 빌드
-xcodebuild build -scheme EndlessCode -destination 'platform=macOS'
+# 전체 테스트 (권장)
+swift test
 
-# 전체 테스트
-xcodebuild test -scheme EndlessCode -destination 'platform=macOS'
-
-# 특정 테스트 클래스
-xcodebuild test -scheme EndlessCode -destination 'platform=macOS' \
-  -only-testing:EndlessCodeTests/JSONLParserTests
+# 특정 테스트 Suite
+swift test --filter JSONLParserTests
 
 # 특정 테스트 메서드
-xcodebuild test -scheme EndlessCode -destination 'platform=macOS' \
-  -only-testing:EndlessCodeTests/JSONLParserTests/test_parseValidJSONL_returnsMessages
+swift test --filter "JSONLParserTests/parseValidJSONLReturnsMessages"
 
-# iOS 테스트
-xcodebuild test -scheme EndlessCode -destination 'platform=iOS Simulator,name=iPhone 16'
+# 병렬 테스트 비활성화 (디버깅 시)
+swift test --parallel=false
 
-# 커버리지 리포트
+# 빌드만 (테스트 실행 없이)
+swift build --build-tests
+```
+
+### Xcode 빌드 (앱 빌드용)
+
+```bash
+# macOS 앱 빌드
+xcodebuild build -scheme EndlessCode -destination 'platform=macOS'
+
+# iOS 앱 빌드
+xcodebuild build -scheme EndlessCode -destination 'platform=iOS Simulator,name=iPhone 16'
+```
+
+### UI Test (XCUITest - Xcode 필요)
+
+```bash
+# macOS UI 테스트
 xcodebuild test -scheme EndlessCode -destination 'platform=macOS' \
-  -enableCodeCoverage YES -resultBundlePath TestResults.xcresult
-xcrun xccov view --report TestResults.xcresult
+  -only-testing:EndlessCodeUITests
+
+# iOS UI 테스트
+xcodebuild test -scheme EndlessCode -destination 'platform=iOS Simulator,name=iPhone 16' \
+  -only-testing:EndlessCodeUITests
 ```
 
 ## Code Conventions

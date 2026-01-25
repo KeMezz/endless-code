@@ -304,28 +304,35 @@ struct ChatView: View {
 
 ## 테스트 실행 명령어
 
-### Unit Test
+### Unit Test (Swift Package Manager 사용 - 필수)
+
+> **⚠️ 중요**: Xcode 26.x의 SPM 빌드 버그로 인해 Unit 테스트는 반드시 `swift test` 사용
+>
+> `xcodebuild test`는 Vapor 의존성(swift-crypto)의 PackageProduct framework 생성 실패 문제 발생
 
 ```bash
-# 전체 테스트
-xcodebuild test \
-  -scheme EndlessCode \
-  -destination 'platform=macOS'
+# 전체 테스트 (권장)
+swift test
 
 # 특정 테스트 Suite
-xcodebuild test \
-  -scheme EndlessCode \
-  -destination 'platform=macOS' \
-  -only-testing:EndlessCodeTests/JSONLParserTests
+swift test --filter JSONLParserTests
 
 # 특정 테스트 메서드
-xcodebuild test \
-  -scheme EndlessCode \
-  -destination 'platform=macOS' \
-  -only-testing:EndlessCodeTests/JSONLParserTests/parseValidJSONLReturnsMessages
+swift test --filter "JSONLParserTests/parseValidJSONLReturnsMessages"
+
+# 병렬 테스트 비활성화 (디버깅 시)
+swift test --parallel=false
+
+# 빌드만 (테스트 실행 없이)
+swift build --build-tests
+
+# verbose 출력
+swift test -v
 ```
 
-### UI Test
+### UI Test (XCUITest - Xcode 필요)
+
+> UI 테스트는 `xcodebuild` 사용 (Swift Testing이 XCUITest 미지원)
 
 ```bash
 # macOS UI 테스트
@@ -337,20 +344,28 @@ xcodebuild test \
 # iOS UI 테스트
 xcodebuild test \
   -scheme EndlessCode \
-  -destination 'platform=iOS Simulator,name=iPhone 16'
+  -destination 'platform=iOS Simulator,name=iPhone 16' \
+  -only-testing:EndlessCodeUITests
 ```
 
 ### 커버리지 리포트
 
+> 커버리지는 `swift test`에서 직접 지원하지 않으므로 별도 도구 사용
+
 ```bash
-# 커버리지 포함 테스트 실행
+# swift-cov 사용 (설치 필요: brew install swift-cov)
+swift test --enable-code-coverage
+xcrun llvm-cov report .build/debug/EndlessCodePackageTests.xctest/Contents/MacOS/EndlessCodePackageTests \
+  -instr-profile=.build/debug/codecov/default.profdata
+
+# 또는 Xcode에서 UI 테스트와 함께 커버리지 확인
 xcodebuild test \
   -scheme EndlessCode \
   -destination 'platform=macOS' \
+  -only-testing:EndlessCodeUITests \
   -enableCodeCoverage YES \
   -resultBundlePath TestResults.xcresult
 
-# 커버리지 리포트 확인
 xcrun xccov view --report TestResults.xcresult
 ```
 
@@ -358,8 +373,8 @@ xcrun xccov view --report TestResults.xcresult
 
 PR 생성 전 반드시 확인:
 
-- [ ] 모든 Unit 테스트 통과
-- [ ] 모든 UI 테스트 통과
+- [ ] **`swift test`로 모든 Unit 테스트 통과** (xcodebuild 사용 금지)
+- [ ] 모든 UI 테스트 통과 (UI 테스트만 xcodebuild 사용)
 - [ ] Line Coverage 80% 이상
 - [ ] 신규 코드에 대한 테스트 작성됨
 - [ ] Mock 객체 적절히 사용됨
