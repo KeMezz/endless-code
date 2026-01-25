@@ -4,6 +4,33 @@ Git diff를 시각화하여 표시하는 기능입니다.
 
 ## ADDED Requirements
 
+### Requirement: Diff Data Source
+시스템은 CLI 출력에서 Diff 데이터를 추출해야 합니다(SHALL).
+
+#### Scenario: tool_result에서 Diff 추출
+- **GIVEN** CLI가 tool_result 메시지 출력
+- **WHEN** output 필드에 unified diff 형식 포함 (--- / +++ 패턴)
+- **THEN** Diff 파서로 자동 전달
+- **AND** 파일별 변경 사항 추출
+
+#### Scenario: git diff 명령 결과 처리
+- **GIVEN** CLI가 Bash 도구로 git diff 실행
+- **WHEN** 결과가 unified diff 형식
+- **THEN** "Diff 뷰어에서 보기" 옵션 표시
+- **AND** 클릭 시 Diff 뷰어로 이동
+
+#### Scenario: staged vs unstaged 구분
+- **GIVEN** git diff 또는 git diff --staged 결과
+- **WHEN** Diff 뷰어에 표시
+- **THEN** staged/unstaged 상태 라벨 표시
+- **AND** 필터링 옵션 제공
+
+#### Scenario: 바이너리 파일 처리
+- **GIVEN** Diff에 바이너리 파일 포함
+- **WHEN** Diff 렌더링
+- **THEN** "Binary file differs" 메시지 표시
+- **AND** 파일 크기 변경량 표시 (가능한 경우)
+
 ### Requirement: Diff Display
 시스템은 Git diff를 시각적으로 표시해야 합니다(SHALL).
 
@@ -118,3 +145,24 @@ Git diff를 시각화하여 표시하는 기능입니다.
 - **GIVEN** 파일별 diff 목록 표시 중
 - **WHEN** 파일 항목 렌더링
 - **THEN** 해당 파일의 추가/삭제 라인 수 표시
+
+### Requirement: Error Handling
+시스템은 Diff 처리 중 오류를 처리해야 합니다(SHALL).
+
+#### Scenario: 대용량 Diff 제한
+- **GIVEN** Diff에 100개 이상 파일 포함
+- **WHEN** Diff 로드
+- **THEN** 처음 100개 파일만 로드
+- **AND** "더 보기" 버튼으로 페이지네이션
+
+#### Scenario: 매우 큰 Hunk 처리
+- **GIVEN** 단일 Hunk가 10,000줄 이상
+- **WHEN** Hunk 렌더링
+- **THEN** 가상화 스크롤 적용
+- **AND** 뷰포트 내 라인만 렌더링
+
+#### Scenario: 잘못된 Diff 형식
+- **GIVEN** unified diff 형식이 아닌 데이터
+- **WHEN** Diff 파싱 시도
+- **THEN** 파싱 실패 경고 표시
+- **AND** 원본 텍스트로 표시 (fallback)
