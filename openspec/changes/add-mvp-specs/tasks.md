@@ -83,6 +83,13 @@
 - [x] 2.4.4 프로젝트 선택 → 상세 뷰 전환 테스트
 - [x] 2.4.5 세션 목록 표시 및 필터 테스트
 
+### 2.5 리팩토링 (PR #4 리뷰 피드백)
+> Section 3 시작 전 처리 권장
+
+- [ ] 2.5.1 ConnectionManager actor 변환 - class → actor, NSLock 제거
+- [ ] 2.5.2 ConnectionManager 이벤트 기반 상태 변경 - polling(100ms) → stateChanges 스트림
+- [ ] 2.5.3 ConnectionManagerProtocol 재설계 - actor 기반 인터페이스
+
 ## 3. macOS App - 채팅
 
 ### 3.1 메시지 표시
@@ -235,6 +242,7 @@
 - [ ] 8.1.2 View 스냅샷 테스트
 - [ ] 8.1.3 통합 테스트 - Server + WebSocket + UI 연동
 - [ ] 8.1.4 성능 테스트 - 메시지 처리량, 대용량 파일 로딩, 메모리 사용량
+- [ ] 8.1.5 WebSocketClient 통합 테스트 - 로컬 WebSocket 서버 사용, 재연결/ping 로직 검증 (PR #4 리뷰 피드백)
 
 ### 8.2 iOS 테스트
 - [ ] 8.2.1 iOS 통합 테스트
