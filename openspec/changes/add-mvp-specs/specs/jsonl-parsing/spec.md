@@ -88,3 +88,48 @@ Claude Code CLI의 JSONL 출력을 실시간으로 파싱하는 기능입니다.
 - **WHEN** 사용자 확인이 필요한 메시지
 - **THEN** 확인 요청 이벤트 발생
 - **AND** 관련 컨텍스트 정보 포함
+
+### Requirement: Error Handling
+시스템은 파싱 오류 및 예외 상황을 처리해야 합니다(SHALL).
+
+#### Scenario: 대용량 JSON 라인 처리
+- **GIVEN** CLI가 stdout으로 출력
+- **WHEN** 단일 라인이 1MB 초과
+- **THEN** 메모리 제한을 위해 청크 단위로 파싱
+- **AND** 1MB 초과 시 "large_message" 플래그 설정
+- **AND** UI에서 "접기" 상태로 표시 권장
+
+#### Scenario: 인코딩 오류
+- **GIVEN** stdout에서 데이터 수신
+- **WHEN** 유효하지 않은 UTF-8 시퀀스 발견
+- **THEN** 해당 바이트 대체 문자(�)로 변환
+- **AND** 인코딩 경고 로그 기록
+- **AND** 파싱 계속 진행
+
+#### Scenario: 버퍼 오버플로우 방지
+- **GIVEN** 불완전한 라인이 버퍼에 누적
+- **WHEN** 버퍼 크기가 10MB 초과 (줄바꿈 없이)
+- **THEN** 현재 버퍼 내용 폐기
+- **AND** "buffer_overflow" 에러 로그 기록
+- **AND** 다음 줄바꿈부터 다시 파싱 시작
+
+#### Scenario: 타임스탬프 형식 불일치
+- **GIVEN** 파싱된 JSON에 timestamp 필드 존재
+- **WHEN** ISO8601 형식이 아닌 경우
+- **THEN** 여러 형식으로 파싱 시도 (Unix epoch, RFC2822)
+- **AND** 모두 실패 시 현재 시간으로 대체
+- **AND** 경고 로그 기록
+
+#### Scenario: 스키마 버전 불일치
+- **GIVEN** 파싱된 JSON에 version 필드 존재
+- **WHEN** 지원하지 않는 버전인 경우
+- **THEN** 최선 노력 파싱 (best-effort parsing)
+- **AND** "unsupported_version" 경고 발생
+- **AND** 사용자에게 앱 업데이트 권장
+
+#### Scenario: 연속 파싱 실패
+- **GIVEN** JSONL 스트림 파싱 중
+- **WHEN** 연속 10개 라인 파싱 실패
+- **THEN** "stream_corrupted" 에러 발생
+- **AND** CLI 프로세스 상태 확인 요청
+- **AND** 스트림 재초기화 시도

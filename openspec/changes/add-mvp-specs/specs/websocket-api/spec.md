@@ -93,3 +93,45 @@
 - **WHEN** 이전 연결 ID 제공
 - **THEN** 이전 세션 컨텍스트 복원
 - **AND** 중단된 지점부터 재개
+
+### Requirement: Error Handling
+시스템은 네트워크 및 프로토콜 오류를 처리해야 합니다(SHALL).
+
+#### Scenario: 네트워크 연결 끊김
+- **GIVEN** 활성 WebSocket 연결
+- **WHEN** 네트워크 연결이 끊김 (TCP RST, 타임아웃 등)
+- **THEN** 연결 상태를 "disconnected"로 변경
+- **AND** 지수 백오프로 재연결 시도 (1s, 2s, 4s, ... 최대 60s)
+- **AND** 최대 10회 재시도 후 "연결 실패" 알림
+
+#### Scenario: 서버 과부하
+- **GIVEN** 클라이언트가 연결 요청
+- **WHEN** 서버의 동시 연결 수가 한계 도달 (100개)
+- **THEN** 503 Service Unavailable 응답
+- **AND** Retry-After 헤더에 권장 재시도 시간 포함
+
+#### Scenario: 메시지 형식 오류
+- **GIVEN** 활성 WebSocket 연결
+- **WHEN** 클라이언트가 잘못된 JSON 형식 전송
+- **THEN** 에러 메시지 응답 (type: "error", code: "invalid_format")
+- **AND** 연결은 유지
+- **AND** 에러 로그 기록
+
+#### Scenario: 세션 ID 불일치
+- **GIVEN** 클라이언트가 메시지 전송
+- **WHEN** 지정된 sessionId가 존재하지 않거나 권한 없음
+- **THEN** 에러 메시지 응답 (type: "error", code: "session_not_found")
+- **AND** 유효한 세션 목록 함께 전송
+
+#### Scenario: 메시지 버퍼 오버플로우
+- **GIVEN** 클라이언트 연결 끊김 중 메시지 누적
+- **WHEN** 버퍼 크기가 10MB 초과
+- **THEN** 오래된 메시지부터 삭제
+- **AND** 재연결 시 "일부 메시지 손실" 경고 전송
+
+#### Scenario: 토큰 만료
+- **GIVEN** 활성 WebSocket 연결
+- **WHEN** 서버에서 토큰 무효화 (재생성 등)
+- **THEN** 에러 메시지 전송 (type: "error", code: "token_expired")
+- **AND** 연결 종료
+- **AND** 클라이언트에 재인증 요청

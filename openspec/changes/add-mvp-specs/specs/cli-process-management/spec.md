@@ -79,3 +79,46 @@ Claude Code CLI를 subprocess로 실행하고 관리하는 기능입니다.
 - **WHEN** 세션 시작
 - **THEN** "Claude CLI not found" 에러 반환
 - **AND** 설치 안내 메시지 표시
+
+### Requirement: Error Recovery
+시스템은 CLI 프로세스 오류에서 복구해야 합니다(SHALL).
+
+#### Scenario: CLI 프로세스 크래시 감지
+- **GIVEN** CLI 프로세스가 실행 중
+- **WHEN** CLI 프로세스가 예기치 않게 종료 (exit code != 0)
+- **THEN** 크래시 이벤트 발생
+- **AND** 에러 로그 기록 (exit code, stderr 내용)
+- **AND** 세션 상태를 "crashed"로 변경
+
+#### Scenario: CLI 크래시 후 자동 재시작
+- **GIVEN** CLI 프로세스가 크래시됨
+- **WHEN** 자동 재시작 정책이 활성화됨
+- **THEN** 지수 백오프로 재시작 시도 (500ms, 1s, 2s)
+- **AND** 최대 3회 재시도
+- **AND** 3회 실패 시 사용자에게 수동 재시작 안내
+
+#### Scenario: CLI 응답 타임아웃
+- **GIVEN** CLI 프로세스에 메시지 전송됨
+- **WHEN** 30초간 stdout/stderr 출력 없음
+- **THEN** 타임아웃 경고 이벤트 발생
+- **AND** 사용자에게 "계속 대기" 또는 "세션 종료" 옵션 제공
+
+#### Scenario: 리소스 부족
+- **GIVEN** 새 세션 시작 요청
+- **WHEN** 시스템 메모리 부족 또는 프로세스 생성 실패
+- **THEN** "resource_exhausted" 에러 반환
+- **AND** 현재 실행 중인 세션 수 표시
+- **AND** 유휴 세션 종료 권장
+
+#### Scenario: stdin 쓰기 실패
+- **GIVEN** CLI 프로세스에 메시지 전송 중
+- **WHEN** stdin 파이프가 닫힘 또는 쓰기 실패
+- **THEN** 쓰기 실패 이벤트 발생
+- **AND** 세션 상태 확인 후 적절한 복구 조치
+- **AND** 필요 시 프로세스 재시작
+
+#### Scenario: 좀비 프로세스 정리
+- **GIVEN** 서버 시작 또는 주기적 점검
+- **WHEN** 추적되지 않는 claude CLI 프로세스 발견
+- **THEN** 해당 프로세스에 SIGTERM 전송
+- **AND** 정리 로그 기록
