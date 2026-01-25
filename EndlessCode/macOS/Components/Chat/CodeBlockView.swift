@@ -215,6 +215,7 @@ struct CodeBlockView: View {
         Text(highlighter.highlightLine(line))
             .font(.system(.body, design: .monospaced))
             .textSelection(.enabled)
+            .fixedSize(horizontal: true, vertical: false)  // 줄바꿈 방지 - 자연스러운 너비 유지
             .padding(.vertical, 2)
     }
 
