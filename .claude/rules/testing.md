@@ -193,6 +193,8 @@ func streamMessagesReceivesAllMessages() async throws {
 ## E2E Test (UI Test) 규칙
 
 > **주의**: UI 테스트는 XCUITest 사용 (Swift Testing 미지원)
+>
+> **중요**: Xcode 26.x SPM 빌드 버그로 인해 `EndlessCodeUITestHost` 스킴 사용 필수
 
 ### 파일 구조
 
@@ -333,19 +335,21 @@ swift test -v
 ### UI Test (XCUITest - Xcode 필요)
 
 > UI 테스트는 `xcodebuild` 사용 (Swift Testing이 XCUITest 미지원)
+>
+> **중요**: `EndlessCodeUITestHost` 스킴 사용 (Xcode 26.x SPM 빌드 버그 우회)
 
 ```bash
-# macOS UI 테스트
+# macOS UI 테스트 (EndlessCodeUITestHost 스킴 필수)
 xcodebuild test \
-  -scheme EndlessCode \
+  -scheme EndlessCodeUITestHost \
   -destination 'platform=macOS' \
   -only-testing:EndlessCodeUITests
 
-# iOS UI 테스트
+# 특정 테스트만 실행
 xcodebuild test \
-  -scheme EndlessCode \
-  -destination 'platform=iOS Simulator,name=iPhone 16' \
-  -only-testing:EndlessCodeUITests
+  -scheme EndlessCodeUITestHost \
+  -destination 'platform=macOS' \
+  -only-testing:EndlessCodeUITests/Section2NavigationFlowTests
 ```
 
 ### 커버리지 리포트
@@ -360,7 +364,7 @@ xcrun llvm-cov report .build/debug/EndlessCodePackageTests.xctest/Contents/MacOS
 
 # 또는 Xcode에서 UI 테스트와 함께 커버리지 확인
 xcodebuild test \
-  -scheme EndlessCode \
+  -scheme EndlessCodeUITestHost \
   -destination 'platform=macOS' \
   -only-testing:EndlessCodeUITests \
   -enableCodeCoverage YES \
@@ -374,7 +378,7 @@ xcrun xccov view --report TestResults.xcresult
 PR 생성 전 반드시 확인:
 
 - [ ] **`swift test`로 모든 Unit 테스트 통과** (xcodebuild 사용 금지)
-- [ ] 모든 UI 테스트 통과 (UI 테스트만 xcodebuild 사용)
+- [ ] 모든 UI 테스트 통과 (`EndlessCodeUITestHost` 스킴 + xcodebuild 사용)
 - [ ] Line Coverage 80% 이상
 - [ ] 신규 코드에 대한 테스트 작성됨
 - [ ] Mock 객체 적절히 사용됨

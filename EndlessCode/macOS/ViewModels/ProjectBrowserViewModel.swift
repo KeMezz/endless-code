@@ -34,7 +34,7 @@ final class ProjectBrowserViewModel: @unchecked Sendable {
         case .name:
             result.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
         case .recent:
-            result.sort { $0.lastAccessedAt > $1.lastAccessedAt }
+            result.sort { ($0.lastUsed ?? .distantPast) > ($1.lastUsed ?? .distantPast) }
         case .sessionCount:
             result.sort { $0.sessionCount > $1.sessionCount }
         }
@@ -118,28 +118,28 @@ extension Project {
                 name: "EndlessCode",
                 path: "/Users/user/projects/EndlessCode",
                 sessionCount: 5,
-                lastAccessedAt: Date()
+                lastUsed: Date()
             ),
             Project(
                 id: "project-2",
                 name: "SwiftUI Demo",
                 path: "/Users/user/projects/SwiftUI-Demo",
                 sessionCount: 3,
-                lastAccessedAt: Date().addingTimeInterval(-3600)
+                lastUsed: Date().addingTimeInterval(-3600)
             ),
             Project(
                 id: "project-3",
                 name: "API Server",
                 path: "/Users/user/projects/api-server",
                 sessionCount: 8,
-                lastAccessedAt: Date().addingTimeInterval(-7200)
+                lastUsed: Date().addingTimeInterval(-7200)
             ),
             Project(
                 id: "project-4",
                 name: "Mobile App",
                 path: "/Users/user/projects/mobile-app",
                 sessionCount: 2,
-                lastAccessedAt: Date().addingTimeInterval(-86400)
+                lastUsed: Date().addingTimeInterval(-86400)
             ),
         ]
     }

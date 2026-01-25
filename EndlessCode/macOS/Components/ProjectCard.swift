@@ -57,6 +57,7 @@ struct ProjectCard: View {
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(isSelected ? Color.accentColor : Color.clear, lineWidth: 1)
             )
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("projectCard-\(project.id)")
@@ -164,9 +165,12 @@ struct ProjectCardCompact: View {
     }
 
     private var lastAccessedText: String {
+        guard let lastUsed = project.lastUsed else {
+            return "Never"
+        }
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .abbreviated
-        return formatter.localizedString(for: project.lastAccessedAt, relativeTo: Date())
+        return formatter.localizedString(for: lastUsed, relativeTo: Date())
     }
 }
 

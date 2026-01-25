@@ -27,17 +27,6 @@ protocol WebSocketClientProtocol: Sendable {
     var connectionState: ConnectionState { get async }
 }
 
-// MARK: - ConnectionState
-
-/// 연결 상태
-enum ConnectionState: Sendable, Equatable {
-    case disconnected
-    case connecting
-    case connected
-    case reconnecting(attempt: Int)
-    case failed(error: String)
-}
-
 // MARK: - WebSocketClientError
 
 /// WebSocket 클라이언트 에러

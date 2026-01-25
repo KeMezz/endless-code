@@ -129,7 +129,11 @@ struct SessionSearchFilterBar: View {
                 Button {
                     stateFilter = nil
                 } label: {
-                    Label("All", systemImage: "line.3.horizontal.decrease.circle")
+                    if stateFilter == nil {
+                        Label("All", systemImage: "checkmark")
+                    } else {
+                        Text("All")
+                    }
                 }
 
                 Divider()
@@ -138,7 +142,11 @@ struct SessionSearchFilterBar: View {
                     Button {
                         stateFilter = state
                     } label: {
-                        Label(state.displayName, systemImage: state.icon)
+                        if stateFilter == state {
+                            Label(state.displayName, systemImage: "checkmark")
+                        } else {
+                            Text(state.displayName)
+                        }
                     }
                 }
             } label: {

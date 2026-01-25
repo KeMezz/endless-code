@@ -103,10 +103,12 @@ struct SidebarView: View {
                 NavigationLink(value: tab) {
                     Label(tab.title, systemImage: tab.icon)
                 }
+                .accessibilityIdentifier("sidebarTab-\(tab.rawValue)")
             }
         }
         .listStyle(.sidebar)
         .navigationTitle("EndlessCode")
+        .accessibilityIdentifier("sidebar")
     }
 }
 
@@ -117,14 +119,17 @@ struct ContentColumnView: View {
     @Environment(AppState.self) private var appState
 
     var body: some View {
-        switch appState.selectedTab {
-        case .projects:
-            ProjectListView()
-        case .sessions:
-            SessionListView()
-        case .settings:
-            SettingsListView()
+        Group {
+            switch appState.selectedTab {
+            case .projects:
+                ProjectListView()
+            case .sessions:
+                SessionListView()
+            case .settings:
+                SettingsListView()
+            }
         }
+        .accessibilityIdentifier("contentColumn")
     }
 }
 
@@ -135,13 +140,16 @@ struct DetailView: View {
     @Environment(AppState.self) private var appState
 
     var body: some View {
-        if let session = appState.selectedSession {
-            ChatView(session: session)
-        } else if let project = appState.selectedProject {
-            ProjectDetailView(project: project)
-        } else {
-            EmptyDetailView()
+        Group {
+            if let session = appState.selectedSession {
+                ChatView(session: session)
+            } else if let project = appState.selectedProject {
+                ProjectDetailView(project: project)
+            } else {
+                EmptyDetailView()
+            }
         }
+        .accessibilityIdentifier("detailView")
     }
 }
 
@@ -166,6 +174,7 @@ struct EmptyDetailView: View {
                 .frame(maxWidth: 300)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .accessibilityIdentifier("emptyDetailView")
     }
 }
 
@@ -187,7 +196,7 @@ struct ConnectionStatusIndicator: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(.ultraThinMaterial, in: Capsule())
+        .accessibilityIdentifier("connectionStatus")
     }
 
     private var statusColor: Color {
@@ -294,6 +303,7 @@ struct SettingsListView: View {
     var body: some View {
         Text("Settings List")
             .navigationTitle("Settings")
+            .accessibilityIdentifier("settingsList")
     }
 }
 
@@ -303,6 +313,7 @@ struct ProjectDetailView: View {
 
     var body: some View {
         Text("Project: \(project.name)")
+            .accessibilityIdentifier("projectDetail-\(project.id)")
     }
 }
 
@@ -312,6 +323,7 @@ struct ChatView: View {
 
     var body: some View {
         Text("Chat: \(session.id)")
+            .accessibilityIdentifier("chatView-\(session.id)")
     }
 }
 
