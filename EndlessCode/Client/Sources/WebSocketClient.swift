@@ -23,6 +23,9 @@ protocol WebSocketClientProtocol: Sendable {
     /// 수신 메시지 스트림
     var messages: AsyncStream<ServerMessage> { get }
 
+    /// 연결 상태 변경 스트림
+    var stateChanges: AsyncStream<ConnectionState> { get }
+
     /// 연결 상태
     var connectionState: ConnectionState { get async }
 }
@@ -93,7 +96,13 @@ actor WebSocketClient: WebSocketClientProtocol {
     private let configuration: WebSocketClientConfiguration
     private var webSocketTask: URLSessionWebSocketTask?
     private var urlSession: URLSession
-    private var _connectionState: ConnectionState = .disconnected
+    private var _connectionState: ConnectionState = .disconnected {
+        didSet {
+            if _connectionState != oldValue {
+                stateContinuation.yield(_connectionState)
+            }
+        }
+    }
     private var reconnectAttempt: Int = 0
     private var shouldReconnect: Bool = false
     private var pingTask: Task<Void, Never>?
@@ -102,6 +111,9 @@ actor WebSocketClient: WebSocketClientProtocol {
 
     private let messageContinuation: AsyncStream<ServerMessage>.Continuation
     private let _messages: AsyncStream<ServerMessage>
+
+    private let stateContinuation: AsyncStream<ConnectionState>.Continuation
+    private let _stateChanges: AsyncStream<ConnectionState>
 
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
@@ -112,11 +124,17 @@ actor WebSocketClient: WebSocketClientProtocol {
         self.configuration = configuration
         self.urlSession = URLSession(configuration: .default)
 
-        var continuation: AsyncStream<ServerMessage>.Continuation!
+        var msgContinuation: AsyncStream<ServerMessage>.Continuation!
         self._messages = AsyncStream { cont in
-            continuation = cont
+            msgContinuation = cont
         }
-        self.messageContinuation = continuation
+        self.messageContinuation = msgContinuation
+
+        var stateCont: AsyncStream<ConnectionState>.Continuation!
+        self._stateChanges = AsyncStream { cont in
+            stateCont = cont
+        }
+        self.stateContinuation = stateCont
 
         self.encoder.dateEncodingStrategy = .iso8601
         self.decoder.dateDecodingStrategy = .iso8601
@@ -124,12 +142,17 @@ actor WebSocketClient: WebSocketClientProtocol {
 
     deinit {
         messageContinuation.finish()
+        stateContinuation.finish()
     }
 
     // MARK: - WebSocketClientProtocol
 
     nonisolated var messages: AsyncStream<ServerMessage> {
         _messages
+    }
+
+    nonisolated var stateChanges: AsyncStream<ConnectionState> {
+        _stateChanges
     }
 
     var connectionState: ConnectionState {
