@@ -132,48 +132,81 @@ struct CodeBlockView: View {
         let useVirtualization = lines.count >= CodeBlockConstants.virtualizationThreshold
 
         ScrollView([.horizontal, .vertical], showsIndicators: true) {
-            if useVirtualization {
-                // 대용량 코드: LazyVStack 사용
-                LazyVStack(alignment: .leading, spacing: 0) {
-                    ForEach(Array(highlightedLines.enumerated()), id: \.offset) { index, highlighted in
-                        codeLineView(lineNumber: index + 1, highlightedCode: highlighted)
-                    }
-                }
-                .padding(.vertical, 8)
-            } else {
-                // 소규모 코드: VStack 사용
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach(Array(highlightedLines.enumerated()), id: \.offset) { index, highlighted in
-                        codeLineView(lineNumber: index + 1, highlightedCode: highlighted)
-                    }
-                }
-                .padding(.vertical, 8)
+            HStack(alignment: .top, spacing: 0) {
+                // 라인 번호 컬럼 (연속 배경)
+                lineNumberColumn(useVirtualization: useVirtualization)
+
+                // 코드 컬럼
+                codeColumn(useVirtualization: useVirtualization)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(maxHeight: lines.count > 20 ? CodeBlockConstants.maxHeight : nil)
     }
 
-    /// 라인 번호 + 코드를 한 행으로 묶은 뷰
+    /// 라인 번호 컬럼 (연속 배경 적용)
     @ViewBuilder
-    private func codeLineView(lineNumber: Int, highlightedCode: AttributedString) -> some View {
-        HStack(alignment: .top, spacing: 0) {
-            // 라인 번호
-            Text("\(lineNumber)")
-                .font(.system(.body, design: .monospaced))
-                .foregroundStyle(.tertiary)
-                .frame(minWidth: lineNumberWidth, alignment: .trailing)
-                .padding(.trailing, 12)
-                .background(Color(nsColor: .controlBackgroundColor).opacity(0.3))
-
-            // 코드 텍스트 (미리 하이라이팅된 결과 사용)
-            Text(highlightedCode)
-                .font(.system(.body, design: .monospaced))
-                .textSelection(.enabled)
-                .fixedSize(horizontal: true, vertical: false)
+    private func lineNumberColumn(useVirtualization: Bool) -> some View {
+        Group {
+            if useVirtualization {
+                LazyVStack(alignment: .trailing, spacing: 0) {
+                    ForEach(0..<lines.count, id: \.self) { index in
+                        lineNumberView(index + 1)
+                    }
+                }
+            } else {
+                VStack(alignment: .trailing, spacing: 0) {
+                    ForEach(0..<lines.count, id: \.self) { index in
+                        lineNumberView(index + 1)
+                    }
+                }
+            }
         }
-        .padding(.leading, 8)
-        .padding(.vertical, 2)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 8)
+        .background(Color(nsColor: .controlBackgroundColor).opacity(0.3))
+    }
+
+    /// 라인 번호 뷰
+    @ViewBuilder
+    private func lineNumberView(_ number: Int) -> some View {
+        Text("\(number)")
+            .font(.system(.body, design: .monospaced))
+            .foregroundStyle(.tertiary)
+            .frame(minWidth: lineNumberWidth, alignment: .trailing)
+            .padding(.vertical, 2)
+    }
+
+    /// 코드 컬럼
+    @ViewBuilder
+    private func codeColumn(useVirtualization: Bool) -> some View {
+        Group {
+            if useVirtualization {
+                LazyVStack(alignment: .leading, spacing: 0) {
+                    ForEach(Array(highlightedLines.enumerated()), id: \.offset) { _, highlighted in
+                        codeLineView(highlightedCode: highlighted)
+                    }
+                }
+            } else {
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(Array(highlightedLines.enumerated()), id: \.offset) { _, highlighted in
+                        codeLineView(highlightedCode: highlighted)
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+    }
+
+    /// 코드 라인 뷰
+    @ViewBuilder
+    private func codeLineView(highlightedCode: AttributedString) -> some View {
+        Text(highlightedCode)
+            .font(.system(.body, design: .monospaced))
+            .textSelection(.enabled)
+            .fixedSize(horizontal: true, vertical: false)
+            .padding(.vertical, 2)
     }
 
     // MARK: - Computed Properties
