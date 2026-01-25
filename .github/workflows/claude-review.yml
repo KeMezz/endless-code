@@ -32,9 +32,10 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
-          # Opus 4.5 모델 사용
-          model: claude-opus-4-5-20251101
+          # Bash 도구 허용 (gh CLI, git 명령 사용을 위해)
+          allowed_tools: "Bash(gh *),Bash(git diff*),Bash(git log*),Bash(git show*),Read,Glob,Grep"
 
           # Claude가 CI 결과 읽기 허용
           additional_permissions: |
