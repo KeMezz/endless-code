@@ -140,16 +140,15 @@ struct DetailView: View {
     @Environment(AppState.self) private var appState
 
     var body: some View {
-        Group {
-            if let session = appState.selectedSession {
-                ChatView(session: session)
-            } else if let project = appState.selectedProject {
-                ProjectDetailView(project: project)
-            } else {
-                EmptyDetailView()
-            }
+        // 각 뷰가 자체 accessibilityIdentifier를 가지므로
+        // Group에 identifier를 부여하지 않음 (내부 identifier override 방지)
+        if let session = appState.selectedSession {
+            ChatView(session: session)
+        } else if let project = appState.selectedProject {
+            ProjectDetailView(project: project)
+        } else {
+            EmptyDetailView()
         }
-        .accessibilityIdentifier("detailView")
     }
 }
 
@@ -317,15 +316,7 @@ struct ProjectDetailView: View {
     }
 }
 
-/// 채팅 뷰 (플레이스홀더)
-struct ChatView: View {
-    let session: Session
-
-    var body: some View {
-        Text("Chat: \(session.id)")
-            .accessibilityIdentifier("chatView-\(session.id)")
-    }
-}
+// ChatView는 ChatView.swift에서 정의됨
 
 /// 새 세션 시트 (플레이스홀더)
 struct NewSessionSheet: View {

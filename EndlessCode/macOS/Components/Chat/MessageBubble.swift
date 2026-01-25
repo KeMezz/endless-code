@@ -1,0 +1,404 @@
+//
+//  MessageBubble.swift
+//  EndlessCode
+//
+//  채팅 메시지 버블 컴포넌트
+//
+
+import SwiftUI
+
+// MARK: - MessageBubble
+
+/// 채팅 메시지 버블
+struct MessageBubble: View {
+    let message: ChatMessageItem
+    let onCopyCode: ((String) -> Void)?
+
+    init(message: ChatMessageItem, onCopyCode: ((String) -> Void)? = nil) {
+        self.message = message
+        self.onCopyCode = onCopyCode
+    }
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            if message.type.isUser {
+                Spacer(minLength: 60)
+            }
+
+            if !message.type.isUser {
+                avatar
+            }
+
+            VStack(alignment: message.type.isUser ? .trailing : .leading, spacing: 4) {
+                roleLabel
+
+                bubbleContent
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(bubbleBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+
+                timestampLabel
+            }
+
+            if message.type.isUser {
+                avatar
+            }
+
+            if !message.type.isUser {
+                Spacer(minLength: 60)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 4)
+        .accessibilityIdentifier("messageBubble-\(message.id)")
+    }
+
+    // MARK: - Subviews
+
+    @ViewBuilder
+    private var avatar: some View {
+        ZStack {
+            Circle()
+                .fill(avatarColor.gradient)
+
+            Image(systemName: avatarIcon)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(.white)
+        }
+        .frame(width: 32, height: 32)
+        .accessibilityIdentifier("messageAvatar-\(message.type.isUser ? "user" : "assistant")")
+    }
+
+    @ViewBuilder
+    private var roleLabel: some View {
+        Text(roleText)
+            .font(.caption)
+            .fontWeight(.medium)
+            .foregroundStyle(.secondary)
+    }
+
+    @ViewBuilder
+    private var bubbleContent: some View {
+        switch message.content {
+        case .text(let text):
+            MessageTextContent(text: text, onCopyCode: onCopyCode)
+        case .streaming(let text):
+            HStack(alignment: .bottom, spacing: 4) {
+                MessageTextContent(text: text, onCopyCode: onCopyCode)
+                TypingIndicator()
+            }
+        case .toolInput(let input):
+            ToolInputContent(input: input)
+        case .toolOutput(let output):
+            ToolOutputContent(output: output)
+        }
+    }
+
+    @ViewBuilder
+    private var timestampLabel: some View {
+        Text(formattedTimestamp)
+            .font(.caption2)
+            .foregroundStyle(.tertiary)
+    }
+
+    private var bubbleBackground: some ShapeStyle {
+        if message.type.isUser {
+            return AnyShapeStyle(Color.accentColor.opacity(0.15))
+        } else {
+            return AnyShapeStyle(Color(nsColor: .controlBackgroundColor))
+        }
+    }
+
+    // MARK: - Computed Properties
+
+    private var avatarColor: Color {
+        message.type.isUser ? .blue : .purple
+    }
+
+    private var avatarIcon: String {
+        message.type.isUser ? "person.fill" : "sparkle"
+    }
+
+    private var roleText: String {
+        switch message.type {
+        case .user:
+            return "You"
+        case .assistant:
+            return "Assistant"
+        case .toolUse(let name, _):
+            return "Tool: \(name)"
+        case .toolResult(_, let isError):
+            return isError ? "Error" : "Result"
+        case .askUser:
+            return "Question"
+        }
+    }
+
+    private var formattedTimestamp: String {
+        RelativeTimestampFormatter.shared.string(from: message.timestamp)
+    }
+}
+
+// MARK: - MessageType Extension
+
+extension ChatMessageItem.MessageType {
+    var isUser: Bool {
+        if case .user = self { return true }
+        return false
+    }
+}
+
+// MARK: - MessageTextContent
+
+/// 텍스트 메시지 콘텐츠
+struct MessageTextContent: View {
+    let text: String
+    let onCopyCode: ((String) -> Void)?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(Array(parseContent().enumerated()), id: \.offset) { _, block in
+                switch block {
+                case .text(let content):
+                    Text(content)
+                        .font(.body)
+                        .foregroundStyle(.primary)
+                        .textSelection(.enabled)
+                case .code(let code, let language):
+                    CodeBlockView(
+                        code: code,
+                        language: language,
+                        onCopy: { onCopyCode?(code) }
+                    )
+                }
+            }
+        }
+    }
+
+    private func parseContent() -> [ContentBlock] {
+        var blocks: [ContentBlock] = []
+        let pattern = "```(\\w*)\\n([\\s\\S]*?)```"
+
+        guard let regex = try? NSRegularExpression(pattern: pattern) else {
+            return [.text(text)]
+        }
+
+        let nsText = text as NSString
+        var lastIndex = 0
+
+        let matches = regex.matches(in: text, range: NSRange(location: 0, length: nsText.length))
+
+        for match in matches {
+            // 코드 블록 이전 텍스트
+            if match.range.location > lastIndex {
+                let textRange = NSRange(location: lastIndex, length: match.range.location - lastIndex)
+                let textContent = nsText.substring(with: textRange).trimmingCharacters(in: .whitespacesAndNewlines)
+                if !textContent.isEmpty {
+                    blocks.append(.text(textContent))
+                }
+            }
+
+            // 코드 블록
+            let languageRange = match.range(at: 1)
+            let codeRange = match.range(at: 2)
+            let language = nsText.substring(with: languageRange)
+            let code = nsText.substring(with: codeRange)
+            blocks.append(.code(code, language.isEmpty ? nil : language))
+
+            lastIndex = match.range.location + match.range.length
+        }
+
+        // 마지막 텍스트
+        if lastIndex < nsText.length {
+            let textContent = nsText.substring(from: lastIndex).trimmingCharacters(in: .whitespacesAndNewlines)
+            if !textContent.isEmpty {
+                blocks.append(.text(textContent))
+            }
+        }
+
+        return blocks.isEmpty ? [.text(text)] : blocks
+    }
+
+    private enum ContentBlock {
+        case text(String)
+        case code(String, String?)
+    }
+}
+
+// MARK: - ToolInputContent
+
+/// 도구 입력 콘텐츠
+struct ToolInputContent: View {
+    let input: [String: AnyCodableValue]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            ForEach(Array(input.keys.sorted()), id: \.self) { key in
+                HStack(alignment: .top, spacing: 4) {
+                    Text("\(key):")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.secondary)
+
+                    Text(formatValue(input[key]))
+                        .font(.caption)
+                        .foregroundStyle(.primary)
+                        .lineLimit(3)
+                }
+            }
+        }
+    }
+
+    private func formatValue(_ value: AnyCodableValue?) -> String {
+        guard let value = value else { return "nil" }
+        switch value {
+        case .string(let s): return s
+        case .int(let i): return String(i)
+        case .double(let d): return String(d)
+        case .bool(let b): return String(b)
+        case .array(let arr): return "[\(arr.count) items]"
+        case .dictionary(let dict): return "{\(dict.count) keys}"
+        case .null: return "null"
+        }
+    }
+}
+
+// MARK: - ToolOutputContent
+
+/// 도구 출력 콘텐츠
+struct ToolOutputContent: View {
+    let output: String
+
+    var body: some View {
+        Text(output)
+            .font(.caption)
+            .foregroundStyle(.primary)
+            .lineLimit(5)
+            .textSelection(.enabled)
+    }
+}
+
+// MARK: - TypingIndicator
+
+/// 타이핑 인디케이터
+struct TypingIndicator: View {
+    @State private var animationPhase = 0
+
+    var body: some View {
+        HStack(spacing: 3) {
+            ForEach(0..<3) { index in
+                Circle()
+                    .fill(Color.secondary.opacity(opacity(for: index)))
+                    .frame(width: 6, height: 6)
+            }
+        }
+        .onAppear {
+            withAnimation(.easeInOut(duration: 0.5).repeatForever()) {
+                animationPhase = 3
+            }
+        }
+        .accessibilityIdentifier("typingIndicator")
+    }
+
+    private func opacity(for index: Int) -> Double {
+        let phase = (animationPhase + index) % 3
+        switch phase {
+        case 0: return 1.0
+        case 1: return 0.6
+        default: return 0.3
+        }
+    }
+}
+
+// MARK: - RelativeTimestampFormatter
+
+/// 상대 시간 포맷터
+final class RelativeTimestampFormatter: @unchecked Sendable {
+    static let shared = RelativeTimestampFormatter()
+
+    private let formatter: RelativeDateTimeFormatter
+
+    private init() {
+        formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .short
+    }
+
+    func string(from date: Date) -> String {
+        let interval = Date().timeIntervalSince(date)
+
+        if interval < 60 {
+            return "Just now"
+        } else if interval < 3600 {
+            return formatter.localizedString(for: date, relativeTo: Date())
+        } else {
+            let calendar = Calendar.current
+            if calendar.isDateInToday(date) {
+                let timeFormatter = DateFormatter()
+                timeFormatter.dateFormat = "HH:mm"
+                return "Today \(timeFormatter.string(from: date))"
+            } else if calendar.isDateInYesterday(date) {
+                let timeFormatter = DateFormatter()
+                timeFormatter.dateFormat = "HH:mm"
+                return "Yesterday \(timeFormatter.string(from: date))"
+            } else {
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "MMM d, HH:mm"
+                return dateFormatter.string(from: date)
+            }
+        }
+    }
+}
+
+// MARK: - Preview
+
+#Preview("User Message") {
+    VStack {
+        MessageBubble(message: ChatMessageItem(
+            id: "1",
+            type: .user,
+            content: .text("Hello, can you help me with SwiftUI?"),
+            timestamp: Date()
+        ))
+
+        MessageBubble(message: ChatMessageItem(
+            id: "2",
+            type: .assistant,
+            content: .text("Of course! What would you like to know?"),
+            timestamp: Date()
+        ))
+    }
+    .padding()
+}
+
+#Preview("Code Block") {
+    MessageBubble(message: ChatMessageItem(
+        id: "3",
+        type: .assistant,
+        content: .text("""
+            Here's an example:
+
+            ```swift
+            struct ContentView: View {
+                var body: some View {
+                    Text("Hello, World!")
+                }
+            }
+            ```
+
+            This is a basic SwiftUI view.
+            """),
+        timestamp: Date()
+    ))
+    .padding()
+}
+
+#Preview("Streaming") {
+    MessageBubble(message: ChatMessageItem(
+        id: "4",
+        type: .assistant,
+        content: .streaming("I'm thinking about this..."),
+        timestamp: Date()
+    ))
+    .padding()
+}
