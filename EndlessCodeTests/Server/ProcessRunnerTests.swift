@@ -205,13 +205,21 @@ struct ProcessRunnerTests {
         }
 
         // Allow Task to start listening
-        try await Task.sleep(for: .milliseconds(50))
+        try await Task.sleep(for: .milliseconds(100))
 
         // When
         try await runner.start()
 
-        // Wait for process to complete
-        try await Task.sleep(for: .milliseconds(300))
+        // Wait for process to complete with timeout
+        var attempts = 0
+        while attempts < 20 {
+            let output = await collector.get()
+            if output.contains("hello") && output.contains("world") {
+                break
+            }
+            try await Task.sleep(for: .milliseconds(100))
+            attempts += 1
+        }
         collectTask.cancel()
 
         // Then
