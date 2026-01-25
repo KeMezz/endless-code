@@ -28,6 +28,27 @@
 1. **모든 태스크에 테스트 필수**: 구현 코드 없이 테스트만 있어도 안됨, 반대도 안됨
 2. **PR 전 테스트 통과 필수**: 실패하는 테스트가 있으면 PR 생성 불가
 3. **TDD 권장**: 가능하면 테스트 먼저 작성
+4. **코드 작성 완료 시 전체 테스트 실행 필수**: Unit 테스트와 E2E 테스트 모두 실행
+
+### 코드 작성 완료 시 테스트 실행 (필수)
+
+코드 작성이 완료되면 **반드시** 다음 순서로 테스트를 실행:
+
+```bash
+# 1. Unit 테스트 실행
+swift test
+
+# 2. E2E 테스트 실행
+xcodebuild test \
+  -scheme EndlessCodeUITestHost \
+  -destination 'platform=macOS' \
+  -only-testing:EndlessCodeUITests
+```
+
+**예외 상황** (E2E 테스트 생략 가능):
+- 내부 구현만 변경하고 외부 동작이 동일한 리팩토링
+- UI와 무관한 서버/모델 코드만 수정한 경우
+- 단, 이 경우에도 기존 E2E 테스트가 통과하는지 확인 권장
 
 ## Unit Test 규칙
 
@@ -375,10 +396,15 @@ xcrun xccov view --report TestResults.xcresult
 
 ## 테스트 체크리스트
 
-PR 생성 전 반드시 확인:
+### 코드 작성 완료 시 (매번 실행)
 
-- [ ] **`swift test`로 모든 Unit 테스트 통과** (xcodebuild 사용 금지)
-- [ ] 모든 UI 테스트 통과 (`EndlessCodeUITestHost` 스킴 + xcodebuild 사용)
+- [ ] **`swift test`로 모든 Unit 테스트 통과**
+- [ ] **E2E 테스트 통과** (`xcodebuild test -scheme EndlessCodeUITestHost ...`)
+
+### PR 생성 전 (최종 확인)
+
+- [ ] 모든 Unit 테스트 통과 (`swift test`)
+- [ ] 모든 E2E 테스트 통과 (`EndlessCodeUITestHost` 스킴 + xcodebuild 사용)
 - [ ] Line Coverage 80% 이상
 - [ ] 신규 코드에 대한 테스트 작성됨
 - [ ] Mock 객체 적절히 사용됨
