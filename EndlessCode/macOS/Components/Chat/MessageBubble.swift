@@ -153,6 +153,11 @@ extension ChatMessageItem.MessageType {
 
 /// 텍스트 메시지 콘텐츠
 struct MessageTextContent: View {
+    /// 코드 블록 파싱용 정규표현식 (캐싱)
+    private static let codeBlockRegex: NSRegularExpression? = {
+        try? NSRegularExpression(pattern: "```(\\w*)\\n([\\s\\S]*?)```")
+    }()
+
     let text: String
     let onCopyCode: ((String) -> Void)?
 
@@ -178,9 +183,8 @@ struct MessageTextContent: View {
 
     private func parseContent() -> [ContentBlock] {
         var blocks: [ContentBlock] = []
-        let pattern = "```(\\w*)\\n([\\s\\S]*?)```"
 
-        guard let regex = try? NSRegularExpression(pattern: pattern) else {
+        guard let regex = Self.codeBlockRegex else {
             return [.text(text)]
         }
 
@@ -282,28 +286,26 @@ struct ToolOutputContent: View {
 // MARK: - TypingIndicator
 
 /// 타이핑 인디케이터
+/// TimelineView를 사용하여 실제로 애니메이션이 동작하도록 구현
 struct TypingIndicator: View {
-    @State private var animationPhase = 0
-
     var body: some View {
-        HStack(spacing: 3) {
-            ForEach(0..<3) { index in
-                Circle()
-                    .fill(Color.secondary.opacity(opacity(for: index)))
-                    .frame(width: 6, height: 6)
-            }
-        }
-        .onAppear {
-            withAnimation(.easeInOut(duration: 0.5).repeatForever()) {
-                animationPhase = 3
+        TimelineView(.periodic(from: .now, by: 0.4)) { timeline in
+            let phase = Int(timeline.date.timeIntervalSinceReferenceDate * 2.5) % 3
+            HStack(spacing: 3) {
+                ForEach(0..<3, id: \.self) { index in
+                    Circle()
+                        .fill(Color.secondary.opacity(opacity(for: index, phase: phase)))
+                        .frame(width: 6, height: 6)
+                        .animation(.easeInOut(duration: 0.2), value: phase)
+                }
             }
         }
         .accessibilityIdentifier("typingIndicator")
     }
 
-    private func opacity(for index: Int) -> Double {
-        let phase = (animationPhase + index) % 3
-        switch phase {
+    private func opacity(for index: Int, phase: Int) -> Double {
+        let adjustedPhase = (phase + index) % 3
+        switch adjustedPhase {
         case 0: return 1.0
         case 1: return 0.6
         default: return 0.3
@@ -317,11 +319,19 @@ struct TypingIndicator: View {
 final class RelativeTimestampFormatter: @unchecked Sendable {
     static let shared = RelativeTimestampFormatter()
 
-    private let formatter: RelativeDateTimeFormatter
+    private let relativeFormatter: RelativeDateTimeFormatter
+    private let timeFormatter: DateFormatter
+    private let dateTimeFormatter: DateFormatter
 
     private init() {
-        formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .short
+        relativeFormatter = RelativeDateTimeFormatter()
+        relativeFormatter.unitsStyle = .short
+
+        timeFormatter = DateFormatter()
+        timeFormatter.dateFormat = "HH:mm"
+
+        dateTimeFormatter = DateFormatter()
+        dateTimeFormatter.dateFormat = "MMM d, HH:mm"
     }
 
     func string(from date: Date) -> String {
@@ -330,21 +340,15 @@ final class RelativeTimestampFormatter: @unchecked Sendable {
         if interval < 60 {
             return "Just now"
         } else if interval < 3600 {
-            return formatter.localizedString(for: date, relativeTo: Date())
+            return relativeFormatter.localizedString(for: date, relativeTo: Date())
         } else {
             let calendar = Calendar.current
             if calendar.isDateInToday(date) {
-                let timeFormatter = DateFormatter()
-                timeFormatter.dateFormat = "HH:mm"
                 return "Today \(timeFormatter.string(from: date))"
             } else if calendar.isDateInYesterday(date) {
-                let timeFormatter = DateFormatter()
-                timeFormatter.dateFormat = "HH:mm"
                 return "Yesterday \(timeFormatter.string(from: date))"
             } else {
-                let dateFormatter = DateFormatter()
-                dateFormatter.dateFormat = "MMM d, HH:mm"
-                return dateFormatter.string(from: date)
+                return dateTimeFormatter.string(from: date)
             }
         }
     }
