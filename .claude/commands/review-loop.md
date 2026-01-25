@@ -1,6 +1,6 @@
 # Review Loop Command
 
-PR 인라인 리뷰 루프를 자동으로 실행합니다. ralph-loop 스타일로 stop hook을 통해 자동 반복됩니다.
+PR 리뷰 코멘트를 분석하고 Claude와 대화하며 반복적으로 처리합니다.
 
 ## 인자
 
@@ -30,7 +30,7 @@ for arg in $ARGUMENTS; do
 done
 ```
 
-### 2. PR 및 Repo 정보 확인
+### 2. PR 정보 확인
 
 ```bash
 # PR 정보
@@ -67,9 +67,9 @@ PR #{PR_NUMBER} 리뷰 루프 진행 중
 
 PR: #{PR_NUMBER}
 Iteration: 1 / {MAX_ITERATIONS}
-Completion: 새 리뷰 코멘트 없음 시 자동 종료
+Completion: Claude가 더 이상 수정 필요 없다고 할 때까지 반복
 
-⚠️  이 루프는 리뷰 코멘트가 없거나 max-iterations에 도달할 때까지 계속됩니다.
+⚠️  이 루프는 Claude 승인 또는 max-iterations에 도달할 때까지 계속됩니다.
 ```
 
 ---
@@ -80,193 +80,87 @@ Completion: 새 리뷰 코멘트 없음 시 자동 종료
 
 `.claude/review-loop.local.md`에서 현재 iteration, PR 정보 확인.
 
-### 2. 리뷰 요청
+### 2. 리뷰 요청 및 응답 대기 (첫 iteration만)
+
+첫 iteration에서만 리뷰 요청 후 자동 대기:
 
 ```bash
+# 요청 전 마지막 Claude 코멘트 시간 기록
+LAST_COMMENT_TIME=$(gh pr view <PR_NUMBER> --json comments \
+  --jq '.comments | map(select(.author.login == "claude")) | last.createdAt // empty')
+
+# 요청 코멘트 작성
 gh pr comment <PR_NUMBER> --body "@claude 리뷰"
+
+# Polling 설정
+TIMEOUT=600   # 10분
+INTERVAL=30   # 30초
+ELAPSED=0
+
+echo "⏳ Claude 리뷰 대기 중..."
+
+while [ $ELAPSED -lt $TIMEOUT ]; do
+  sleep $INTERVAL
+  ELAPSED=$((ELAPSED + INTERVAL))
+
+  NEW_COMMENT_TIME=$(gh pr view <PR_NUMBER> --json comments \
+    --jq '.comments | map(select(.author.login == "claude")) | last.createdAt // empty')
+
+  if [ -n "$NEW_COMMENT_TIME" ] && [ "$NEW_COMMENT_TIME" != "$LAST_COMMENT_TIME" ]; then
+    echo "✅ Claude 응답 완료!"
+    break
+  fi
+
+  echo "   대기 중... ($ELAPSED초 / $TIMEOUT초)"
+done
+
+if [ $ELAPSED -ge $TIMEOUT ]; then
+  echo "⚠️ 타임아웃 - Claude 응답 없음"
+  # 사용자에게 계속 대기할지 질문
+fi
 ```
 
-요청 코멘트 ID 저장 (나중에 삭제용).
-
-### 3. 리뷰 완료 대기
-
-AskUserQuestion으로 선택지 제공:
-- **리뷰 완료**: Claude 리뷰가 완료됨, 처리 시작
-- **중단**: 루프 종료
-
-### 4. "@claude 리뷰" 코멘트 삭제
-
-리뷰 요청 코멘트 삭제:
+### 3. 리뷰 코멘트 수집
 
 ```bash
-gh api -X DELETE repos/<OWNER>/<REPO>/issues/comments/<REQUEST_COMMENT_ID>
+gh pr view <PR_NUMBER> --json comments --jq '.comments | map(select(.author.login == "claude")) | last'
 ```
 
-### 5. 리뷰 코멘트 수집 (Unresolved만)
+Claude의 최신 리뷰 코멘트 가져오기.
 
-#### 5.1 인라인 코멘트 (미해결 스레드만)
+### 5. 코멘트 타당성 분석
 
-GraphQL로 미해결 리뷰 스레드만 수집:
+**각 지적 사항에 대해:**
 
-```bash
-gh api graphql -f query='
-query($owner: String!, $repo: String!, $pr: Int!) {
-  repository(owner: $owner, name: $repo) {
-    pullRequest(number: $pr) {
-      reviewThreads(first: 100) {
-        nodes {
-          isResolved
-          id
-          comments(first: 10) {
-            nodes {
-              id
-              databaseId
-              author { login }
-              body
-              path
-              line
-              createdAt
-            }
-          }
-        }
-      }
-    }
-  }
-}' -f owner="<OWNER>" -f repo="<REPO>" -F pr=<PR_NUMBER> \
-  --jq '.data.repository.pullRequest.reviewThreads.nodes
-    | map(select(.isResolved == false))
-    | map({
-        threadId: .id,
-        comments: .comments.nodes | map(select(.author.login == "github-actions" or .author.login == "claude-bot" or .author.login == "copilot")) | map({
-          id: .databaseId,
-          path: .path,
-          line: .line,
-          body: .body,
-          created_at: .createdAt
-        })
-      })
-    | map(select(.comments | length > 0))'
-```
+1. **실제 코드 확인**: 지적된 파일/라인을 Read tool로 직접 확인
+2. **타당성 평가**:
+   - 지적이 정확한가?
+   - 현재 아키텍처/환경에서 실제 문제인가?
+   - 수정의 비용/효과는?
 
-#### 5.2 일반 코멘트 (Bot 작성)
+3. **분류**:
+   | 분류 | 기준 | 행동 |
+   |------|------|------|
+   | ✅ 타당 | 지적이 정확하고 수정 필요 | 수정 |
+   | ⚠️ 부분 타당 | 일부만 맞거나 개선 권장 수준 | 선택적 수정 |
+   | ❌ 부당 | 지적이 잘못됨 또는 현 환경에서 불필요 | Skip |
 
-```bash
-gh api repos/<OWNER>/<REPO>/issues/<PR_NUMBER>/comments \
-  --jq '[.[] | select(.user.type == "Bot" or .user.login == "github-actions[bot]" or .user.login == "claude[bot]") | {
-    type: "general",
-    id: .id,
-    body: .body,
-    created_at: .created_at
-  }] | sort_by(.created_at) | reverse | .[0:5]'
-```
+### 6. 코드 수정
 
-**새 코멘트 없으면** → 종료 조건 충족
+타당한 지적에 대해서만 수정:
 
-### 6. 종료 조건 확인
+1. 파일 읽기 (Read)
+2. 수정 (Edit)
+3. 테스트 실행 (`swift test`)
+4. 스테이징 (`git add`)
 
-새 미해결 코멘트가 없으면:
-
-```
-✅ 모든 리뷰 코멘트 처리 완료!
-
-<promise>리뷰 완료</promise>
-```
-
-상태 파일에서 `active: false`로 업데이트.
-
-### 7. 각 코멘트 처리
-
-코멘트 type에 따라 처리:
-
-#### 7.1 심각도 파악
-
-코멘트 body에서 심각도 이모지 확인:
-- 🔴 **Critical**: 반드시 수정
-- 🟡 **Warning**: 수정 권장
-- 🟢 **Suggestion**: 선택적
-
-#### 7.2 Suggestion 블록 확인
-
-```markdown
-```suggestion
-수정된 코드
-```
-```
-
-있으면 해당 코드를 그대로 적용.
-
-#### 7.3 수정 결정
-
-| 심각도 | 기본 행동 |
-|--------|----------|
-| 🔴 Critical | ACCEPT (수정) |
-| 🟡 Warning | 검토 후 결정 |
-| 🟢 Suggestion | 타당하면 ACCEPT, 아니면 REJECT |
-
-#### 7.4 ACCEPT: 코드 수정 + 스레드 Resolve
-
-**인라인 코멘트**:
-1. 파일 읽기 및 수정
-2. 스테이징: `git add <path>`
-3. 답글 작성:
-   ```bash
-   gh api repos/<OWNER>/<REPO>/pulls/comments/<COMMENT_ID>/replies \
-     -f body="✅ 수정 완료"
-   ```
-4. **스레드 Resolve**:
-   ```bash
-   gh api graphql -f query='
-   mutation($threadId: ID!) {
-     resolveReviewThread(input: {threadId: $threadId}) {
-       thread { isResolved }
-     }
-   }' -f threadId="<THREAD_ID>"
-   ```
-
-**일반 코멘트**:
-1. 코멘트에서 언급된 파일/패턴 파악
-2. 해당 파일들 수정
-3. 리액션 추가:
-   ```bash
-   gh api repos/<OWNER>/<REPO>/issues/comments/<COMMENT_ID>/reactions \
-     -f content="+1"
-   ```
-
-#### 7.5 REJECT: 이유 설명 + 스레드 Resolve
-
-**인라인 코멘트**:
-```bash
-# 답글
-gh api repos/<OWNER>/<REPO>/pulls/comments/<COMMENT_ID>/replies \
-  -f body="현재 구현을 유지합니다.
-
-**이유**: <구체적 이유>"
-
-# 스레드 Resolve (REJECT도 처리 완료이므로)
-gh api graphql -f query='
-mutation($threadId: ID!) {
-  resolveReviewThread(input: {threadId: $threadId}) {
-    thread { isResolved }
-  }
-}' -f threadId="<THREAD_ID>"
-```
-
-**일반 코멘트**:
-```bash
-gh pr comment <PR_NUMBER> --body "다음 피드백에 대해 현재 구현을 유지합니다:
-
-> <원본 코멘트 요약>
-
-**이유**: <구체적 이유>"
-```
-
-### 8. 커밋 및 푸시
+### 7. 커밋 및 푸시
 
 수정된 파일이 있으면:
 
 ```bash
 git commit -m "$(cat <<'EOF'
-fix: 리뷰 반영
+refactor: 리뷰 피드백 반영
 
 - <파일1>: <수정 내용>
 - <파일2>: <수정 내용>
@@ -278,7 +172,107 @@ EOF
 git push
 ```
 
-### 9. Iteration 업데이트
+### 8. 대응 댓글 작성
+
+PR에 @claude 멘션하여 대응 내용 작성:
+
+```bash
+gh pr comment <PR_NUMBER> --body "$(cat <<'EOF'
+@claude 리뷰 피드백을 분석했습니다. 아래 판단이 적절한지 검토해주세요.
+
+---
+
+## ❌ 수정하지 않은 항목
+
+### 1. {이슈 제목} ({리뷰어 평가} → Skip)
+
+**리뷰어 주장**: {요약}
+
+**실제 분석**:
+- {코드 확인 결과}
+- {Skip 이유}
+
+**결론**: {Skip 근거}
+
+---
+
+## ✅ 수정한 항목
+
+### 1. {이슈 제목}
+
+**변경 전:**
+```swift
+{원본 코드}
+```
+
+**변경 후:**
+```swift
+{수정된 코드}
+```
+
+**이유**: {수정 이유}
+
+---
+
+## 질문
+
+1. Skip한 판단이 적절한가요?
+2. 수정한 항목의 구현이 적절한가요?
+3. 추가로 수정이 필요한 부분이 있나요?
+EOF
+)"
+```
+
+### 9. Claude 응답 대기 (자동 Polling)
+
+```bash
+# 대응 댓글 작성 직후 시간 기록
+REQUEST_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+# Polling 설정
+TIMEOUT=600   # 10분
+INTERVAL=30   # 30초
+ELAPSED=0
+
+echo "⏳ Claude 검토 응답 대기 중..."
+
+while [ $ELAPSED -lt $TIMEOUT ]; do
+  sleep $INTERVAL
+  ELAPSED=$((ELAPSED + INTERVAL))
+
+  # REQUEST_TIME 이후의 Claude 코멘트 확인
+  NEW_RESPONSE=$(gh pr view <PR_NUMBER> --json comments \
+    --jq --arg after "$REQUEST_TIME" \
+    '.comments | map(select(.author.login == "claude" and .createdAt > $after)) | last // empty')
+
+  if [ -n "$NEW_RESPONSE" ]; then
+    echo "✅ Claude 응답 완료!"
+    break
+  fi
+
+  echo "   대기 중... ($ELAPSED초 / $TIMEOUT초)"
+done
+
+if [ $ELAPSED -ge $TIMEOUT ]; then
+  echo "⚠️ 타임아웃"
+  # AskUserQuestion으로 계속/중단 선택
+fi
+```
+
+### 10. Claude 응답 분석
+
+```bash
+gh pr view <PR_NUMBER> --json comments --jq '.comments | map(select(.author.login == "claude")) | last'
+```
+
+응답 내용 확인:
+
+| Claude 응답 | 행동 |
+|-------------|------|
+| "머지 승인", "타당합니다", "수정 불필요" 등 | **루프 종료** |
+| 추가 수정 요청 | **Step 5로 돌아가 반복** |
+
+### 11. Iteration 업데이트
 
 상태 파일의 iteration 증가:
 
@@ -288,13 +282,13 @@ active: true
 iteration: {N+1}
 ...
 ---
+
+- Iteration N: {처리 요약}
 ```
 
-### 10. 루프 반복
+### 12. 루프 반복
 
-Step 2로 돌아가 "@claude 리뷰" 재요청.
-
-Stop hook이 활성화되어 있으면 자동으로 다음 iteration 시작.
+Claude가 추가 수정을 요청하면 Step 5로 돌아가 반복.
 
 ---
 
@@ -302,10 +296,10 @@ Stop hook이 활성화되어 있으면 자동으로 다음 iteration 시작.
 
 다음 중 하나 충족 시 `<promise>리뷰 완료</promise>` 출력:
 
-1. ✅ 새 미해결 리뷰 코멘트 없음
+1. ✅ Claude가 "머지 승인" 또는 "추가 수정 불필요" 응답
 2. ⚠️ max-iterations 도달
 3. 🛑 사용자 "중단" 선택
-4. ⚠️ 동일 파일/라인 코멘트 3회 반복
+4. ⚠️ 동일 이슈 3회 반복 (무한 루프 방지)
 
 ---
 
@@ -321,12 +315,12 @@ max_iterations: 10
 pr_number: 42
 owner_repo: "user/repo"
 started_at: "2024-01-15T10:30:00Z"
-processed_comments: [123, 456, 789]
 ---
 
 PR #42 리뷰 루프 진행 중
-- Iteration 1: 3개 코멘트 처리
-- Iteration 2: 1개 코멘트 처리
+- Iteration 1: 초기 리뷰 요청, 8개 코멘트 수신
+- Iteration 2: 2개 수정, 6개 Skip, Claude 승인 대기
+- Iteration 3: Claude 승인 완료
 ```
 
 ---
@@ -339,41 +333,54 @@ PR #42 리뷰 루프 진행 중
 └─────────────────┬───────────────────────────────────────┘
                   ▼
 ┌─────────────────────────────────────────────────────────┐
-│  2. "@claude 리뷰" 코멘트 작성                            │
+│  2. "@claude 리뷰" 코멘트 작성 (첫 iteration만)            │
 └─────────────────┬───────────────────────────────────────┘
                   ▼
 ┌─────────────────────────────────────────────────────────┐
-│  3. 사용자 대기 (리뷰 완료 / 중단)                         │
+│  3. 자동 Polling (30초 간격, 최대 10분)                    │
+│     → Claude 코멘트 감지 시 다음 단계                      │
 └─────────────────┬───────────────────────────────────────┘
                   ▼
 ┌─────────────────────────────────────────────────────────┐
-│  4. "@claude 리뷰" 코멘트 삭제                            │
+│  4. Claude 리뷰 코멘트 수집                               │
 └─────────────────┬───────────────────────────────────────┘
                   ▼
 ┌─────────────────────────────────────────────────────────┐
-│  5. Unresolved 코멘트 수집 (GraphQL)                     │
+│  5. 각 지적 사항 타당성 분석 (실제 코드 확인)               │
+│     - ✅ 타당: 수정                                       │
+│     - ❌ 부당: Skip + 이유 기록                           │
+└─────────────────┬───────────────────────────────────────┘
+                  ▼
+┌─────────────────────────────────────────────────────────┐
+│  6. 코드 수정 + 테스트                                    │
+└─────────────────┬───────────────────────────────────────┘
+                  ▼
+┌─────────────────────────────────────────────────────────┐
+│  7. 커밋 & 푸시                                           │
+└─────────────────┬───────────────────────────────────────┘
+                  ▼
+┌─────────────────────────────────────────────────────────┐
+│  8. @claude 멘션하여 대응 댓글 작성                        │
+│     - 수정한 항목 설명                                    │
+│     - Skip한 항목 + 이유 설명                             │
+│     - 판단이 적절한지 질문                                 │
+└─────────────────┬───────────────────────────────────────┘
+                  ▼
+┌─────────────────────────────────────────────────────────┐
+│  9. 자동 Polling (30초 간격, 최대 10분)                    │
+│     → Claude 응답 감지 시 분석                            │
 └─────────────────┬───────────────────────────────────────┘
                   ▼
           ┌───────┴───────┐
-          │ 코멘트 있음?   │
+          │ Claude 응답    │
           └───────┬───────┘
-        No        │        Yes
+     승인         │        추가 수정 요청
           ▼       │         ▼
 ┌─────────────┐   │  ┌─────────────────────────────────────┐
-│ <promise>   │   │  │  6. 각 코멘트 처리                    │
-│ 리뷰 완료   │   │  │     - ACCEPT: 수정 + Resolve         │
-│ </promise>  │   │  │     - REJECT: 답글 + Resolve         │
-└─────────────┘   │  └─────────────────┬───────────────────┘
-                  │                    ▼
-                  │  ┌─────────────────────────────────────┐
-                  │  │  7. 커밋 & 푸시                       │
-                  │  └─────────────────┬───────────────────┘
-                  │                    ▼
-                  │  ┌─────────────────────────────────────┐
-                  │  │  8. Iteration++ → Step 2로 반복      │
-                  │  └─────────────────────────────────────┘
-                  │                    │
-                  └────────────────────┘
+│ <promise>   │   │  │  10. Iteration++ → Step 5로 반복    │
+│ 리뷰 완료   │   │  └─────────────────────────────────────┘
+│ </promise>  │   │                    │
+└─────────────┘   └────────────────────┘
 ```
 
 ---
@@ -386,13 +393,12 @@ PR #42 리뷰 루프 진행 중
 | 항목 | 수 |
 |------|---|
 | 총 Iteration | N |
-| 처리된 코멘트 | M |
-| 수정 반영 (ACCEPT) | A |
-| 유지 (REJECT) | R |
-| Resolved 스레드 | S |
+| 수정 반영 | A |
+| Skip (판단 유지) | S |
 | 커밋 | C |
 
 PR: <URL>
+Claude 최종 응답: "머지 승인 가능"
 
 <promise>리뷰 완료</promise>
 ```
