@@ -174,7 +174,9 @@ actor ClaudeCodeManager: ClaudeCodeManagerProtocol {
 
     private func createParsedMessageStream(for session: ManagedSession) -> AsyncStream<ParsedMessage> {
         AsyncStream { continuation in
-            Task {
+            let task = Task {
+                defer { continuation.finish() }
+
                 let parser = JSONLParser()
 
                 for await line in session.runner.stdout {
@@ -190,8 +192,10 @@ actor ClaudeCodeManager: ClaudeCodeManagerProtocol {
                         }
                     }
                 }
+            }
 
-                continuation.finish()
+            continuation.onTermination = { _ in
+                task.cancel()
             }
         }
     }

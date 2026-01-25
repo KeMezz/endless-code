@@ -224,7 +224,12 @@ actor SessionManager: SessionManagerProtocol {
 
     private func handleMessage(sessionId: String, message: ParsedMessage) async {
         // 세션 활동 시간 업데이트
-        try? await sessionStore.touchSession(id: sessionId)
+        do {
+            try await sessionStore.touchSession(id: sessionId)
+        } catch {
+            // touchSession 실패는 치명적이지 않으나 디버깅을 위해 로깅
+            print("⚠️ 세션 활동 시간 업데이트 실패: \(sessionId) - \(error.localizedDescription)")
+        }
 
         // TODO: WebSocket을 통해 클라이언트에 메시지 전달
         // 이 부분은 WebSocketHandler에서 구현
