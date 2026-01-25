@@ -20,17 +20,22 @@ struct MessageBubble: View {
     }
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: 0) {
             if message.type.isUser {
                 Spacer(minLength: 60)
             }
 
-            if !message.type.isUser {
-                avatar
-            }
-
             VStack(alignment: message.type.isUser ? .trailing : .leading, spacing: 4) {
-                roleLabel
+                // 아바타 + 역할 레이블 행
+                HStack(spacing: 8) {
+                    if !message.type.isUser {
+                        avatar
+                    }
+                    roleLabel
+                    if message.type.isUser {
+                        avatar
+                    }
+                }
 
                 bubbleContent
                     .padding(.horizontal, 14)
@@ -39,10 +44,6 @@ struct MessageBubble: View {
                     .clipShape(RoundedRectangle(cornerRadius: 16))
 
                 timestampLabel
-            }
-
-            if message.type.isUser {
-                avatar
             }
 
             if !message.type.isUser {

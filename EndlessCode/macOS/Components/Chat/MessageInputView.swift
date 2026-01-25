@@ -17,13 +17,9 @@ struct MessageInputView: View {
     let onSend: () -> Void
 
     @FocusState private var isFocused: Bool
-    @State private var textEditorHeight: CGFloat = 36
-
-    private let minHeight: CGFloat = 36
-    private let maxHeight: CGFloat = 200
 
     var body: some View {
-        HStack(alignment: .bottom, spacing: 12) {
+        HStack(alignment: .center, spacing: 12) {
             attachmentButton
 
             textEditor
@@ -54,60 +50,35 @@ struct MessageInputView: View {
 
     @ViewBuilder
     private var textEditor: some View {
-        ZStack(alignment: .leading) {
-            // 플레이스홀더
-            if text.isEmpty {
-                Text("Ask Claude to write code...")
-                    .foregroundStyle(.tertiary)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .allowsHitTesting(false)
-            }
-
-            // 숨겨진 텍스트 (높이 계산용)
-            Text(text.isEmpty ? " " : text)
-                .font(.body)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .opacity(0)
-                .background(GeometryReader { geometry in
-                    Color.clear.preference(
-                        key: TextEditorHeightKey.self,
-                        value: geometry.size.height
-                    )
-                })
-
-            // 실제 텍스트 에디터
-            TextEditor(text: $text)
-                .font(.body)
-                .scrollContentBackground(.hidden)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .frame(height: max(minHeight, min(textEditorHeight, maxHeight)))
-                .focused($isFocused)
-                .onKeyPress(.return, phases: .down) { keyPress in
-                    // Shift+Enter는 줄바꿈, Enter만 누르면 전송
-                    if !keyPress.modifiers.contains(.shift) && canSend {
-                        onSend()
-                        return .handled
-                    }
-                    return .ignored
+        TextField("Ask Claude to write code...", text: $text, axis: .vertical)
+            .textFieldStyle(.plain)
+            .font(.body)
+            .lineLimit(1...8)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .focused($isFocused)
+            .onKeyPress(.return, phases: .down) { keyPress in
+                if keyPress.modifiers.contains(.shift) {
+                    // Shift+Enter: 줄바꿈 추가
+                    text += "\n"
+                    return .handled
+                } else if canSend {
+                    // Enter만: 전송
+                    onSend()
+                    return .handled
                 }
-                .accessibilityIdentifier("messageTextEditor")
-        }
-        .background(Color(nsColor: .textBackgroundColor))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(
-                    isFocused ? Color.accentColor.opacity(0.5) : Color.secondary.opacity(0.2),
-                    lineWidth: 1
-                )
-        )
-        .onPreferenceChange(TextEditorHeightKey.self) { height in
-            textEditorHeight = height
-        }
-        .accessibilityIdentifier("messageInput")
+                return .ignored
+            }
+            .background(Color(nsColor: .textBackgroundColor))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(
+                        isFocused ? Color.accentColor.opacity(0.5) : Color.secondary.opacity(0.2),
+                        lineWidth: 1
+                    )
+            )
+            .accessibilityIdentifier("messageInput")
     }
 
     @ViewBuilder
@@ -136,17 +107,6 @@ struct MessageInputView: View {
         .animation(.easeInOut(duration: 0.15), value: canSend)
         .accessibilityIdentifier("sendButton")
         .accessibilityLabel(isLoading ? "Sending message" : "Send message")
-    }
-}
-
-// MARK: - TextEditorHeightKey
-
-/// 텍스트 에디터 높이 PreferenceKey
-private struct TextEditorHeightKey: PreferenceKey {
-    static var defaultValue: CGFloat = 36
-
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = max(value, nextValue())
     }
 }
 

@@ -36,20 +36,20 @@ struct ChatPage {
         app.staticTexts["Start a conversation"]
     }
 
-    /// 메시지 입력 뷰 - placeholder 텍스트로 확인
+    /// 메시지 입력 뷰 - accessibilityIdentifier로 확인
     var messageInputView: XCUIElement {
-        app.staticTexts["Ask Claude to write code..."]
+        app.descendants(matching: .any)["messageInputView"]
     }
 
-    /// 메시지 입력 필드 - TextEditor
-    /// Note: accessibilityIdentifier "messageTextEditor"를 사용
+    /// 메시지 입력 필드 - TextField
+    /// Note: accessibilityIdentifier "messageInput"를 사용
     var messageInput: XCUIElement {
-        // TextEditor는 textViews로 탐색, 명시적 identifier 우선
-        let textEditor = app.textViews["messageTextEditor"]
-        if textEditor.exists {
-            return textEditor
+        // TextField는 textFields로 탐색
+        let textField = app.textFields["messageInput"]
+        if textField.exists {
+            return textField
         }
-        return app.textViews.firstMatch
+        return app.textFields.firstMatch
     }
 
     /// 전송 버튼 - image로 찾기 (arrow.up 아이콘)

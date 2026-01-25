@@ -75,15 +75,15 @@ final class Section3ChatFlowTests: XCTestCase {
 
         // ChatView 관련 요소 확인
         let sessionText = app.staticTexts["Session"]
-        let placeholderText = app.staticTexts["Ask Claude to write code..."]
+        let messageInput = chatPage.messageInput
 
         // Then: ChatView가 표시되었음을 확인 - 헤더의 "Session" 텍스트로 검증
         XCTAssertTrue(sessionText.waitForExistence(timeout: 10),
                       "채팅 헤더의 Session 텍스트가 표시되어야 합니다")
 
-        // Then: 메시지 입력 뷰가 표시되어야 함 (placeholder로 확인)
-        XCTAssertTrue(placeholderText.exists,
-                      "메시지 입력 뷰의 placeholder가 표시되어야 합니다")
+        // Then: 메시지 입력 뷰가 표시되어야 함 (TextField로 확인)
+        XCTAssertTrue(messageInput.waitForExistence(timeout: 5),
+                      "메시지 입력 뷰가 표시되어야 합니다")
 
         // 스크린샷 저장
         let screenshot = app.screenshot()
@@ -134,14 +134,13 @@ final class Section3ChatFlowTests: XCTestCase {
         XCTAssertTrue(sessionText.waitForExistence(timeout: 10),
                       "ChatView가 표시되어야 합니다")
 
-        // Then: 메시지 입력 필드가 존재해야 함 (placeholder로 확인)
-        let placeholder = app.staticTexts["Ask Claude to write code..."]
-        XCTAssertTrue(placeholder.waitForExistence(timeout: 5),
+        // Then: 메시지 입력 필드가 존재해야 함 (TextField로 확인)
+        XCTAssertTrue(chatPage.messageInput.waitForExistence(timeout: 5),
                       "메시지 입력 필드가 존재해야 합니다")
 
-        // Then: TextEditor가 존재해야 함
-        XCTAssertTrue(chatPage.messageInput.waitForExistence(timeout: 3),
-                      "TextEditor가 존재해야 합니다")
+        // Then: TextField가 hittable해야 함
+        XCTAssertTrue(chatPage.messageInput.isHittable,
+                      "TextField가 클릭 가능해야 합니다")
 
         // 스크린샷 저장
         let screenshot = app.screenshot()
