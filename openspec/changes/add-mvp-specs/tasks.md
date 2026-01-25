@@ -3,53 +3,53 @@
 ## 1. Server Core
 
 ### 1.1 프로젝트 기반 설정
-- [ ] 1.1.1 Vapor 패키지 추가 및 서버 엔트리포인트
-- [ ] 1.1.2 공통 모델 정의 - Message, Session, Project 타입
-- [ ] 1.1.3 설정 모델 및 환경 변수 처리
+- [x] 1.1.1 Vapor 패키지 추가 및 서버 엔트리포인트
+- [x] 1.1.2 공통 모델 정의 - Message, Session, Project 타입
+- [x] 1.1.3 설정 모델 및 환경 변수 처리
 
 ### 1.2 CLI 프로세스 관리
-- [ ] 1.2.1 ProcessRunner - 기본 Process 래퍼, 시작/종료
-- [ ] 1.2.2 ProcessRunner - stdin 쓰기, stdout/stderr 스트리밍
-- [ ] 1.2.3 ClaudeCodeManager - ProcessRunner 통합, 세션별 프로세스 관리
-- [ ] 1.2.4 ClaudeCodeManager - 에러 복구 (크래시 감지, 자동 재시작, 지수 백오프)
-- [ ] 1.2.5 ClaudeCodeManager - 리소스 관리 (세션 수 제한, 좀비 프로세스 정리)
+- [x] 1.2.1 ProcessRunner - 기본 Process 래퍼, 시작/종료
+- [x] 1.2.2 ProcessRunner - stdin 쓰기, stdout/stderr 스트리밍
+- [x] 1.2.3 ClaudeCodeManager - ProcessRunner 통합, 세션별 프로세스 관리
+- [x] 1.2.4 ClaudeCodeManager - 에러 복구 (크래시 감지, 자동 재시작, 지수 백오프)
+- [x] 1.2.5 ClaudeCodeManager - 리소스 관리 (세션 수 제한, 좀비 프로세스 정리)
 
 ### 1.3 JSONL 파싱
-- [ ] 1.3.1 JSONLParser - 라인 버퍼링 및 기본 파싱
-- [ ] 1.3.2 메시지 타입 분류 - message, tool_use, tool_result
-- [ ] 1.3.3 방어적 파싱 - 누락 필드, 알 수 없는 타입 처리
+- [x] 1.3.1 JSONLParser - 라인 버퍼링 및 기본 파싱
+- [x] 1.3.2 메시지 타입 분류 - message, tool_use, tool_result
+- [x] 1.3.3 방어적 파싱 - 누락 필드, 알 수 없는 타입 처리
 
 ### 1.4 세션 관리
-- [ ] 1.4.1 ProjectDiscovery - ~/.claude/projects 디렉토리 스캔
-- [ ] 1.4.2 ProjectDiscovery - 메타데이터 추출 (이름, 경로, 세션 수)
-- [ ] 1.4.3 ProjectDiscovery - 유효성 검증 및 필터링
-- [ ] 1.4.4 SessionStore - 세션 CRUD (Create, Read, Update, Delete)
-- [ ] 1.4.5 SessionStore - 메모리 캐시 및 상태 관리
-- [ ] 1.4.6 SessionHistoryLoader - JSONL 파일 파싱
-- [ ] 1.4.7 SessionHistoryLoader - 페이지네이션 (최근 1,000개 초기 로드)
-- [ ] 1.4.8 SessionHistoryLoader - 손상 파일 복구 (유효 라인만 로드)
+- [x] 1.4.1 ProjectDiscovery - ~/.claude/projects 디렉토리 스캔
+- [x] 1.4.2 ProjectDiscovery - 메타데이터 추출 (이름, 경로, 세션 수)
+- [x] 1.4.3 ProjectDiscovery - 유효성 검증 및 필터링
+- [x] 1.4.4 SessionStore - 세션 CRUD (Create, Read, Update, Delete)
+- [x] 1.4.5 SessionStore - 메모리 캐시 및 상태 관리
+- [x] 1.4.6 SessionHistoryLoader - JSONL 파일 파싱
+- [x] 1.4.7 SessionHistoryLoader - 페이지네이션 (최근 1,000개 초기 로드)
+- [x] 1.4.8 SessionHistoryLoader - 손상 파일 복구 (유효 라인만 로드)
 
 ### 1.5 WebSocket API
-- [ ] 1.5.1 WebSocket 라우트 및 연결 관리
-- [ ] 1.5.2 토큰 기반 인증 - Authorization 헤더 검증, 401 응답
-- [ ] 1.5.3 메시지 수신 → CLI stdin 전달
-- [ ] 1.5.4 CLI stdout → 클라이언트 브로드캐스트
-- [ ] 1.5.5 연결 상태 동기화 - 초기 상태 전송, 상태 변경 브로드캐스트
-- [ ] 1.5.6 재연결 지원 - Ping/Pong, 연결 ID 유지, 히스토리 재전송
-- [ ] 1.5.7 에러 처리 - 지수 백오프 재연결, 버퍼 오버플로우 방지
+- [x] 1.5.1 WebSocket 라우트 및 연결 관리
+- [x] 1.5.2 토큰 기반 인증 - Authorization 헤더 검증, 401 응답
+- [x] 1.5.3 메시지 수신 → CLI stdin 전달
+- [x] 1.5.4 CLI stdout → 클라이언트 브로드캐스트
+- [x] 1.5.5 연결 상태 동기화 - 초기 상태 전송, 상태 변경 브로드캐스트
+- [x] 1.5.6 재연결 지원 - Ping/Pong, 연결 ID 유지, 히스토리 재전송
+- [x] 1.5.7 에러 처리 - 지수 백오프 재연결, 버퍼 오버플로우 방지
 
 ### 1.6 대화형 프롬프트
-- [ ] 1.6.1 AskUserQuestion 감지 - tool_use 타입 필터링
-- [ ] 1.6.2 프롬프트 상태 관리 - 대기 중/응답됨/타임아웃
-- [ ] 1.6.3 응답 주입 - 선택 옵션 직렬화, stdin 전송
-- [ ] 1.6.4 타임아웃 처리 - 30분 대기, 만료 시 알림
+- [x] 1.6.1 AskUserQuestion 감지 - tool_use 타입 필터링
+- [x] 1.6.2 프롬프트 상태 관리 - 대기 중/응답됨/타임아웃
+- [x] 1.6.3 응답 주입 - 선택 옵션 직렬화, stdin 전송
+- [x] 1.6.4 타임아웃 처리 - 30분 대기, 만료 시 알림
 
 ### 1.7 서버 테스트
-- [ ] 1.7.1 ProcessRunner 단위 테스트 - 시작/종료, stdin/stdout
-- [ ] 1.7.2 JSONLParser 단위 테스트 - 타입 분류, 방어적 파싱
-- [ ] 1.7.3 SessionManager 단위 테스트 - CRUD, 상태 전환
-- [ ] 1.7.4 WebSocket 통합 테스트 - 연결, 인증, 메시지 전달
-- [ ] 1.7.5 에러 시나리오 테스트 - 크래시 복구, 타임아웃, 재연결
+- [x] 1.7.1 ProcessRunner 단위 테스트 - 시작/종료, stdin/stdout
+- [x] 1.7.2 JSONLParser 단위 테스트 - 타입 분류, 방어적 파싱
+- [x] 1.7.3 SessionManager 단위 테스트 - CRUD, 상태 전환
+- [x] 1.7.4 WebSocket 통합 테스트 - 연결, 인증, 메시지 전달
+- [x] 1.7.5 에러 시나리오 테스트 - 크래시 복구, 타임아웃, 재연결
 
 ## 2. macOS App - 공통 컴포넌트
 
