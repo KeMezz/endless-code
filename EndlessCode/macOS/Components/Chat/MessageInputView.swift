@@ -41,7 +41,7 @@ struct MessageInputView: View {
     @ViewBuilder
     private var attachmentButton: some View {
         Button {
-            // TODO: 첨부 파일 기능
+            // TODO(Section-3.3): 첨부 파일 기능 - 파일 선택 다이얼로그 및 업로드 구현
         } label: {
             Image(systemName: "plus.circle.fill")
                 .font(.title2)
@@ -49,6 +49,7 @@ struct MessageInputView: View {
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("attachmentButton")
+        .accessibilityLabel("Attach file")
     }
 
     @ViewBuilder
@@ -84,11 +85,15 @@ struct MessageInputView: View {
                 .padding(.vertical, 4)
                 .frame(height: max(minHeight, min(textEditorHeight, maxHeight)))
                 .focused($isFocused)
-                .onSubmit {
-                    if canSend && !NSEvent.modifierFlags.contains(.shift) {
+                .onKeyPress(.return, phases: .down) { keyPress in
+                    // Shift+Enter는 줄바꿈, Enter만 누르면 전송
+                    if !keyPress.modifiers.contains(.shift) && canSend {
                         onSend()
+                        return .handled
                     }
+                    return .ignored
                 }
+                .accessibilityIdentifier("messageTextEditor")
         }
         .background(Color(nsColor: .textBackgroundColor))
         .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -130,6 +135,7 @@ struct MessageInputView: View {
         .disabled(!canSend || isLoading)
         .animation(.easeInOut(duration: 0.15), value: canSend)
         .accessibilityIdentifier("sendButton")
+        .accessibilityLabel(isLoading ? "Sending message" : "Send message")
     }
 }
 
