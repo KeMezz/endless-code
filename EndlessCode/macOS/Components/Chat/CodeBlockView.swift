@@ -20,7 +20,13 @@ private enum CodeBlockConstants {
     static let maxHeight: CGFloat = 400
 
     /// 라인 번호 최소 너비
-    static let lineNumberMinWidth: CGFloat = 30
+    static let lineNumberMinWidth: CGFloat = 20
+
+    /// 코드 라인 높이 (monospaced body 기준)
+    static let lineHeight: CGFloat = 20
+
+    /// 코드 영역 상하 패딩 합계
+    static let verticalPadding: CGFloat = 16
 }
 
 // MARK: - CodeBlockView
@@ -131,82 +137,75 @@ struct CodeBlockView: View {
     private var codeContent: some View {
         let useVirtualization = lines.count >= CodeBlockConstants.virtualizationThreshold
 
-        ScrollView([.horizontal, .vertical], showsIndicators: true) {
-            HStack(alignment: .top, spacing: 0) {
-                // 라인 번호 컬럼 (연속 배경)
-                lineNumberColumn(useVirtualization: useVirtualization)
-
-                // 코드 컬럼
-                codeColumn(useVirtualization: useVirtualization)
+        GeometryReader { geometry in
+            ScrollView([.horizontal, .vertical], showsIndicators: true) {
+                if useVirtualization {
+                    lazyCodeRows
+                        .frame(minWidth: geometry.size.width, alignment: .leading)
+                } else {
+                    regularCodeRows
+                        .frame(minWidth: geometry.size.width, alignment: .leading)
+                }
             }
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: calculateContentHeight())
+    }
+
+    /// 코드 콘텐츠 높이 계산
+    private func calculateContentHeight() -> CGFloat {
+        let calculatedHeight = CGFloat(lines.count) * CodeBlockConstants.lineHeight
+            + CodeBlockConstants.verticalPadding
+
+        if lines.count > 20 {
+            return min(calculatedHeight, CodeBlockConstants.maxHeight)
+        }
+        return calculatedHeight
+    }
+
+    /// LazyVStack 기반 코드 행 (대용량 최적화)
+    private var lazyCodeRows: some View {
+        LazyVStack(alignment: .leading, spacing: 0) {
+            ForEach(0..<lines.count, id: \.self) { index in
+                codeRow(index: index)
+            }
+        }
+        .padding(.vertical, 8)
+    }
+
+    /// VStack 기반 코드 행 (일반)
+    private var regularCodeRows: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(0..<lines.count, id: \.self) { index in
+                codeRow(index: index)
+            }
+        }
+        .padding(.vertical, 8)
+    }
+
+    /// 단일 코드 행 (라인 번호 + 코드)
+    @ViewBuilder
+    private func codeRow(index: Int) -> some View {
+        HStack(alignment: .top, spacing: 0) {
+            // 라인 번호
+            Text("\(index + 1)")
+                .font(.system(.body, design: .monospaced))
+                .foregroundStyle(.tertiary)
+                .frame(width: lineNumberWidth, alignment: .trailing)
+                .padding(.leading, 8)
+                .padding(.trailing, 8)
+                .padding(.vertical, 2)
+                .background(Color(nsColor: .controlBackgroundColor).opacity(0.3))
+
+            // 코드
+            Text(highlightedLines[index])
+                .font(.system(.body, design: .monospaced))
+                .textSelection(.enabled)
+                .fixedSize(horizontal: true, vertical: false)
+                .padding(.leading, 8)
+                .padding(.vertical, 2)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(maxHeight: lines.count > 20 ? CodeBlockConstants.maxHeight : nil)
-    }
-
-    /// 라인 번호 컬럼 (연속 배경 적용)
-    @ViewBuilder
-    private func lineNumberColumn(useVirtualization: Bool) -> some View {
-        Group {
-            if useVirtualization {
-                LazyVStack(alignment: .trailing, spacing: 0) {
-                    ForEach(0..<lines.count, id: \.self) { index in
-                        lineNumberView(index + 1)
-                    }
-                }
-            } else {
-                VStack(alignment: .trailing, spacing: 0) {
-                    ForEach(0..<lines.count, id: \.self) { index in
-                        lineNumberView(index + 1)
-                    }
-                }
-            }
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 8)
-        .background(Color(nsColor: .controlBackgroundColor).opacity(0.3))
-    }
-
-    /// 라인 번호 뷰
-    @ViewBuilder
-    private func lineNumberView(_ number: Int) -> some View {
-        Text("\(number)")
-            .font(.system(.body, design: .monospaced))
-            .foregroundStyle(.tertiary)
-            .frame(minWidth: lineNumberWidth, alignment: .trailing)
-            .padding(.vertical, 2)
-    }
-
-    /// 코드 컬럼
-    @ViewBuilder
-    private func codeColumn(useVirtualization: Bool) -> some View {
-        Group {
-            if useVirtualization {
-                LazyVStack(alignment: .leading, spacing: 0) {
-                    ForEach(Array(highlightedLines.enumerated()), id: \.offset) { _, highlighted in
-                        codeLineView(highlightedCode: highlighted)
-                    }
-                }
-            } else {
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach(Array(highlightedLines.enumerated()), id: \.offset) { _, highlighted in
-                        codeLineView(highlightedCode: highlighted)
-                    }
-                }
-            }
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-    }
-
-    /// 코드 라인 뷰
-    @ViewBuilder
-    private func codeLineView(highlightedCode: AttributedString) -> some View {
-        Text(highlightedCode)
-            .font(.system(.body, design: .monospaced))
-            .textSelection(.enabled)
-            .fixedSize(horizontal: true, vertical: false)
-            .padding(.vertical, 2)
     }
 
     // MARK: - Computed Properties
@@ -214,7 +213,7 @@ struct CodeBlockView: View {
     /// 라인 번호 표시 너비 (자릿수에 따라 동적 조절)
     private var lineNumberWidth: CGFloat {
         let digits = String(lines.count).count
-        return max(CodeBlockConstants.lineNumberMinWidth, CGFloat(digits * 10 + 10))
+        return max(CodeBlockConstants.lineNumberMinWidth, CGFloat(digits * 8 + 4))
     }
 
     // MARK: - Helpers
