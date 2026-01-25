@@ -54,34 +54,41 @@ actor ConnectionManager: ConnectionManagerProtocol {
     init(client: any WebSocketClientProtocol) {
         self.client = client
 
-        var stateCont: AsyncStream<ConnectionState>.Continuation!
-        self._stateChanges = AsyncStream { cont in
-            stateCont = cont
-        }
-        self.stateContinuation = stateCont
-
-        var msgCont: AsyncStream<ServerMessage>.Continuation!
-        self._messages = AsyncStream { cont in
-            msgCont = cont
-        }
-        self.messageContinuation = msgCont
+        let streams = Self.makeStreams()
+        self._stateChanges = streams.stateStream
+        self.stateContinuation = streams.stateCont
+        self._messages = streams.messageStream
+        self.messageContinuation = streams.msgCont
     }
 
     init(configuration: WebSocketClientConfiguration) {
         let client = WebSocketClient(configuration: configuration)
         self.client = client
 
+        let streams = Self.makeStreams()
+        self._stateChanges = streams.stateStream
+        self.stateContinuation = streams.stateCont
+        self._messages = streams.messageStream
+        self.messageContinuation = streams.msgCont
+    }
+
+    private static func makeStreams() -> (
+        stateStream: AsyncStream<ConnectionState>,
+        stateCont: AsyncStream<ConnectionState>.Continuation,
+        messageStream: AsyncStream<ServerMessage>,
+        msgCont: AsyncStream<ServerMessage>.Continuation
+    ) {
         var stateCont: AsyncStream<ConnectionState>.Continuation!
-        self._stateChanges = AsyncStream { cont in
+        let stateStream = AsyncStream<ConnectionState> { cont in
             stateCont = cont
         }
-        self.stateContinuation = stateCont
 
         var msgCont: AsyncStream<ServerMessage>.Continuation!
-        self._messages = AsyncStream { cont in
+        let messageStream = AsyncStream<ServerMessage> { cont in
             msgCont = cont
         }
-        self.messageContinuation = msgCont
+
+        return (stateStream, stateCont, messageStream, msgCont)
     }
 
     deinit {
@@ -130,24 +137,20 @@ actor ConnectionManager: ConnectionManagerProtocol {
 
     private func startStateMonitoring() {
         stateMonitorTask?.cancel()
-        stateMonitorTask = Task { [weak self] in
-            guard let self = self else { return }
-
-            for await newState in self.client.stateChanges {
+        stateMonitorTask = Task {
+            for await newState in client.stateChanges {
                 guard !Task.isCancelled else { break }
-                await self.updateState(newState)
+                await updateState(newState)
             }
         }
     }
 
     private func startForwardingMessages() {
         messageForwardTask?.cancel()
-        messageForwardTask = Task { [weak self] in
-            guard let self = self else { return }
-
-            for await message in self.client.messages {
+        messageForwardTask = Task {
+            for await message in client.messages {
                 guard !Task.isCancelled else { break }
-                self.messageContinuation.yield(message)
+                messageContinuation.yield(message)
             }
         }
     }
