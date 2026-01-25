@@ -34,22 +34,26 @@ struct DetailPage {
 
     // MARK: - Dynamic Elements
 
-    /// 프로젝트 상세 - ProjectDetailView가 Text로 구현되어 있음
-    /// 주의: DetailView의 Group accessibilityIdentifier가 내부 뷰들을 override함
+    /// 프로젝트 상세 - FileExplorerView로 구현됨
+    /// 주의: SwiftUI의 accessibilityIdentifier는 중첩 시 예상대로 동작하지 않을 수 있음
     func projectDetail(id: String) -> XCUIElement {
+        // 우선: projectDetail-{id} identifier로 찾기
         let element = app.descendants(matching: .any)["projectDetail-\(id)"]
         if element.exists {
             return element
         }
-        // fallback: staticTexts에서 identifier로 찾기
-        let staticTextElement = app.staticTexts["projectDetail-\(id)"]
-        if staticTextElement.exists {
-            return staticTextElement
+        // fallback 1: fileExplorerView identifier로 찾기 (Section 4 FileExplorerView)
+        let explorerView = app.descendants(matching: .any)["fileExplorerView"]
+        if explorerView.exists {
+            return explorerView
         }
-        // fallback 2: "Project: " 텍스트로 찾기 (Group identifier override 우회)
-        return app.staticTexts.matching(
-            NSPredicate(format: "value BEGINSWITH 'Project: '")
-        ).firstMatch
+        // fallback 2: fileTreePanel identifier로 찾기
+        let treePanel = app.descendants(matching: .any)["fileTreePanel"]
+        if treePanel.exists {
+            return treePanel
+        }
+        // fallback 3: staticTexts에서 identifier로 찾기
+        return app.staticTexts["projectDetail-\(id)"]
     }
 
     func chatView(sessionId: String) -> XCUIElement {
