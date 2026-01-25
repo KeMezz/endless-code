@@ -21,6 +21,9 @@ private enum CodeBlockConstants {
 
     /// 라인 번호 최소 너비
     static let lineNumberMinWidth: CGFloat = 30
+
+    /// 코드 영역 수직 패딩 (상단 8 + 하단 8)
+    static let verticalPadding: CGFloat = 16
 }
 
 // MARK: - CodeBlockView
@@ -226,7 +229,7 @@ struct CodeBlockView: View {
     // MARK: - Helpers
 
     private func calculateHeight() -> CGFloat {
-        CGFloat(lines.count) * CodeBlockConstants.lineHeight + 16
+        CGFloat(lines.count) * CodeBlockConstants.lineHeight + CodeBlockConstants.verticalPadding
     }
 
     private func copyToClipboard() {

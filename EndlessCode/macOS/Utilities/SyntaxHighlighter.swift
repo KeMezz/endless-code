@@ -267,14 +267,24 @@ public struct SyntaxHighlighter: Sendable {
             guard matchRange.location != NSNotFound,
                   let swiftRange = Range(matchRange, in: line) else { continue }
 
-            let matchedText = String(line[swiftRange])
+            // NSRange를 AttributedString.Index로 직접 변환하여 정확한 위치에 적용
+            let startOffset = line.distance(from: line.startIndex, to: swiftRange.lowerBound)
+            let endOffset = line.distance(from: line.startIndex, to: swiftRange.upperBound)
 
-            // AttributedString에서 해당 텍스트의 범위 찾기
-            if let attrRange = attributedString.range(of: matchedText, options: [], locale: nil) {
-                // 이미 색상이 적용된 경우 스킵 (문자열, 주석 등)
-                if attributedString[attrRange].foregroundColor == nil {
-                    attributedString[attrRange].foregroundColor = color
-                }
+            let attrStartIndex = attributedString.index(
+                attributedString.startIndex,
+                offsetByCharacters: startOffset
+            )
+            let attrEndIndex = attributedString.index(
+                attributedString.startIndex,
+                offsetByCharacters: endOffset
+            )
+
+            let attrRange = attrStartIndex..<attrEndIndex
+
+            // 이미 색상이 적용된 경우 스킵 (문자열, 주석 등)
+            if attributedString[attrRange].foregroundColor == nil {
+                attributedString[attrRange].foregroundColor = color
             }
         }
     }
