@@ -10,8 +10,8 @@ import Foundation
 // MARK: - ProjectBrowserViewModel
 
 /// 프로젝트 브라우저 ViewModel
-@Observable
-final class ProjectBrowserViewModel: @unchecked Sendable {
+@Observable @MainActor
+final class ProjectBrowserViewModel {
     // MARK: - Properties
 
     /// 모든 프로젝트 목록

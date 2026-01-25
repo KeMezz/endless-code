@@ -10,8 +10,8 @@ import Foundation
 // MARK: - SessionListViewModel
 
 /// 세션 목록 ViewModel
-@Observable
-final class SessionListViewModel: @unchecked Sendable {
+@Observable @MainActor
+final class SessionListViewModel {
     // MARK: - Properties
 
     /// 모든 세션 목록
