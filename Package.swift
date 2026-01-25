@@ -46,7 +46,7 @@ let package = Package(
                 .product(name: "VaporTesting", package: "vapor"),
             ],
             path: "EndlessCodeTests",
-            sources: ["Server", "Client"]
+            sources: ["Server", "Client", "Shared"]
         ),
     ]
 )
