@@ -3,9 +3,25 @@
 //  EndlessCode
 //
 //  코드 블록 표시 컴포넌트
+//  - 언어별 신택스 하이라이팅
+//  - 대용량 코드 최적화 (LazyVStack)
+//  - 라인 번호 및 복사 기능
 //
 
 import SwiftUI
+
+// MARK: - Constants
+
+private enum CodeBlockConstants {
+    /// 가상화 적용 기준 라인 수
+    static let virtualizationThreshold = 100
+
+    /// 라인 높이
+    static let lineHeight: CGFloat = 24
+
+    /// 라인 번호 최소 너비
+    static let lineNumberMinWidth: CGFloat = 30
+}
 
 // MARK: - CodeBlockView
 
@@ -19,10 +35,18 @@ struct CodeBlockView: View {
     @State private var isHovering = false
     @State private var resetCopiedTask: Task<Void, Never>?
 
+    // 캐싱된 하이라이터 및 라인
+    private let highlighter: SyntaxHighlighter
+    private let lines: [String]
+
     init(code: String, language: String? = nil, onCopy: (() -> Void)? = nil) {
         self.code = code
         self.language = language
         self.onCopy = onCopy
+        self.highlighter = SyntaxHighlighter.forLanguage(language)
+
+        let trimmed = code.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.lines = trimmed.components(separatedBy: "\n")
     }
 
     var body: some View {
@@ -118,45 +142,91 @@ struct CodeBlockView: View {
 
     @ViewBuilder
     private var lineNumbers: some View {
-        VStack(alignment: .trailing, spacing: 0) {
-            ForEach(Array(lines.enumerated()), id: \.offset) { index, _ in
-                Text("\(index + 1)")
-                    .font(.system(.caption, design: .monospaced))
-                    .foregroundStyle(.tertiary)
-                    .frame(minWidth: 30, alignment: .trailing)
-                    .padding(.vertical, 2)
+        let useVirtualization = lines.count >= CodeBlockConstants.virtualizationThreshold
+
+        if useVirtualization {
+            // 대용량 코드: LazyVStack 사용
+            ScrollView(.vertical, showsIndicators: false) {
+                LazyVStack(alignment: .trailing, spacing: 0) {
+                    ForEach(Array(lines.enumerated()), id: \.offset) { index, _ in
+                        lineNumberView(index + 1)
+                    }
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 8)
             }
+            .frame(height: min(calculateHeight(), 600))
+            .background(Color(nsColor: .controlBackgroundColor).opacity(0.3))
+        } else {
+            // 소규모 코드: VStack 사용
+            VStack(alignment: .trailing, spacing: 0) {
+                ForEach(Array(lines.enumerated()), id: \.offset) { index, _ in
+                    lineNumberView(index + 1)
+                }
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 8)
+            .background(Color(nsColor: .controlBackgroundColor).opacity(0.3))
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 8)
-        .background(Color(nsColor: .controlBackgroundColor).opacity(0.3))
+    }
+
+    @ViewBuilder
+    private func lineNumberView(_ number: Int) -> some View {
+        Text("\(number)")
+            .font(.system(.caption, design: .monospaced))
+            .foregroundStyle(.tertiary)
+            .frame(minWidth: lineNumberWidth, alignment: .trailing)
+            .padding(.vertical, 2)
     }
 
     @ViewBuilder
     private var codeText: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
-                Text(highlightedLine(line))
-                    .font(.system(.body, design: .monospaced))
-                    .textSelection(.enabled)
-                    .padding(.vertical, 2)
+        let useVirtualization = lines.count >= CodeBlockConstants.virtualizationThreshold
+
+        if useVirtualization {
+            // 대용량 코드: LazyVStack으로 뷰포트 렌더링
+            ScrollView(.vertical, showsIndicators: true) {
+                LazyVStack(alignment: .leading, spacing: 0) {
+                    ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
+                        highlightedLineView(line)
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
             }
+            .frame(height: min(calculateHeight(), 600))
+        } else {
+            // 소규모 코드: VStack 사용
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
+                    highlightedLineView(line)
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+    }
+
+    @ViewBuilder
+    private func highlightedLineView(_ line: String) -> some View {
+        Text(highlighter.highlightLine(line))
+            .font(.system(.body, design: .monospaced))
+            .textSelection(.enabled)
+            .padding(.vertical, 2)
     }
 
     // MARK: - Computed Properties
 
-    private var lines: [String] {
-        let trimmed = code.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.components(separatedBy: "\n")
+    /// 라인 번호 표시 너비 (자릿수에 따라 동적 조절)
+    private var lineNumberWidth: CGFloat {
+        let digits = String(lines.count).count
+        return max(CodeBlockConstants.lineNumberMinWidth, CGFloat(digits * 10 + 10))
     }
 
     // MARK: - Helpers
 
     private func calculateHeight() -> CGFloat {
-        CGFloat(lines.count) * 24 + 16
+        CGFloat(lines.count) * CodeBlockConstants.lineHeight + 16
     }
 
     private func copyToClipboard() {
@@ -173,104 +243,6 @@ struct CodeBlockView: View {
             // Task가 취소되지 않은 경우에만 상태 업데이트
             if !Task.isCancelled {
                 isCopied = false
-            }
-        }
-    }
-
-    // MARK: - Syntax Highlighting
-
-    /// 키워드 하이라이팅용 정규표현식 (캐싱, 단어 경계 체크)
-    /// - TODO(Section-3.2): Tree-sitter 기반 신택스 하이라이팅으로 교체 예정
-    private static let keywordRegex: NSRegularExpression? = {
-        let keywords = [
-            "struct", "class", "enum", "protocol", "extension",
-            "func", "var", "let", "if", "else", "guard", "switch",
-            "case", "for", "while", "return", "import", "private",
-            "public", "internal", "fileprivate", "static", "final",
-            "override", "async", "await", "throws", "try", "catch", "some"
-        ]
-        let pattern = "\\b(\(keywords.joined(separator: "|")))\\b"
-        return try? NSRegularExpression(pattern: pattern)
-    }()
-
-    /// @ 프리픽스 키워드용 정규표현식
-    private static let attributeRegex: NSRegularExpression? = {
-        let attributes = ["@State", "@Binding", "@Observable", "@MainActor", "@Published", "@Environment"]
-        let pattern = "(\(attributes.joined(separator: "|")))\\b"
-        return try? NSRegularExpression(pattern: pattern)
-    }()
-
-    /// 기본 신택스 하이라이팅 (Tree-sitter 통합 전까지 임시 사용)
-    /// 정규표현식 기반으로 단어 경계를 체크하여 부분 매칭 방지
-    /// - TODO(Section-3.2): Tree-sitter 기반 신택스 하이라이팅으로 교체 예정
-    private func highlightedLine(_ line: String) -> AttributedString {
-        var attributedString = AttributedString(line)
-        let nsLine = line as NSString
-        let fullRange = NSRange(location: 0, length: nsLine.length)
-
-        // 키워드 하이라이팅 (단어 경계 체크)
-        if let regex = Self.keywordRegex {
-            let matches = regex.matches(in: line, range: fullRange)
-            for match in matches {
-                if let range = Range(match.range, in: line),
-                   let attrRange = attributedString.range(of: String(line[range])) {
-                    attributedString[attrRange].foregroundColor = .purple
-                }
-            }
-        }
-
-        // @ 프리픽스 속성 하이라이팅
-        if let regex = Self.attributeRegex {
-            let matches = regex.matches(in: line, range: fullRange)
-            for match in matches {
-                if let range = Range(match.range, in: line),
-                   let attrRange = attributedString.range(of: String(line[range])) {
-                    attributedString[attrRange].foregroundColor = .purple
-                }
-            }
-        }
-
-        // 문자열 하이라이팅
-        highlightStrings(&attributedString)
-
-        // 주석 하이라이팅
-        highlightComments(&attributedString)
-
-        return attributedString
-    }
-
-    private func highlightStrings(_ attributedString: inout AttributedString) {
-        let string = String(attributedString.characters)
-        var inString = false
-        var stringStart: String.Index?
-
-        for (index, char) in string.enumerated() {
-            let strIndex = string.index(string.startIndex, offsetBy: index)
-            if char == "\"" {
-                if inString {
-                    // 문자열 끝
-                    if let start = stringStart {
-                        let range = start...strIndex
-                        if let attrRange = Range(range, in: attributedString) {
-                            attributedString[attrRange].foregroundColor = .red
-                        }
-                    }
-                    inString = false
-                    stringStart = nil
-                } else {
-                    // 문자열 시작
-                    inString = true
-                    stringStart = strIndex
-                }
-            }
-        }
-    }
-
-    private func highlightComments(_ attributedString: inout AttributedString) {
-        let string = String(attributedString.characters)
-        if let commentIndex = string.range(of: "//") {
-            if let attrRange = Range(commentIndex.lowerBound..<string.endIndex, in: attributedString) {
-                attributedString[attrRange].foregroundColor = .green
             }
         }
     }
@@ -297,6 +269,63 @@ struct CodeBlockView: View {
         language: "swift"
     )
     .frame(width: 500)
+    .padding()
+}
+
+#Preview("JavaScript Code") {
+    CodeBlockView(
+        code: """
+        async function fetchData(url) {
+            const response = await fetch(url);
+            const data = await response.json();
+            console.log("Data:", data);
+            return data;
+        }
+
+        // Call the function
+        fetchData("https://api.example.com/data")
+            .then(result => console.log(result))
+            .catch(error => console.error(error));
+        """,
+        language: "javascript"
+    )
+    .frame(width: 500)
+    .padding()
+}
+
+#Preview("Python Code") {
+    CodeBlockView(
+        code: """
+        def calculate_fibonacci(n: int) -> list[int]:
+            '''Calculate Fibonacci sequence up to n terms.'''
+            if n <= 0:
+                return []
+            elif n == 1:
+                return [0]
+
+            fib = [0, 1]
+            for i in range(2, n):
+                fib.append(fib[i-1] + fib[i-2])
+            return fib
+
+        # Example usage
+        result = calculate_fibonacci(10)
+        print(f"Fibonacci: {result}")
+        """,
+        language: "python"
+    )
+    .frame(width: 500)
+    .padding()
+}
+
+#Preview("Large Code (Virtualized)") {
+    let largeCode = (1...200).map { "let line\($0) = \"This is line \\($0)\"  // Comment for line \\($0)" }.joined(separator: "\n")
+
+    return CodeBlockView(
+        code: largeCode,
+        language: "swift"
+    )
+    .frame(width: 600, height: 400)
     .padding()
 }
 
