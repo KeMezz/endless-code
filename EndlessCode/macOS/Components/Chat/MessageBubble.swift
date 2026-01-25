@@ -301,6 +301,8 @@ struct TypingIndicator: View {
             }
         }
         .accessibilityIdentifier("typingIndicator")
+        .accessibilityLabel("Assistant is typing")
+        .accessibilityAddTraits(.updatesFrequently)
     }
 
     private func opacity(for index: Int, phase: Int) -> Double {
@@ -315,10 +317,11 @@ struct TypingIndicator: View {
 
 // MARK: - RelativeTimestampFormatter
 
-/// 상대 시간 포맷터
+/// 상대 시간 포맷터 (스레드 안전)
 final class RelativeTimestampFormatter: @unchecked Sendable {
     static let shared = RelativeTimestampFormatter()
 
+    private let lock = NSLock()
     private let relativeFormatter: RelativeDateTimeFormatter
     private let timeFormatter: DateFormatter
     private let dateTimeFormatter: DateFormatter
@@ -335,6 +338,9 @@ final class RelativeTimestampFormatter: @unchecked Sendable {
     }
 
     func string(from date: Date) -> String {
+        lock.lock()
+        defer { lock.unlock() }
+
         let interval = Date().timeIntervalSince(date)
 
         if interval < 60 {

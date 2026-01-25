@@ -177,25 +177,56 @@ struct CodeBlockView: View {
         }
     }
 
-    /// 기본 신택스 하이라이팅 (Tree-sitter 통합 전까지 임시 사용)
-    /// - Note: 현재 O(n*k) 복잡도 (n: 텍스트 길이, k: 키워드 수)
-    /// - TODO(Section-3.2): Tree-sitter 기반 신택스 하이라이팅으로 교체 예정
-    private func highlightedLine(_ line: String) -> AttributedString {
-        var attributedString = AttributedString(line)
+    // MARK: - Syntax Highlighting
 
-        // 키워드 하이라이팅 (Swift 기본) - 임시 구현
+    /// 키워드 하이라이팅용 정규표현식 (캐싱, 단어 경계 체크)
+    /// - TODO(Section-3.2): Tree-sitter 기반 신택스 하이라이팅으로 교체 예정
+    private static let keywordRegex: NSRegularExpression? = {
         let keywords = [
             "struct", "class", "enum", "protocol", "extension",
             "func", "var", "let", "if", "else", "guard", "switch",
             "case", "for", "while", "return", "import", "private",
             "public", "internal", "fileprivate", "static", "final",
-            "override", "async", "await", "throws", "try", "catch",
-            "@State", "@Binding", "@Observable", "@MainActor", "some"
+            "override", "async", "await", "throws", "try", "catch", "some"
         ]
+        let pattern = "\\b(\(keywords.joined(separator: "|")))\\b"
+        return try? NSRegularExpression(pattern: pattern)
+    }()
 
-        for keyword in keywords {
-            if let range = attributedString.range(of: keyword) {
-                attributedString[range].foregroundColor = .purple
+    /// @ 프리픽스 키워드용 정규표현식
+    private static let attributeRegex: NSRegularExpression? = {
+        let attributes = ["@State", "@Binding", "@Observable", "@MainActor", "@Published", "@Environment"]
+        let pattern = "(\(attributes.joined(separator: "|")))\\b"
+        return try? NSRegularExpression(pattern: pattern)
+    }()
+
+    /// 기본 신택스 하이라이팅 (Tree-sitter 통합 전까지 임시 사용)
+    /// 정규표현식 기반으로 단어 경계를 체크하여 부분 매칭 방지
+    /// - TODO(Section-3.2): Tree-sitter 기반 신택스 하이라이팅으로 교체 예정
+    private func highlightedLine(_ line: String) -> AttributedString {
+        var attributedString = AttributedString(line)
+        let nsLine = line as NSString
+        let fullRange = NSRange(location: 0, length: nsLine.length)
+
+        // 키워드 하이라이팅 (단어 경계 체크)
+        if let regex = Self.keywordRegex {
+            let matches = regex.matches(in: line, range: fullRange)
+            for match in matches {
+                if let range = Range(match.range, in: line),
+                   let attrRange = attributedString.range(of: String(line[range])) {
+                    attributedString[attrRange].foregroundColor = .purple
+                }
+            }
+        }
+
+        // @ 프리픽스 속성 하이라이팅
+        if let regex = Self.attributeRegex {
+            let matches = regex.matches(in: line, range: fullRange)
+            for match in matches {
+                if let range = Range(match.range, in: line),
+                   let attrRange = attributedString.range(of: String(line[range])) {
+                    attributedString[attrRange].foregroundColor = .purple
+                }
             }
         }
 
