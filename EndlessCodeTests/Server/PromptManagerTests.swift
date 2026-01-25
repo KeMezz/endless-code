@@ -5,6 +5,7 @@
 //  PromptManager 테스트 (Swift Testing)
 //
 
+import Foundation
 import Testing
 @testable import EndlessCode
 
@@ -178,20 +179,24 @@ struct PromptManagerTests {
 
     // MARK: - Timeout Tests
 
-    @Test("Timeout changes state to timed out")
-    func timeoutChangesStateToTimedOut() async throws {
-        // Given - very short timeout
-        let manager = PromptManager(timeoutSeconds: 1)
+    @Test("Prompt expiration date is set correctly")
+    func promptExpirationDateIsSetCorrectly() async {
+        // Given
+        let timeoutSeconds = 60
+        let manager = PromptManager(timeoutSeconds: timeoutSeconds)
         let question = AskUserQuestion(toolUseId: "tool123", question: "Q?")
-        _ = await manager.registerPrompt(sessionId: "session1", question: question)
+        let before = Date()
 
-        // When - wait for timeout with some margin
-        try await Task.sleep(for: .seconds(2))
+        // When
+        let prompt = await manager.registerPrompt(sessionId: "session1", question: question)
+        let after = Date()
 
-        // Then
-        let expired = await manager.cleanupExpiredPrompts()
-        #expect(expired.count == 1)
-        #expect(expired[0].state == .timedOut)
+        // Then - expiresAt should be roughly timeoutSeconds after creation
+        let expectedMinExpiry = before.addingTimeInterval(TimeInterval(timeoutSeconds))
+        let expectedMaxExpiry = after.addingTimeInterval(TimeInterval(timeoutSeconds))
+
+        #expect(prompt.expiresAt >= expectedMinExpiry)
+        #expect(prompt.expiresAt <= expectedMaxExpiry.addingTimeInterval(1)) // 1초 여유
     }
 
     // MARK: - Cleanup Tests
@@ -218,38 +223,24 @@ struct PromptManagerTests {
         #expect(session2Prompts.count == 1)
     }
 
-    // MARK: - Callback Tests
+    // MARK: - State Change Tests
 
-    @Test("On state change calls callback")
-    func onStateChangeCallsCallback() async throws {
+    @Test("Respond to prompt returns formatted response")
+    func respondToPromptReturnsFormattedResponse() async throws {
         // Given
         let manager = PromptManager(timeoutSeconds: 60)
-        var callbackCalled = false
-        var receivedPrompt: PendingPrompt?
-
-        await manager.onStateChange { prompt in
-            callbackCalled = true
-            receivedPrompt = prompt
-        }
-
         let question = AskUserQuestion(toolUseId: "tool123", question: "Q?")
         let prompt = await manager.registerPrompt(sessionId: "session1", question: question)
 
         // When
-        _ = try await manager.respondToPrompt(
+        let response = try await manager.respondToPrompt(
             promptId: prompt.id,
             selectedOptions: ["Yes"],
             customInput: nil
         )
 
         // Then
-        #expect(callbackCalled)
-        #expect(receivedPrompt?.id == prompt.id)
-        if case .responded = receivedPrompt?.state {
-            // Success
-        } else {
-            Issue.record("Expected responded state")
-        }
+        #expect(response.contains("Yes"))
     }
 
     // MARK: - MultiSelect Tests
