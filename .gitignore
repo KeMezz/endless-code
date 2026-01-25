@@ -1,0 +1,69 @@
+# Xcode
+## Build generated
+build/
+DerivedData/
+*.xccheckout
+*.moved-aside
+*.xcuserstate
+*.xcscmblueprint
+
+## User-specific files
+xcuserdata/
+*.xcuserdatad/
+
+## Obj-C/Swift specific
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+## Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Packages/
+
+# CocoaPods (if used)
+Pods/
+*.xcworkspace
+!*.xcodeproj/project.xcworkspace/
+
+# Carthage (if used)
+Carthage/Build/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Thumbnails
+*.Thumbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+*.pem
+*.key
+
+# Test outputs
+TestResults.xcresult/
+*.coverage
+coverage/
+
+# Debug
+*.log
+logs/
+
+# Secrets (never commit)
+**/secrets/
+**/credentials/
