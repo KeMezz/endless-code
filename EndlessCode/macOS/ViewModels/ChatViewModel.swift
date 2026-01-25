@@ -7,6 +7,43 @@
 
 import Foundation
 
+// MARK: - ChatServiceProtocol
+
+/// 채팅 서비스 프로토콜 (의존성 주입용)
+protocol ChatServiceProtocol: Sendable {
+    func loadMessages(for session: Session) async throws -> [ChatMessageItem]
+    func sendMessage(_ content: String, to session: Session) -> AsyncStream<ChatMessageItem>
+}
+
+// MARK: - DefaultChatService
+
+/// 기본 채팅 서비스 (샘플 데이터 사용)
+struct DefaultChatService: ChatServiceProtocol {
+    func loadMessages(for session: Session) async throws -> [ChatMessageItem] {
+        // 시뮬레이션 딜레이
+        try? await Task.sleep(for: .milliseconds(500))
+        return ChatMessageItem.sampleMessages
+    }
+
+    func sendMessage(_ content: String, to session: Session) -> AsyncStream<ChatMessageItem> {
+        AsyncStream { continuation in
+            Task {
+                // 시뮬레이션 딜레이
+                try? await Task.sleep(for: .seconds(1))
+
+                let response = ChatMessageItem(
+                    id: UUID().uuidString,
+                    type: .assistant,
+                    content: .text("This is a simulated response from Claude."),
+                    timestamp: Date()
+                )
+                continuation.yield(response)
+                continuation.finish()
+            }
+        }
+    }
+}
+
 // MARK: - ChatViewModel
 
 /// 채팅 화면의 상태를 관리하는 ViewModel
@@ -15,6 +52,7 @@ final class ChatViewModel {
     // MARK: - Properties
 
     let session: Session
+    private let chatService: ChatServiceProtocol
 
     private(set) var messages: [ChatMessageItem] = []
     private(set) var isLoading = false
@@ -29,8 +67,9 @@ final class ChatViewModel {
 
     // MARK: - Initialization
 
-    init(session: Session) {
+    init(session: Session, chatService: ChatServiceProtocol = DefaultChatService()) {
         self.session = session
+        self.chatService = chatService
     }
 
     // MARK: - Actions
@@ -39,11 +78,12 @@ final class ChatViewModel {
         isLoading = true
         error = nil
 
-        // TODO: 실제 서버에서 메시지 로드
-        // 현재는 샘플 데이터 사용
-        try? await Task.sleep(for: .milliseconds(500))
+        do {
+            messages = try await chatService.loadMessages(for: session)
+        } catch {
+            self.error = .loadFailed
+        }
 
-        messages = ChatMessageItem.sampleMessages
         isLoading = false
     }
 
@@ -65,17 +105,10 @@ final class ChatViewModel {
         // 스트리밍 시작
         isStreaming = true
 
-        // TODO: WebSocket으로 메시지 전송 및 응답 스트리밍
-        // 현재는 시뮬레이션
-        try? await Task.sleep(for: .seconds(1))
-
-        let assistantMessage = ChatMessageItem(
-            id: UUID().uuidString,
-            type: .assistant,
-            content: .text("This is a simulated response from Claude."),
-            timestamp: Date()
-        )
-        messages.append(assistantMessage)
+        // 서비스를 통해 메시지 전송 및 응답 수신
+        for await response in chatService.sendMessage(content, to: session) {
+            messages.append(response)
+        }
 
         isStreaming = false
     }
