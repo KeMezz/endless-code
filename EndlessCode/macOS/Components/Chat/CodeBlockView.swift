@@ -17,6 +17,7 @@ struct CodeBlockView: View {
 
     @State private var isCopied = false
     @State private var isHovering = false
+    @State private var resetCopiedTask: Task<Void, Never>?
 
     init(code: String, language: String? = nil, onCopy: (() -> Void)? = nil) {
         self.code = code
@@ -41,6 +42,9 @@ struct CodeBlockView: View {
         )
         .onHover { hovering in
             isHovering = hovering
+        }
+        .onDisappear {
+            resetCopiedTask?.cancel()
         }
         .accessibilityIdentifier("codeBlock")
     }
@@ -93,6 +97,7 @@ struct CodeBlockView: View {
         .animation(.easeInOut(duration: 0.15), value: isHovering)
         .animation(.easeInOut(duration: 0.15), value: isCopied)
         .accessibilityIdentifier("copyCodeButton")
+        .accessibilityLabel(isCopied ? "Code copied" : "Copy code to clipboard")
     }
 
     @ViewBuilder
@@ -161,19 +166,24 @@ struct CodeBlockView: View {
         isCopied = true
         onCopy?()
 
-        Task {
+        // 기존 Task 취소 후 새 Task 생성
+        resetCopiedTask?.cancel()
+        resetCopiedTask = Task {
             try? await Task.sleep(for: .seconds(2))
-            await MainActor.run {
+            // Task가 취소되지 않은 경우에만 상태 업데이트
+            if !Task.isCancelled {
                 isCopied = false
             }
         }
     }
 
-    /// 기본 신택스 하이라이팅 (Tree-sitter 통합 전까지 사용)
+    /// 기본 신택스 하이라이팅 (Tree-sitter 통합 전까지 임시 사용)
+    /// - Note: 현재 O(n*k) 복잡도 (n: 텍스트 길이, k: 키워드 수)
+    /// - TODO(Section-3.2): Tree-sitter 기반 신택스 하이라이팅으로 교체 예정
     private func highlightedLine(_ line: String) -> AttributedString {
         var attributedString = AttributedString(line)
 
-        // 키워드 하이라이팅 (Swift 기본)
+        // 키워드 하이라이팅 (Swift 기본) - 임시 구현
         let keywords = [
             "struct", "class", "enum", "protocol", "extension",
             "func", "var", "let", "if", "else", "guard", "switch",
