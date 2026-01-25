@@ -9,9 +9,14 @@ import SwiftUI
 
 @main
 struct EndlessCodeApp: App {
+    @State private var appState = AppState()
+    @State private var appRouter = AppRouter()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainView()
+                .environment(appState)
+                .environment(appRouter)
         }
     }
 }

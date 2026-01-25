@@ -10,7 +10,7 @@ import Foundation
 // MARK: - Session
 
 /// 세션 정보
-struct Session: Codable, Sendable, Identifiable, Equatable {
+struct Session: Codable, Sendable, Identifiable, Equatable, Hashable {
     let id: String
     let projectId: String
     var state: SessionState
@@ -38,7 +38,7 @@ struct Session: Codable, Sendable, Identifiable, Equatable {
 // MARK: - SessionState
 
 /// 세션 상태
-enum SessionState: String, Codable, Sendable, Equatable {
+enum SessionState: String, Codable, Sendable, Equatable, Hashable {
     case active
     case paused
     case terminated

@@ -10,7 +10,7 @@ import Foundation
 // MARK: - Project
 
 /// 프로젝트 정보
-struct Project: Codable, Sendable, Identifiable, Equatable {
+struct Project: Codable, Sendable, Identifiable, Equatable, Hashable {
     let id: String
     let name: String
     let path: String

@@ -79,15 +79,32 @@ xcodebuild build -scheme EndlessCode -destination 'platform=iOS Simulator,name=i
 
 ### UI Test (XCUITest - Xcode 필요)
 
+> **중요**: Xcode 26.x의 SPM 빌드 버그(swift-crypto)로 인해 UI 테스트는 `EndlessCodeUITestHost` 스킴 사용 필수
+>
+> `EndlessCodeUITestHost`는 Vapor 의존성 없이 UI만 테스트하는 별도 타겟입니다.
+
 ```bash
-# macOS UI 테스트
-xcodebuild test -scheme EndlessCode -destination 'platform=macOS' \
+# macOS UI 테스트 (EndlessCodeUITestHost 스킴 사용)
+xcodebuild test -scheme EndlessCodeUITestHost -destination 'platform=macOS' \
   -only-testing:EndlessCodeUITests
 
-# iOS UI 테스트
-xcodebuild test -scheme EndlessCode -destination 'platform=iOS Simulator,name=iPhone 16' \
-  -only-testing:EndlessCodeUITests
+# 특정 테스트만 실행
+xcodebuild test -scheme EndlessCodeUITestHost -destination 'platform=macOS' \
+  -only-testing:EndlessCodeUITests/Section2NavigationFlowTests
 ```
+
+**UI 테스트 타겟 구조**:
+- `EndlessCodeUITestHost`: Vapor 없이 UI만 빌드하는 앱 타겟
+- `EndlessCodeUITests`: XCUITest 기반 UI 테스트
+
+**Page Object 패턴 사용**:
+- `EndlessCodeUITests/Pages/`: 재사용 가능한 Page Object 정의
+- `EndlessCodeUITests/Flows/`: 테스트 시나리오 (Given-When-Then)
+
+**accessibilityIdentifier 주의사항**:
+- SwiftUI Group의 identifier가 내부 뷰를 override할 수 있음
+- NavigationLink는 `app.buttons`로 찾음 (macOS에서)
+- AppTab.rawValue가 대문자 시작이므로 identifier도 대문자 (예: `sidebarTab-Projects`)
 
 ## Code Conventions
 

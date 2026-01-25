@@ -13,6 +13,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		C0218A912F26072D002C0163 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C0359F362F2529B00073D287 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C0218A852F260654002C0163;
+			remoteInfo = EndlessCodeUITestHost;
+		};
 		C0359F4C2F2529B40073D287 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C0359F362F2529B00073D287 /* Project object */;
@@ -30,14 +37,47 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C0218A8F2F260654002C0163 /* EndlessCodeUITestHost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EndlessCodeUITestHost.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0359F3E2F2529B00073D287 /* EndlessCode.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EndlessCode.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0359F4B2F2529B40073D287 /* EndlessCodeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EndlessCodeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0359F552F2529B40073D287 /* EndlessCodeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EndlessCodeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C0218A902F260654002C0163 /* Exceptions for "EndlessCode" folder in "EndlessCodeUITestHost" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Client/Sources/ConnectionManager.swift,
+				Client/Sources/MessageRouter.swift,
+				Client/Sources/WebSocketClient.swift,
+				Server/Sources/ClaudeCodeManager.swift,
+				Server/Sources/JSONLParser.swift,
+				Server/Sources/ProcessRunner.swift,
+				Server/Sources/ProjectDiscovery.swift,
+				Server/Sources/PromptManager.swift,
+				Server/Sources/Routes.swift,
+				Server/Sources/ServerApp.swift,
+				Server/Sources/SessionHistoryLoader.swift,
+				Server/Sources/SessionManager.swift,
+				Server/Sources/SessionStore.swift,
+				Server/Sources/WebSocketHandler.swift,
+				Server/Sources/WebSocketMessage.swift,
+			);
+			target = C0218A852F260654002C0163 /* EndlessCodeUITestHost */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		C0218A792F260568002C0163 /* EndlessCodeUITestHost */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = EndlessCodeUITestHost;
+			sourceTree = "<group>";
+		};
 		C0359F402F2529B00073D287 /* EndlessCode */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C0218A902F260654002C0163 /* Exceptions for "EndlessCode" folder in "EndlessCodeUITestHost" target */,
+			);
 			path = EndlessCode;
 			sourceTree = "<group>";
 		};
@@ -54,6 +94,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		C0218A892F260654002C0163 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C0359F3B2F2529B00073D287 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -87,6 +134,7 @@
 				C0359F402F2529B00073D287 /* EndlessCode */,
 				C0359F4E2F2529B40073D287 /* EndlessCodeTests */,
 				C0359F582F2529B40073D287 /* EndlessCodeUITests */,
+				C0218A792F260568002C0163 /* EndlessCodeUITestHost */,
 				C0359F3F2F2529B00073D287 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -97,6 +145,7 @@
 				C0359F3E2F2529B00073D287 /* EndlessCode.app */,
 				C0359F4B2F2529B40073D287 /* EndlessCodeTests.xctest */,
 				C0359F552F2529B40073D287 /* EndlessCodeUITests.xctest */,
+				C0218A8F2F260654002C0163 /* EndlessCodeUITestHost.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -104,6 +153,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		C0218A852F260654002C0163 /* EndlessCodeUITestHost */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C0218A8C2F260654002C0163 /* Build configuration list for PBXNativeTarget "EndlessCodeUITestHost" */;
+			buildPhases = (
+				C0218A882F260654002C0163 /* Sources */,
+				C0218A892F260654002C0163 /* Frameworks */,
+				C0218A8B2F260654002C0163 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				C0359F402F2529B00073D287 /* EndlessCode */,
+			);
+			name = EndlessCodeUITestHost;
+			packageProductDependencies = (
+			);
+			productName = EndlessCode;
+			productReference = C0218A8F2F260654002C0163 /* EndlessCodeUITestHost.app */;
+			productType = "com.apple.product-type.application";
+		};
 		C0359F3D2F2529B00073D287 /* EndlessCode */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = C0359F5F2F2529B40073D287 /* Build configuration list for PBXNativeTarget "EndlessCode" */;
@@ -164,6 +235,7 @@
 			);
 			dependencies = (
 				C0359F572F2529B40073D287 /* PBXTargetDependency */,
+				C0218A922F26072D002C0163 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				C0359F582F2529B40073D287 /* EndlessCodeUITests */,
@@ -194,7 +266,7 @@
 					};
 					C0359F542F2529B40073D287 = {
 						CreatedOnToolsVersion = 26.2;
-						TestTargetID = C0359F3D2F2529B00073D287;
+						TestTargetID = C0218A852F260654002C0163;
 					};
 				};
 			};
@@ -218,11 +290,19 @@
 				C0359F3D2F2529B00073D287 /* EndlessCode */,
 				C0359F4A2F2529B40073D287 /* EndlessCodeTests */,
 				C0359F542F2529B40073D287 /* EndlessCodeUITests */,
+				C0218A852F260654002C0163 /* EndlessCodeUITestHost */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		C0218A8B2F260654002C0163 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C0359F3C2F2529B00073D287 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -247,6 +327,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		C0218A882F260654002C0163 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C0359F3A2F2529B00073D287 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -271,6 +358,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		C0218A922F26072D002C0163 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C0218A852F260654002C0163 /* EndlessCodeUITestHost */;
+			targetProxy = C0218A912F26072D002C0163 /* PBXContainerItemProxy */;
+		};
 		C0359F4D2F2529B40073D287 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = C0359F3D2F2529B00073D287 /* EndlessCode */;
@@ -284,6 +376,116 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		C0218A8D2F260654002C0163 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = LV4BA6HYT3;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "";
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = kemezz.EndlessCode;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Debug;
+		};
+		C0218A8E2F260654002C0163 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = LV4BA6HYT3;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "";
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = kemezz.EndlessCode;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Release;
+		};
 		C0359F5D2F2529B40073D287 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -410,9 +612,20 @@
 				DEVELOPMENT_TEAM = LV4BA6HYT3;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -454,9 +667,20 @@
 				DEVELOPMENT_TEAM = LV4BA6HYT3;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -560,7 +784,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_TARGET_NAME = EndlessCode;
+				TEST_TARGET_NAME = EndlessCodeUITestHost;
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Debug;
@@ -585,7 +809,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_TARGET_NAME = EndlessCode;
+				TEST_TARGET_NAME = EndlessCodeUITestHost;
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Release;
@@ -593,6 +817,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		C0218A8C2F260654002C0163 /* Build configuration list for PBXNativeTarget "EndlessCodeUITestHost" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C0218A8D2F260654002C0163 /* Debug */,
+				C0218A8E2F260654002C0163 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		C0359F392F2529B00073D287 /* Build configuration list for PBXProject "EndlessCode" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

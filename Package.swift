@@ -36,6 +36,7 @@ let package = Package(
                 "Shared/Models",
                 "Shared/Utilities",
                 "Server/Sources",
+                "Client/Sources",
             ]
         ),
         .testTarget(
@@ -45,7 +46,7 @@ let package = Package(
                 .product(name: "VaporTesting", package: "vapor"),
             ],
             path: "EndlessCodeTests",
-            sources: ["Server"]
+            sources: ["Server", "Client"]
         ),
     ]
 )
