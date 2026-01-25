@@ -13,11 +13,10 @@ struct SidebarPage {
 
     // MARK: - Elements
 
-    /// 사이드바 - List는 다양한 타입으로 렌더링될 수 있음
+    /// 사이드바 - SwiftUI List는 macOS에서 Outline으로 렌더링됨
     var sidebar: XCUIElement {
-        // identifier로 직접 검색
-        let element = app.descendants(matching: .any)["sidebar"]
-        return element
+        // macOS에서 SwiftUI List(.sidebar 스타일)는 Outline으로 렌더링됨
+        app.outlines["sidebar"]
     }
 
     /// Projects 탭

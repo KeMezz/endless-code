@@ -93,36 +93,40 @@
 ## 3. macOS App - 채팅
 
 ### 3.1 메시지 표시
-- [ ] 3.1.1 MessageBubble - 사용자/어시스턴트 구분
-- [ ] 3.1.2 MessageList - 스크롤, 날짜 구분선
-- [ ] 3.1.3 스트리밍 메시지 표시 - 타이핑 인디케이터
+- [x] 3.1.1 MessageBubble - 사용자/어시스턴트 구분
+- [x] 3.1.2 MessageList - 스크롤, 날짜 구분선
+- [x] 3.1.3 스트리밍 메시지 표시 - 타이핑 인디케이터
 
 ### 3.2 코드 블록
-- [ ] 3.2.1 CodeBlockView - 기본 레이아웃, 언어 라벨, 라인 번호
-- [ ] 3.2.2 언어 감지 - 마크다운 fence 파싱, 확장자 기반 fallback
+- [x] 3.2.1 CodeBlockView - 기본 레이아웃, 언어 라벨, 라인 번호
+- [x] 3.2.2 언어 감지 - 마크다운 fence 파싱, 확장자 기반 fallback
 - [ ] 3.2.3 Tree-sitter 파서 초기화 - 언어별 파서 로드, 캐싱
 - [ ] 3.2.4 Tree-sitter 토큰화 - 증분 파싱, 토큰→스타일 매핑
 - [ ] 3.2.5 대용량 코드 처리 - 1,000줄 이상 가상화, 뷰포트 렌더링
-- [ ] 3.2.6 복사 버튼 - 클립보드 복사, 완료 피드백 (2초)
+- [x] 3.2.6 복사 버튼 - 클립보드 복사, 완료 피드백 (2초)
 
 ### 3.3 입력 및 전송
-- [ ] 3.3.1 MessageInputView - 텍스트 입력, 여러 줄
-- [ ] 3.3.2 전송 로직 및 상태 표시
+- [x] 3.3.1 MessageInputView - 텍스트 입력, 여러 줄
+- [x] 3.3.2 전송 로직 및 상태 표시
 
 ### 3.4 도구 사용 표시
-- [ ] 3.4.1 ToolUseView - 도구 이름, 파라미터
-- [ ] 3.4.2 ToolResultView - 결과, 접기/펼치기
+- [x] 3.4.1 ToolUseView - 도구 이름, 파라미터
+- [x] 3.4.2 ToolResultView - 결과, 접기/펼치기
 
 ### 3.5 에러 및 상태 알림
-- [ ] 3.5.1 ToastView - 일시적 알림 (3초 자동 해제)
-- [ ] 3.5.2 ErrorBanner - 지속 에러 표시 (수동 해제)
-- [ ] 3.5.3 ConnectionStatusBar - 연결 상태, 재연결 진행률
+- [x] 3.5.1 ToastView - 일시적 알림 (3초 자동 해제)
+- [x] 3.5.2 ErrorBanner - 지속 에러 표시 (수동 해제)
+- [x] 3.5.3 ConnectionStatusBar - 연결 상태, 재연결 진행률
 
 ### 3.6 Section 3 E2E 테스트
-- [ ] 3.6.1 메시지 전송 및 표시 테스트
-- [ ] 3.6.2 코드 블록 렌더링 테스트
-- [ ] 3.6.3 스트리밍 메시지 표시 테스트
-- [ ] 3.6.4 도구 사용 표시 테스트
+> 모든 테스트 통과 (7개). accessibilityIdentifier 문제 해결됨:
+> - SidebarPage: SwiftUI List(.sidebar)는 XCUITest에서 Outline 타입으로 렌더링
+> - ChatPage: NavigationSplitView detail의 accessibilityIdentifier 전파 이슈 → text-based detection으로 우회
+> - MessageInputView: TextEditor에 명시적 accessibilityIdentifier 추가
+- [x] 3.6.1 메시지 전송 및 표시 테스트 ✅
+- [x] 3.6.2 코드 블록 렌더링 테스트 ✅
+- [x] 3.6.3 스트리밍 메시지 표시 테스트 ✅
+- [x] 3.6.4 도구 사용 표시 테스트 ✅
 
 ## 4. macOS App - 파일 탐색기
 
