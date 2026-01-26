@@ -111,14 +111,15 @@ enum ProjectSortOrder: String, CaseIterable, Identifiable {
 
 extension Project {
     /// 샘플 프로젝트 데이터
-    /// Note: 첫 번째 프로젝트는 홈 디렉토리를 사용하여 실제 파일 탐색 가능
+    /// UI 테스트 모드에서는 샌드박스 내 테스트 디렉토리 사용
     static var sampleProjects: [Project] {
-        let homeDir = FileManager.default.homeDirectoryForCurrentUser.path
+        let testProjectPath = setupTestProjectIfNeeded()
+
         return [
             Project(
                 id: "project-1",
-                name: "Home",
-                path: homeDir,
+                name: "TestProject",
+                path: testProjectPath,
                 sessionCount: 5,
                 lastUsed: Date()
             ),
@@ -144,5 +145,133 @@ extension Project {
                 lastUsed: Date().addingTimeInterval(-86400)
             ),
         ]
+    }
+
+    /// 테스트 프로젝트 디렉토리 설정
+    /// UI 테스트 모드이거나, 홈 디렉토리 접근 불가 시 샌드박스 내 테스트 디렉토리 생성
+    private static func setupTestProjectIfNeeded() -> String {
+        let fileManager = FileManager.default
+
+        // 앱의 Documents 디렉토리 (샌드박스 내)
+        guard let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            return fileManager.homeDirectoryForCurrentUser.path
+        }
+
+        let testProjectURL = documentsURL.appendingPathComponent("TestProject")
+
+        // UI 테스트 모드 확인
+        let isUITesting = ProcessInfo.processInfo.arguments.contains("--uitesting")
+
+        // 테스트 프로젝트가 없거나 UI 테스트 모드면 생성
+        if isUITesting || !fileManager.fileExists(atPath: testProjectURL.path) {
+            createTestProjectStructure(at: testProjectURL)
+        }
+
+        return testProjectURL.path
+    }
+
+    /// 테스트용 프로젝트 구조 생성
+    private static func createTestProjectStructure(at url: URL) {
+        let fileManager = FileManager.default
+
+        // 기존 디렉토리 삭제 후 재생성
+        try? fileManager.removeItem(at: url)
+
+        do {
+            // 루트 디렉토리
+            try fileManager.createDirectory(at: url, withIntermediateDirectories: true)
+
+            // src 폴더
+            let srcURL = url.appendingPathComponent("src")
+            try fileManager.createDirectory(at: srcURL, withIntermediateDirectories: true)
+
+            // src/main.swift
+            let mainSwiftContent = """
+            import Foundation
+
+            func main() {
+                print("Hello, World!")
+            }
+
+            main()
+            """
+            try mainSwiftContent.write(
+                to: srcURL.appendingPathComponent("main.swift"),
+                atomically: true,
+                encoding: .utf8
+            )
+
+            // src/utils.swift
+            let utilsContent = """
+            import Foundation
+
+            struct Utils {
+                static func formatDate(_ date: Date) -> String {
+                    let formatter = DateFormatter()
+                    formatter.dateStyle = .medium
+                    return formatter.string(from: date)
+                }
+            }
+            """
+            try utilsContent.write(
+                to: srcURL.appendingPathComponent("utils.swift"),
+                atomically: true,
+                encoding: .utf8
+            )
+
+            // tests 폴더
+            let testsURL = url.appendingPathComponent("tests")
+            try fileManager.createDirectory(at: testsURL, withIntermediateDirectories: true)
+
+            // tests/test_main.swift
+            let testContent = """
+            import XCTest
+
+            final class MainTests: XCTestCase {
+                func testExample() {
+                    XCTAssertTrue(true)
+                }
+            }
+            """
+            try testContent.write(
+                to: testsURL.appendingPathComponent("test_main.swift"),
+                atomically: true,
+                encoding: .utf8
+            )
+
+            // README.md
+            let readmeContent = """
+            # TestProject
+
+            This is a test project for E2E testing.
+
+            ## Structure
+
+            - `src/` - Source files
+            - `tests/` - Test files
+            """
+            try readmeContent.write(
+                to: url.appendingPathComponent("README.md"),
+                atomically: true,
+                encoding: .utf8
+            )
+
+            // config.json
+            let configContent = """
+            {
+                "name": "TestProject",
+                "version": "1.0.0",
+                "debug": true
+            }
+            """
+            try configContent.write(
+                to: url.appendingPathComponent("config.json"),
+                atomically: true,
+                encoding: .utf8
+            )
+
+        } catch {
+            print("Failed to create test project structure: \(error)")
+        }
     }
 }

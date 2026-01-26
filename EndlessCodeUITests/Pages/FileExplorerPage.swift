@@ -74,6 +74,30 @@ struct FileExplorerPage {
         app.descendants(matching: .any)["fileTreeView"]
     }
 
+    /// 파일 트리 아이템들 (fileTreeItem-* identifier를 가진 요소들)
+    var fileTreeItems: XCUIElementQuery {
+        app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier BEGINSWITH 'fileTreeItem-'")
+        )
+    }
+
+    /// 파일 트리가 로드되었는지 확인 (아이템이 존재하는지로 판단)
+    func isFileTreeLoaded(timeout: TimeInterval = 5) -> Bool {
+        // 먼저 fileTreeView identifier로 시도
+        if fileTreeView.waitForExistence(timeout: 1) {
+            return true
+        }
+        // fallback: fileTreeItem-* 요소가 있는지 확인
+        let startTime = Date()
+        while Date().timeIntervalSince(startTime) < timeout {
+            if fileTreeItems.count > 0 {
+                return true
+            }
+            Thread.sleep(forTimeInterval: 0.5)
+        }
+        return false
+    }
+
     /// 파일/폴더 행
     func fileRow(named name: String) -> XCUIElement {
         app.descendants(matching: .any)["fileRow-\(name)"]

@@ -28,6 +28,7 @@ struct FileTreeView: View {
             }
             .padding(.vertical, 8)
         }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("fileTreeView")
     }
 }
