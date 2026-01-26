@@ -1,106 +1,87 @@
 # UI 검증 Command
 
-UI 변경 후 스크린샷을 찍어 예상대로 렌더링되었는지 검증합니다.
+UI 변경 후 E2E 테스트를 통해 자동으로 스크린샷을 찍고, 예상대로 렌더링되었는지 검증합니다.
 
 ## 인자
 
-- `$ARGUMENTS`: 검증할 UI 설명 (선택). 없으면 최근 변경 사항 기준으로 검증.
+- `$ARGUMENTS`: 검증할 시나리오 (선택)
+
+**지원 시나리오**:
+| 시나리오 | 설명 |
+|---------|------|
+| `file-selected` | 파일 탐색기에서 파일 선택 상태 (기본값) |
+| `file-empty` | 파일 탐색기 빈 상태 |
+| `project-list` | 프로젝트 목록 |
+| `session-list` | 세션 목록 |
+| `chat` | 채팅 화면 |
+| `search` | 파일 검색 결과 |
 
 예시:
-- `/verify-ui 파일 탐색기에서 파일 선택 시 우측 패널이 꽉 차야 함`
-- `/verify-ui`
+- `/verify-ui` (기본: file-selected)
+- `/verify-ui file-selected`
+- `/verify-ui project-list`
 
 ---
 
 ## 워크플로우
 
-### 1. 검증 조건 확인
+### 1. 시나리오 매핑
 
-`$ARGUMENTS`가 있으면 해당 내용을 검증 조건으로 사용.
-없으면 최근 git diff를 분석하여 UI 관련 변경 사항을 파악.
+`$ARGUMENTS`를 테스트 메서드에 매핑:
 
-```bash
-# 최근 변경된 UI 파일 확인
-git diff --name-only HEAD~1 | grep -E '\.(swift)$' | grep -E '(View|Component)'
-```
+| 인자 | 테스트 메서드 |
+|------|-------------|
+| `file-selected` (기본) | `test_capture_fileExplorer_withFileSelected` |
+| `file-empty` | `test_capture_fileExplorer_emptyState` |
+| `project-list` | `test_capture_projectList` |
+| `session-list` | `test_capture_sessionList` |
+| `chat` | `test_capture_chatView` |
+| `search` | `test_capture_fileExplorer_searchResults` |
 
-### 2. 앱 빌드
-
-```bash
-xcodebuild build -scheme EndlessCode -destination 'platform=macOS' -quiet 2>&1 | tail -10
-```
-
-빌드 실패 시 에러 메시지 출력 후 종료.
-
-### 3. 기존 앱 종료 (있으면)
+### 2. E2E 테스트 실행 (자동 스크린샷)
 
 ```bash
-pkill -f "EndlessCode.app" 2>/dev/null || true
-sleep 1
+# 스크린샷 디렉토리 초기화
+rm -rf /tmp/verify-ui-screenshots
+mkdir -p /tmp/verify-ui-screenshots
+
+# 시나리오에 맞는 테스트 실행
+TEST_METHOD="test_capture_fileExplorer_withFileSelected"  # $ARGUMENTS에 따라 변경
+
+xcodebuild test \
+  -scheme EndlessCodeUITestHost \
+  -destination 'platform=macOS' \
+  -only-testing:"EndlessCodeUITests/ScreenshotCaptureTests/${TEST_METHOD}" \
+  2>&1 | tee /tmp/verify-ui-output.log
+
+# 스크린샷 경로 추출
+SCREENSHOT_PATH=$(grep "SCREENSHOT_PATH:" /tmp/verify-ui-output.log | tail -1 | cut -d' ' -f2)
+echo "Screenshot: $SCREENSHOT_PATH"
 ```
 
-### 4. 앱 실행
+### 3. 스크린샷 분석
 
-```bash
-# DerivedData에서 앱 경로 찾기
-APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData/EndlessCode-*/Build/Products/Debug -name "EndlessCode.app" -type d 2>/dev/null | head -1)
-
-if [ -z "$APP_PATH" ]; then
-  echo "❌ EndlessCode.app을 찾을 수 없습니다. 빌드를 먼저 실행하세요."
-  exit 1
-fi
-
-open "$APP_PATH"
-sleep 3
-```
-
-### 5. 앱 윈도우 활성화
-
-```bash
-osascript -e 'tell application "EndlessCode" to activate'
-sleep 1
-```
-
-### 6. 스크린샷 촬영
-
-```bash
-SCREENSHOT_PATH="/tmp/verify-ui-$(date +%Y%m%d-%H%M%S).png"
-screencapture -x "$SCREENSHOT_PATH"
-echo "📸 스크린샷 저장: $SCREENSHOT_PATH"
-```
-
-### 7. 스크린샷 분석
-
-Read tool을 사용하여 스크린샷 분석:
+테스트 성공 시 스크린샷 파일을 Read tool로 분석:
 
 ```
 Read: {SCREENSHOT_PATH}
 ```
 
+### 4. 검증 결과 판정
+
 스크린샷을 보고 다음을 확인:
 
 1. **레이아웃**: 요소들이 올바른 위치에 있는가?
-2. **크기**: 패널, 버튼 등이 적절한 크기인가?
-3. **콘텐츠**: 텍스트, 아이콘이 올바르게 표시되는가?
-4. **상태**: 로딩, 에러 등 상태가 올바른가?
+2. **크기**: 패널이 전체 영역을 사용하는가?
+3. **콘텐츠**: 텍스트, 코드가 올바르게 표시되는가?
+4. **정렬**: 콘텐츠가 상단 좌측부터 시작하는가?
 
-### 8. 검증 결과 판정
-
-검증 조건과 스크린샷을 비교하여 판정:
-
-| 결과 | 조건 |
-|------|------|
-| ✅ PASS | 모든 검증 조건 충족 |
-| ⚠️ PARTIAL | 일부 조건만 충족 |
-| ❌ FAIL | 주요 조건 미충족 |
-
-### 9. 결과 출력
+### 5. 결과 출력
 
 ```markdown
 ## UI 검증 결과
 
-**검증 조건**: {$ARGUMENTS 또는 자동 감지된 조건}
-
+**시나리오**: {$ARGUMENTS 또는 file-selected}
 **스크린샷**: {SCREENSHOT_PATH}
 
 ### 분석
@@ -109,146 +90,126 @@ Read: {SCREENSHOT_PATH}
 
 ### 결과: {✅ PASS | ⚠️ PARTIAL | ❌ FAIL}
 
-{PASS인 경우}
-모든 검증 조건이 충족되었습니다.
-
-{PARTIAL인 경우}
-#### 충족된 조건
-- {조건 1}
-
-#### 미충족 조건
-- {조건 2}: {이유}
-
-{FAIL인 경우}
-#### 발견된 문제
-1. **{문제 1}**: {설명}
-   - 예상: {예상 동작}
-   - 실제: {실제 동작}
-   - 원인 추정: {가능한 원인}
-
-#### 수정 제안
-1. {파일명}:{라인번호} - {수정 내용}
+{결과에 따른 상세 내용}
 ```
 
 ---
 
-## 대화형 검증 모드
+## 테스트 실패 시
 
-스크린샷만으로 확인이 어려운 경우 (예: 특정 버튼 클릭 후 상태):
-
-### 사용자에게 조작 요청
-
-```markdown
-### 수동 조작 필요
-
-다음 단계를 수행해주세요:
-
-1. {조작 1}
-2. {조작 2}
-
-완료 후 "확인"이라고 말씀해주세요. 스크린샷을 다시 찍겠습니다.
-```
-
-사용자가 "확인" 응답 시 Step 6부터 반복.
-
----
-
-## 디자인 참조 비교 (선택)
-
-`ui-design/` 디렉토리에 참조 디자인이 있는 경우:
+테스트가 실패하면 에러 로그 확인:
 
 ```bash
-# 관련 디자인 파일 찾기
+# 에러 메시지 확인
+grep -E "(error|Error|ERROR|failed|FAILED)" /tmp/verify-ui-output.log
+```
+
+가능한 원인:
+1. **프로젝트 없음**: TestProject가 샌드박스에 없음
+2. **빌드 실패**: EndlessCodeUITestHost 빌드 오류
+3. **타임아웃**: UI 요소 로딩 지연
+
+---
+
+## 커스텀 검증
+
+특정 조건을 검증하고 싶을 때:
+
+```
+/verify-ui file-selected
+
+검증 조건:
+- 파일 내용이 상단 좌측부터 표시되어야 함
+- 라인 번호가 왼쪽에 표시되어야 함
+- 패널 전체를 채워야 함
+```
+
+스크린샷 분석 시 위 조건들을 기준으로 판정.
+
+---
+
+## 디자인 참조 비교
+
+`ui-design/` 디렉토리의 참조 디자인과 비교:
+
+```bash
+# 관련 디자인 파일
 ls ui-design/*.png
 ```
 
-참조 디자인과 현재 스크린샷을 비교하여 일치도 확인.
+참조 디자인을 함께 읽어서 일치도 확인.
 
 ---
 
-## 예시 실행
+## 전체 실행 예시
 
-### 예시 1: 파일 탐색기 검증
+### 성공 케이스
 
 ```
-/verify-ui 파일 탐색기에서 파일 선택 시 우측 패널에 파일 내용이 꽉 차게 표시되어야 함
+/verify-ui file-selected
 ```
 
 출력:
 ```
 ## UI 검증 결과
 
-**검증 조건**: 파일 탐색기에서 파일 선택 시 우측 패널에 파일 내용이 꽉 차게 표시되어야 함
-
-**스크린샷**: /tmp/verify-ui-20240126-143022.png
+**시나리오**: file-selected
+**스크린샷**: /tmp/verify-ui-screenshots/fileExplorer_fileSelected_2024-01-26T12-00-00Z.png
 
 ### 분석
 
-스크린샷에서 EndlessCode 앱의 파일 탐색기 화면이 보입니다:
-- 왼쪽 패널: 파일 트리가 표시됨 (TestProject)
-- 오른쪽 패널: config.json 파일이 선택된 상태
-- 파일 내용이 우측 패널 전체를 채우고 있음
-- 라인 번호가 왼쪽에 표시됨
-- 코드가 상단 좌측부터 시작하여 올바르게 정렬됨
+스크린샷에서 파일 탐색기 화면이 보입니다:
+- 왼쪽 패널: 파일 트리 (src 폴더 확장, utils.swift 선택됨)
+- 오른쪽 패널: utils.swift 파일 내용
+  - 헤더에 파일명과 크기 표시
+  - 라인 번호가 왼쪽에 표시됨 (1-9)
+  - 코드가 **상단 좌측**부터 시작하여 패널 전체를 채움
+  - import Foundation, struct Utils 등 코드가 올바르게 표시됨
 
 ### 결과: ✅ PASS
 
 모든 검증 조건이 충족되었습니다.
-- 우측 패널이 전체 높이를 사용함
-- 파일 내용이 상단부터 올바르게 표시됨
-- 스크롤 영역이 패널 전체를 차지함
+- 파일 내용이 상단 좌측부터 올바르게 표시됨
+- 패널 전체 영역을 사용함
+- 라인 번호와 코드가 정렬됨
 ```
 
-### 예시 2: 문제 발견
+### 실패 케이스
 
 ```
-/verify-ui 채팅 화면에서 메시지 입력창이 하단에 고정되어야 함
+/verify-ui file-selected
 ```
 
 출력:
 ```
 ## UI 검증 결과
 
-**검증 조건**: 채팅 화면에서 메시지 입력창이 하단에 고정되어야 함
-
-**스크린샷**: /tmp/verify-ui-20240126-143522.png
+**시나리오**: file-selected
+**스크린샷**: /tmp/verify-ui-screenshots/fileExplorer_fileSelected_2024-01-26T12-00-00Z.png
 
 ### 분석
 
-스크린샷에서 채팅 화면이 보이지만:
-- 메시지 입력창이 화면 중앙에 위치함
-- 하단에 불필요한 여백이 있음
+스크린샷에서 문제가 발견되었습니다:
+- 파일 내용이 패널의 **가운데 하단**에 작게 표시됨
+- 상단과 좌측에 불필요한 여백이 있음
 
 ### 결과: ❌ FAIL
 
 #### 발견된 문제
-1. **입력창 위치 오류**: 하단 고정이 아닌 중앙 배치
-   - 예상: 입력창이 화면 하단에 고정
-   - 실제: 입력창이 화면 중앙에 위치
-   - 원인 추정: VStack에서 Spacer() 누락 또는 frame 설정 오류
+1. **레이아웃 오류**: 콘텐츠가 상단 좌측이 아닌 가운데에 표시
+   - 예상: 코드가 패널 상단 좌측부터 시작
+   - 실제: 코드가 가운데 하단에 위치
+   - 원인 추정: ScrollView 내부 콘텐츠 정렬 문제
 
 #### 수정 제안
-1. ChatView.swift:25 - VStack 내부에 메시지 목록과 입력창 사이 Spacer() 확인
-2. MessageInputView.swift - frame(maxHeight:) 설정 확인
+1. FileContentView.swift - GeometryReader로 콘텐츠 크기 강제
 ```
 
 ---
 
 ## 주의사항
 
-1. **권한 필요**: `screencapture`는 화면 녹화 권한 필요 (시스템 설정 > 개인 정보 보호)
-2. **앱 상태**: 앱이 실행 중이어야 함, 다이얼로그가 열려있으면 닫아야 함
-3. **해상도**: 스크린샷은 현재 화면 해상도로 촬영됨
-4. **멀티 모니터**: 메인 모니터의 스크린샷만 촬영됨
-
----
-
-## 연속 검증
-
-여러 화면을 연속으로 검증할 때:
-
-```
-/verify-ui 프로젝트 목록 → 파일 탐색기 → 파일 선택 순서로 네비게이션 검증
-```
-
-이 경우 각 단계마다 스크린샷을 찍고 분석.
+1. **EndlessCodeUITestHost 스킴 사용**: Vapor 의존성 문제 우회
+2. **샌드박스 데이터 필요**: TestProject가 있어야 테스트 가능
+3. **실행 시간**: E2E 테스트 실행으로 약 30초 소요
+4. **권한**: 화면 녹화 권한 필요 (XCUITest)
