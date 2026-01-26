@@ -1,6 +1,6 @@
 # UI 검증 Command
 
-UI 변경 후 E2E 테스트를 통해 자동으로 스크린샷을 찍고, 예상대로 렌더링되었는지 검증합니다.
+UI 변경 후 E2E 테스트를 통해 자동으로 화면을 조작하고 스크린샷을 찍어 검증합니다.
 
 ## 인자
 
@@ -38,30 +38,39 @@ UI 변경 후 E2E 테스트를 통해 자동으로 스크린샷을 찍고, 예�
 | `chat` | `test_capture_chatView` |
 | `search` | `test_capture_fileExplorer_searchResults` |
 
-### 2. E2E 테스트 실행 (자동 스크린샷)
+### 2. E2E 테스트 실행 (화면 자동 조작)
 
 ```bash
-# 스크린샷 디렉토리 초기화
-rm -rf /tmp/verify-ui-screenshots
-mkdir -p /tmp/verify-ui-screenshots
-
 # 시나리오에 맞는 테스트 실행
+# 테스트가 앱을 실행하고 원하는 화면으로 자동 네비게이션
 TEST_METHOD="test_capture_fileExplorer_withFileSelected"  # $ARGUMENTS에 따라 변경
 
 xcodebuild test \
   -scheme EndlessCodeUITestHost \
   -destination 'platform=macOS' \
-  -only-testing:"EndlessCodeUITests/ScreenshotCaptureTests/${TEST_METHOD}" \
-  2>&1 | tee /tmp/verify-ui-output.log
+  -only-testing:EndlessCodeUITests/ScreenshotCaptureTests/${TEST_METHOD} \
+  2>&1 | tee /tmp/verify-ui-output.log | tail -30
+```
 
-# 스크린샷 경로 추출
-SCREENSHOT_PATH=$(grep "SCREENSHOT_PATH:" /tmp/verify-ui-output.log | tail -1 | cut -d' ' -f2)
+### 3. 스크린샷 캡처 (테스트 완료 후)
+
+> **중요**: XCUITest 샌드박스 제한으로 테스트 내부에서 /tmp에 직접 저장 불가.
+> 테스트가 앱을 원하는 상태로 만든 후, `screencapture`로 직접 캡처.
+
+```bash
+# 앱 활성화 (테스트 완료 후에도 앱이 실행 중)
+osascript -e 'tell application "EndlessCode" to activate'
+sleep 1
+
+# 스크린샷 캡처
+SCREENSHOT_PATH="/tmp/verify-ui-$(date +%Y%m%d-%H%M%S).png"
+screencapture -x "$SCREENSHOT_PATH"
 echo "Screenshot: $SCREENSHOT_PATH"
 ```
 
-### 3. 스크린샷 분석
+### 4. 스크린샷 분석
 
-테스트 성공 시 스크린샷 파일을 Read tool로 분석:
+스크린샷 파일을 Read tool로 분석:
 
 ```
 Read: {SCREENSHOT_PATH}

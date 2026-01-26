@@ -34,7 +34,9 @@ final class ScreenshotCaptureTests: XCTestCase {
     }
 
     override func tearDownWithError() throws {
-        app.terminate()
+        // 스크린샷 검증을 위해 앱을 종료하지 않음
+        // 사용자가 직접 확인 후 종료하거나 다음 테스트에서 종료됨
+        // app.terminate()
         app = nil
     }
 
