@@ -40,6 +40,7 @@ struct FileSearchField: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .background(.gray.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("fileSearchField")
     }
 }
@@ -73,6 +74,7 @@ struct FileFilterChips: View {
             }
             .padding(.horizontal, 12)
         }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("fileFilterChips")
     }
 
@@ -198,6 +200,7 @@ struct SearchResultsView: View {
                 }
             }
         }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("searchResultsList")
     }
 }

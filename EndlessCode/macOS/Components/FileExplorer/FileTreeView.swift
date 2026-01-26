@@ -172,6 +172,7 @@ struct FileItemRow: View {
         .onHover { hovering in
             isHovered = hovering
         }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("fileRow-\(item.name)")
     }
 

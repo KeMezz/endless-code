@@ -37,7 +37,15 @@ struct FileExplorerPage {
 
     /// 검색 입력 필드
     var searchInput: XCUIElement {
-        searchField.textFields.firstMatch
+        // 먼저 searchField 내부에서 찾기
+        let fieldInput = searchField.textFields.firstMatch
+        if fieldInput.exists {
+            return fieldInput
+        }
+        // fallback: placeholder로 직접 찾기
+        return app.textFields.matching(
+            NSPredicate(format: "placeholderValue CONTAINS 'Search'")
+        ).firstMatch
     }
 
     /// 검색 결과 목록
@@ -55,6 +63,25 @@ struct FileExplorerPage {
     /// 필터 칩 영역
     var filterChips: XCUIElement {
         app.descendants(matching: .any)["fileFilterChips"]
+    }
+
+    /// 필터 칩이 표시되는지 확인 (identifier 또는 filterChip-* 버튼으로 판단)
+    func isFilterChipsLoaded(timeout: TimeInterval = 5) -> Bool {
+        if filterChips.waitForExistence(timeout: 1) {
+            return true
+        }
+        // fallback: filterChip-* 버튼이 있는지 확인
+        let startTime = Date()
+        while Date().timeIntervalSince(startTime) < timeout {
+            let filterButtons = app.buttons.matching(
+                NSPredicate(format: "identifier BEGINSWITH 'filterChip-'")
+            )
+            if filterButtons.count > 0 {
+                return true
+            }
+            Thread.sleep(forTimeInterval: 0.5)
+        }
+        return false
     }
 
     /// 브랜치 칩 (동적 이름)
@@ -163,9 +190,19 @@ struct FileExplorerPage {
 
     /// 검색어 입력
     func search(_ text: String) {
-        if searchInput.waitForExistence(timeout: 3) {
+        // searchInput이 존재하면 사용
+        if searchInput.waitForExistence(timeout: 2) {
             searchInput.click()
             searchInput.typeText(text)
+            return
+        }
+        // fallback: placeholder로 직접 TextField 찾기
+        let textField = app.textFields.matching(
+            NSPredicate(format: "placeholderValue CONTAINS 'Search'")
+        ).firstMatch
+        if textField.waitForExistence(timeout: 2) {
+            textField.click()
+            textField.typeText(text)
         }
     }
 
@@ -178,9 +215,24 @@ struct FileExplorerPage {
 
     /// 필터 선택
     func selectFilter(_ filter: String) {
+        // filterChip-{filter} identifier로 찾기
         let chip = filterChip(filter)
-        if chip.waitForExistence(timeout: 2) {
+        if chip.waitForExistence(timeout: 1) {
             chip.click()
+            return
+        }
+        // fallback: label로 버튼 찾기
+        let button = app.buttons[filter]
+        if button.waitForExistence(timeout: 1) {
+            button.click()
+            return
+        }
+        // fallback 2: 텍스트가 포함된 버튼 찾기
+        let buttons = app.buttons.matching(
+            NSPredicate(format: "label CONTAINS %@", filter)
+        )
+        if buttons.count > 0 {
+            buttons.firstMatch.click()
         }
     }
 

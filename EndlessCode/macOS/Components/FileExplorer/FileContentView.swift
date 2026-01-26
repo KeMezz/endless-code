@@ -55,6 +55,7 @@ struct FileContentView: View {
                 emptyView
             }
         }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("fileContentView")
         .task(id: file.id) {
             await loadContent()
