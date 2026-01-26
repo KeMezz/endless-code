@@ -205,6 +205,7 @@ struct FileExplorerView: View {
                 emptyViewerPlaceholder
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .accessibilityIdentifier("fileViewerPanel")
     }
 

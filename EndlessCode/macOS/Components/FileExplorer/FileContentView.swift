@@ -55,6 +55,7 @@ struct FileContentView: View {
                 emptyView
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("fileContentView")
         .task(id: file.id) {
@@ -114,24 +115,28 @@ struct FileContentView: View {
         let lines = content.components(separatedBy: "\n")
         let language = detectLanguage()
 
-        return ScrollView([.horizontal, .vertical]) {
-            HStack(alignment: .top, spacing: 0) {
-                // 라인 번호
-                LineNumbersView(lineCount: lines.count)
+        return GeometryReader { geometry in
+            ScrollView([.horizontal, .vertical]) {
+                HStack(alignment: .top, spacing: 0) {
+                    // 라인 번호
+                    LineNumbersView(lineCount: lines.count)
 
-                Divider()
+                    Divider()
 
-                // 코드 콘텐츠
-                LazyVStack(alignment: .leading, spacing: 0) {
-                    ForEach(Array(lines.enumerated()), id: \.offset) { index, line in
-                        highlightedLine(line, language: language)
-                            .frame(height: 20)
+                    // 코드 콘텐츠
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        ForEach(Array(lines.enumerated()), id: \.offset) { index, line in
+                            highlightedLine(line, language: language)
+                                .frame(height: 20)
+                        }
                     }
+                    .padding(.horizontal, 8)
                 }
-                .padding(.horizontal, 8)
+                .font(.system(size: 12, design: .monospaced))
+                .frame(minWidth: geometry.size.width, minHeight: geometry.size.height, alignment: .topLeading)
             }
-            .font(.system(size: 12, design: .monospaced))
         }
+        .background(Color(nsColor: .textBackgroundColor))
         .accessibilityIdentifier("codeScrollView")
     }
 
