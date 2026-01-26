@@ -111,12 +111,14 @@ enum ProjectSortOrder: String, CaseIterable, Identifiable {
 
 extension Project {
     /// 샘플 프로젝트 데이터
+    /// Note: 첫 번째 프로젝트는 홈 디렉토리를 사용하여 실제 파일 탐색 가능
     static var sampleProjects: [Project] {
-        [
+        let homeDir = FileManager.default.homeDirectoryForCurrentUser.path
+        return [
             Project(
                 id: "project-1",
-                name: "EndlessCode",
-                path: "/Users/user/projects/EndlessCode",
+                name: "Home",
+                path: homeDir,
                 sessionCount: 5,
                 lastUsed: Date()
             ),

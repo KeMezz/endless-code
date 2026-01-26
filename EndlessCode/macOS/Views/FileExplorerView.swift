@@ -70,6 +70,9 @@ struct FileExplorerView: View {
             // 콘텐츠 (검색 결과 또는 트리)
             if viewModel.isLoading {
                 loadingView
+            } else if let error = viewModel.errorMessage {
+                // 에러 표시
+                errorView(error)
             } else if !viewModel.searchText.isEmpty {
                 // 검색 모드
                 SearchResultsView(
@@ -125,6 +128,32 @@ struct FileExplorerView: View {
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func errorView(_ message: String) -> some View {
+        VStack(spacing: 12) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 32))
+                .foregroundStyle(.orange)
+
+            Text("Failed to load files")
+                .font(.headline)
+
+            Text(message)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+
+            Button("Retry") {
+                Task {
+                    await viewModel.loadFileTree()
+                }
+            }
+            .buttonStyle(.bordered)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .accessibilityIdentifier("fileTreeError")
     }
 
     private var activePathBar: some View {
