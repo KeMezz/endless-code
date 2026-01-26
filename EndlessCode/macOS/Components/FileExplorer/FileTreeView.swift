@@ -54,6 +54,11 @@ struct FileTreeItemView: View {
         viewModel.selectedFile?.id == item.id
     }
 
+    /// ViewModel에서 현재 아이템의 children 가져오기
+    private var currentChildren: [FileSystemItem] {
+        viewModel.getItem(byId: item.id)?.children ?? []
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // 아이템 행
@@ -78,10 +83,10 @@ struct FileTreeItemView: View {
                 }
             )
 
-            // 자식 (확장된 경우)
+            // 자식 (확장된 경우) - ViewModel에서 현재 상태 조회
             if item.isDirectory && isExpanded {
                 if depth < Self.maxDisplayDepth {
-                    ForEach(item.children ?? []) { child in
+                    ForEach(currentChildren) { child in
                         FileTreeItemView(
                             item: child,
                             viewModel: viewModel,

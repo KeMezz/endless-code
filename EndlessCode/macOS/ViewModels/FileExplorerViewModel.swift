@@ -143,6 +143,27 @@ final class FileExplorerViewModel {
         }
     }
 
+    /// ID로 현재 아이템 상태 조회
+    func getItem(byId id: String) -> FileSystemItem? {
+        guard let root = rootItem else { return nil }
+        return findItem(in: root, withId: id)
+    }
+
+    /// 재귀적으로 아이템 찾기
+    private func findItem(in item: FileSystemItem, withId id: String) -> FileSystemItem? {
+        if item.id == id {
+            return item
+        }
+        if let children = item.children {
+            for child in children {
+                if let found = findItem(in: child, withId: id) {
+                    return found
+                }
+            }
+        }
+        return nil
+    }
+
     /// 폴더 확장 (자식 로드)
     func expandFolder(_ item: FileSystemItem) async {
         guard item.isDirectory else { return }
@@ -601,14 +622,24 @@ final class GitService: GitServiceProtocol, Sendable {
             process.arguments = arguments
             process.currentDirectoryURL = URL(fileURLWithPath: path)
 
-            let pipe = Pipe()
-            process.standardOutput = pipe
-            process.standardError = pipe
+            let stdoutPipe = Pipe()
+            let stderrPipe = Pipe()
+            process.standardOutput = stdoutPipe
+            process.standardError = stderrPipe
 
             // terminationHandler를 사용하여 비동기 처리
-            process.terminationHandler = { _ in
-                let data = pipe.fileHandleForReading.readDataToEndOfFile()
-                if let output = String(data: data, encoding: .utf8) {
+            process.terminationHandler = { process in
+                let stdoutData = stdoutPipe.fileHandleForReading.readDataToEndOfFile()
+                let stderrData = stderrPipe.fileHandleForReading.readDataToEndOfFile()
+
+                // 종료 코드 확인 - 0이 아니면 에러
+                if process.terminationStatus != 0 {
+                    let errorMessage = String(data: stderrData, encoding: .utf8) ?? "Unknown error"
+                    continuation.resume(throwing: GitError.commandFailed(errorMessage))
+                    return
+                }
+
+                if let output = String(data: stdoutData, encoding: .utf8) {
                     continuation.resume(returning: output)
                 } else {
                     continuation.resume(returning: "")
@@ -620,6 +651,22 @@ final class GitService: GitServiceProtocol, Sendable {
             } catch {
                 continuation.resume(throwing: error)
             }
+        }
+    }
+}
+
+// MARK: - GitError
+
+enum GitError: Error, LocalizedError {
+    case commandFailed(String)
+    case notAGitRepository
+
+    var errorDescription: String? {
+        switch self {
+        case .commandFailed(let message):
+            return "Git command failed: \(message)"
+        case .notAGitRepository:
+            return "Not a git repository"
         }
     }
 }
