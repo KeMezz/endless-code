@@ -40,20 +40,18 @@ final class Section4FileExplorerFlowTests: XCTestCase {
 
         // When: Projects 탭 선택 후 프로젝트 선택
         sidebarPage.selectProjectsTab()
-        sleep(1)
 
-        // 프로젝트가 있다면 첫 번째 프로젝트 선택
+        // 프로젝트 카드가 나타날 때까지 대기
         let projectCards = app.descendants(matching: .any).matching(
             NSPredicate(format: "identifier BEGINSWITH 'projectCard-'")
         )
 
         // 프로젝트가 없는 경우 스킵
-        guard projectCards.count > 0 else {
+        guard projectCards.firstMatch.waitForExistence(timeout: 5) else {
             throw XCTSkip("테스트할 프로젝트가 없습니다")
         }
 
         projectCards.firstMatch.click()
-        sleep(1)
 
         // Then: 파일 탐색기가 표시됨
         // Note: 실제 프로젝트가 있어야 테스트 가능
@@ -69,18 +67,16 @@ final class Section4FileExplorerFlowTests: XCTestCase {
     func test_toggleFolder_expandsAndCollapsesChildren() throws {
         // Given: 파일 탐색기가 표시된 상태
         sidebarPage.selectProjectsTab()
-        sleep(1)
 
         let projectCards = app.descendants(matching: .any).matching(
             NSPredicate(format: "identifier BEGINSWITH 'projectCard-'")
         )
 
-        guard projectCards.count > 0 else {
+        guard projectCards.firstMatch.waitForExistence(timeout: 5) else {
             throw XCTSkip("테스트할 프로젝트가 없습니다")
         }
 
         projectCards.firstMatch.click()
-        sleep(2)  // 파일 트리 로딩을 위해 대기 시간 증가
 
         // 디버깅용 스크린샷 - 프로젝트 클릭 후
         let screenshot1 = XCUIScreen.main.screenshot()
@@ -129,14 +125,16 @@ final class Section4FileExplorerFlowTests: XCTestCase {
                 throw XCTSkip("토글할 폴더가 없습니다")
             }
             altToggleButtons.firstMatch.click()
-            sleep(1)
+            // 토글 애니메이션 완료 대기
+            _ = fileExplorerPage.fileTreePanel.waitForExistence(timeout: 2)
             XCTAssertTrue(true, "폴더 토글이 예외 없이 실행됨")
             return
         }
 
         // 토글 버튼 클릭
         toggleButtons.firstMatch.click()
-        sleep(1)
+        // 토글 애니메이션 완료 대기
+        _ = fileExplorerPage.fileTreePanel.waitForExistence(timeout: 2)
 
         // Then: 확장/축소가 동작함 (UI 변경 확인)
         // 정확한 검증은 폴더 구조에 따라 다름
@@ -149,18 +147,16 @@ final class Section4FileExplorerFlowTests: XCTestCase {
     func test_selectFile_displaysFileContent() throws {
         // Given: 파일 탐색기가 표시된 상태
         sidebarPage.selectProjectsTab()
-        sleep(1)
 
         let projectCards = app.descendants(matching: .any).matching(
             NSPredicate(format: "identifier BEGINSWITH 'projectCard-'")
         )
 
-        guard projectCards.count > 0 else {
+        guard projectCards.firstMatch.waitForExistence(timeout: 5) else {
             throw XCTSkip("테스트할 프로젝트가 없습니다")
         }
 
         projectCards.firstMatch.click()
-        sleep(2)
 
         // 파일 트리가 로드될 때까지 대기
         guard fileExplorerPage.isFileTreeLoaded(timeout: 5) else {
@@ -203,7 +199,6 @@ final class Section4FileExplorerFlowTests: XCTestCase {
 
         // 파일 클릭
         file.click()
-        sleep(1)
 
         // Then: 파일 내용이 표시됨 - 여러 방법으로 확인
         let contentDisplayed = fileExplorerPage.fileContentView.waitForExistence(timeout: 3)
@@ -230,18 +225,19 @@ final class Section4FileExplorerFlowTests: XCTestCase {
     func test_searchFiles_filtersResults() throws {
         // Given: 파일 탐색기가 표시된 상태
         sidebarPage.selectProjectsTab()
-        sleep(1)
 
         let projectCards = app.descendants(matching: .any).matching(
             NSPredicate(format: "identifier BEGINSWITH 'projectCard-'")
         )
 
-        guard projectCards.count > 0 else {
+        guard projectCards.firstMatch.waitForExistence(timeout: 5) else {
             throw XCTSkip("테스트할 프로젝트가 없습니다")
         }
 
         projectCards.firstMatch.click()
-        sleep(2)
+
+        // 파일 트리 패널 로드 대기
+        _ = fileExplorerPage.fileTreePanel.waitForExistence(timeout: 5)
 
         // 디버깅: UI 계층 덤프
         let hierarchyAttachment = XCTAttachment(string: app.debugDescription)
@@ -263,7 +259,8 @@ final class Section4FileExplorerFlowTests: XCTestCase {
 
         // When: 검색어 입력
         fileExplorerPage.search("swift")
-        sleep(2)  // 디바운스 대기 시간 증가
+        // 디바운스 대기 (300ms) + 검색 완료 대기
+        _ = fileExplorerPage.searchResultsList.waitForExistence(timeout: 3)
 
         // Then: 검색 결과가 표시되거나 검색 UI가 변경됨
         // 검색 결과 목록
@@ -295,18 +292,19 @@ final class Section4FileExplorerFlowTests: XCTestCase {
     func test_clearSearch_resetsToTreeView() throws {
         // Given: 검색어가 입력된 상태
         sidebarPage.selectProjectsTab()
-        sleep(1)
 
         let projectCards = app.descendants(matching: .any).matching(
             NSPredicate(format: "identifier BEGINSWITH 'projectCard-'")
         )
 
-        guard projectCards.count > 0 else {
+        guard projectCards.firstMatch.waitForExistence(timeout: 5) else {
             throw XCTSkip("테스트할 프로젝트가 없습니다")
         }
 
         projectCards.firstMatch.click()
-        sleep(2)
+
+        // 파일 트리 패널 로드 대기
+        _ = fileExplorerPage.fileTreePanel.waitForExistence(timeout: 5)
 
         // 검색 필드 확인 (identifier 또는 placeholder로)
         let searchFieldExists = fileExplorerPage.searchField.waitForExistence(timeout: 2)
@@ -320,7 +318,8 @@ final class Section4FileExplorerFlowTests: XCTestCase {
 
         // 검색어 입력
         fileExplorerPage.search("test")
-        sleep(1)
+        // 디바운스 대기
+        _ = fileExplorerPage.searchResultsList.waitForExistence(timeout: 2)
 
         // When: 검색 초기화 (clearSearchButton 또는 Escape 키)
         if fileExplorerPage.clearSearchButton.waitForExistence(timeout: 1) {
@@ -335,7 +334,6 @@ final class Section4FileExplorerFlowTests: XCTestCase {
                 textField.typeText(XCUIKeyboardKey.delete.rawValue)
             }
         }
-        sleep(1)
 
         // Then: 파일 트리가 다시 표시됨
         XCTAssertTrue(

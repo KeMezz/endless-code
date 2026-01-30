@@ -616,42 +616,35 @@ final class GitService: GitServiceProtocol, Sendable {
 
     /// Git 명령 실행
     private func runGitCommand(_ arguments: [String], at path: String) async throws -> String {
-        try await withCheckedThrowingContinuation { continuation in
-            let process = Process()
-            process.executableURL = URL(fileURLWithPath: "/usr/bin/git")
-            process.arguments = arguments
-            process.currentDirectoryURL = URL(fileURLWithPath: path)
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/git")
+        process.arguments = arguments
+        process.currentDirectoryURL = URL(fileURLWithPath: path)
 
-            let stdoutPipe = Pipe()
-            let stderrPipe = Pipe()
-            process.standardOutput = stdoutPipe
-            process.standardError = stderrPipe
+        let stdoutPipe = Pipe()
+        let stderrPipe = Pipe()
+        process.standardOutput = stdoutPipe
+        process.standardError = stderrPipe
 
-            // terminationHandler를 사용하여 비동기 처리
-            process.terminationHandler = { process in
-                let stdoutData = stdoutPipe.fileHandleForReading.readDataToEndOfFile()
-                let stderrData = stderrPipe.fileHandleForReading.readDataToEndOfFile()
-
-                // 종료 코드 확인 - 0이 아니면 에러
-                if process.terminationStatus != 0 {
-                    let errorMessage = String(data: stderrData, encoding: .utf8) ?? "Unknown error"
-                    continuation.resume(throwing: GitError.commandFailed(errorMessage))
-                    return
-                }
-
-                if let output = String(data: stdoutData, encoding: .utf8) {
-                    continuation.resume(returning: output)
-                } else {
-                    continuation.resume(returning: "")
-                }
-            }
-
-            do {
-                try process.run()
-            } catch {
-                continuation.resume(throwing: error)
-            }
+        do {
+            try process.run()
+        } catch {
+            throw error
         }
+
+        // waitUntilExit 사용 - terminationHandler보다 안정적
+        process.waitUntilExit()
+
+        let stdoutData = stdoutPipe.fileHandleForReading.readDataToEndOfFile()
+        let stderrData = stderrPipe.fileHandleForReading.readDataToEndOfFile()
+
+        // 종료 코드 확인 - 0이 아니면 에러
+        if process.terminationStatus != 0 {
+            let errorMessage = String(data: stderrData, encoding: .utf8) ?? "Unknown error"
+            throw GitError.commandFailed(errorMessage)
+        }
+
+        return String(data: stdoutData, encoding: .utf8) ?? ""
     }
 }
 
