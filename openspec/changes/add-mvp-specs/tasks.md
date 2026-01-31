@@ -163,26 +163,26 @@
 ## 5. macOS App - Diff 뷰어
 
 ### 5.1 Diff 파싱
-- [ ] 5.1.1 DiffDataSource - tool_result에서 diff 추출
-- [ ] 5.1.2 DiffDataSource - git diff 출력 감지 및 자동 표시
-- [ ] 5.1.3 UnifiedDiff 파서 - 파일 헤더 파싱 (--- / +++)
-- [ ] 5.1.4 UnifiedDiff 파서 - Hunk 추출 (@@ 패턴)
-- [ ] 5.1.5 DiffLine 모델 - 추가/삭제/컨텍스트 분류
-- [ ] 5.1.6 대용량 Diff 처리 - 100개 파일 초과 시 페이지네이션
+- [x] 5.1.1 DiffDataSource - tool_result에서 diff 추출
+- [x] 5.1.2 DiffDataSource - git diff 출력 감지 및 자동 표시
+- [x] 5.1.3 UnifiedDiff 파서 - 파일 헤더 파싱 (--- / +++)
+- [x] 5.1.4 UnifiedDiff 파서 - Hunk 추출 (@@ 패턴)
+- [x] 5.1.5 DiffLine 모델 - 추가/삭제/컨텍스트 분류
+- [x] 5.1.6 대용량 Diff 처리 - 100개 파일 초과 시 페이지네이션
 
 ### 5.2 Diff 표시
-- [ ] 5.2.1 DiffHunkView - 라인별 렌더링
-- [ ] 5.2.2 이중 라인 번호 표시
-- [ ] 5.2.3 Diff 내 신택스 하이라이팅
+- [x] 5.2.1 DiffHunkView - 라인별 렌더링
+- [x] 5.2.2 이중 라인 번호 표시
+- [x] 5.2.3 Diff 내 신택스 하이라이팅
 
 ### 5.3 파일 목록
-- [ ] 5.3.1 DiffFileList - 파일별 그룹화
-- [ ] 5.3.2 통계 표시 - 추가/삭제 라인 수
+- [x] 5.3.1 DiffFileList - 파일별 그룹화
+- [x] 5.3.2 통계 표시 - 추가/삭제 라인 수
 
 ### 5.4 Section 5 E2E 테스트
-- [ ] 5.4.1 Diff 뷰어 표시 테스트
-- [ ] 5.4.2 Hunk 탐색 테스트
-- [ ] 5.4.3 파일 목록 필터링 테스트
+- [x] 5.4.1 Diff 뷰어 표시 테스트
+- [x] 5.4.2 Hunk 탐색 테스트
+- [x] 5.4.3 파일 목록 필터링 테스트
 
 ## 6. macOS App - 기타 UI
 

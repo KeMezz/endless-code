@@ -114,6 +114,88 @@ public enum SupportedLanguage: String, CaseIterable, Sendable {
         }
     }
 
+    /// 파일 확장자로부터 언어 결정
+    public static func from(extension ext: String) -> SupportedLanguage {
+        let lowercased = ext.lowercased()
+
+        switch lowercased {
+        // Swift
+        case "swift":
+            return .swift
+
+        // JavaScript/TypeScript
+        case "js", "jsx", "mjs", "cjs":
+            return .javascript
+        case "ts", "tsx":
+            return .typescript
+
+        // Python
+        case "py", "pyw", "pyi":
+            return .python
+
+        // Go
+        case "go":
+            return .go
+
+        // Rust
+        case "rs":
+            return .rust
+
+        // Java
+        case "java":
+            return .java
+
+        // Kotlin
+        case "kt", "kts":
+            return .kotlin
+
+        // C#
+        case "cs":
+            return .csharp
+
+        // C/C++
+        case "c", "h":
+            return .c
+        case "cpp", "cc", "cxx", "hpp", "hxx":
+            return .cpp
+
+        // Ruby
+        case "rb", "erb":
+            return .ruby
+
+        // PHP
+        case "php":
+            return .php
+
+        // Web
+        case "html", "htm", "xhtml":
+            return .html
+        case "css", "scss", "sass", "less":
+            return .css
+
+        // Data
+        case "json", "jsonl":
+            return .json
+        case "yaml", "yml":
+            return .yaml
+
+        // Shell
+        case "sh", "bash", "zsh":
+            return .bash
+
+        // SQL
+        case "sql":
+            return .sql
+
+        // Markdown
+        case "md", "markdown", "mdx":
+            return .markdown
+
+        default:
+            return .unknown
+        }
+    }
+
     /// 언어별 규칙
     public var rules: LanguageRules {
         switch self {
