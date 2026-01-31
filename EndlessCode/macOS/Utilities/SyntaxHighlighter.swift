@@ -293,9 +293,18 @@ public struct SyntaxHighlighter: Sendable {
 // MARK: - Convenience Extensions
 
 extension SyntaxHighlighter {
+    /// 공유 인스턴스 (기본 언어 없음)
+    public static let shared = SyntaxHighlighter(language: .unknown)
+
     /// 언어 이름으로 하이라이터 생성
     public static func forLanguage(_ name: String?) -> SyntaxHighlighter {
         let language = SupportedLanguage.from(name: name ?? "")
         return SyntaxHighlighter(language: language)
+    }
+
+    /// 단일 라인을 언어 지정하여 하이라이팅 (편의 메서드)
+    public func highlight(_ line: String, language: String) -> AttributedString {
+        let highlighter = SyntaxHighlighter.forLanguage(language)
+        return highlighter.highlightLine(line)
     }
 }

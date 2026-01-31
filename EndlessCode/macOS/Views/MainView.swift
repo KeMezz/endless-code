@@ -306,12 +306,12 @@ struct SettingsListView: View {
     }
 }
 
-/// 프로젝트 상세 뷰 (플레이스홀더)
+/// 프로젝트 상세 뷰 - FileExplorerView 사용
 struct ProjectDetailView: View {
     let project: Project
 
     var body: some View {
-        Text("Project: \(project.name)")
+        FileExplorerView(project: project)
             .accessibilityIdentifier("projectDetail-\(project.id)")
     }
 }

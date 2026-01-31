@@ -50,6 +50,41 @@ xcodebuild test \
 - UI와 무관한 서버/모델 코드만 수정한 경우
 - 단, 이 경우에도 기존 E2E 테스트가 통과하는지 확인 권장
 
+### UI 변경 시 검증 (필수)
+
+**UI 관련 코드 수정 시 반드시 `/verify-ui` 커맨드로 시각적 검증 수행.**
+
+```bash
+# UI 검증 실행 (기본: file-selected 시나리오)
+/verify-ui
+
+# 특정 시나리오 검증
+/verify-ui project-list
+/verify-ui file-selected
+```
+
+**UI 검증이 필요한 경우**:
+- View 파일 수정 (*.swift in Views/, Components/)
+- 레이아웃 관련 코드 변경 (frame, padding, alignment 등)
+- 새로운 UI 컴포넌트 추가
+- 스타일/테마 변경
+
+**UI 검증 시나리오 추가 규칙**:
+
+새로운 화면이나 주요 UI 흐름을 추가할 때, `ScreenshotCaptureTests`에 해당 시나리오 추가:
+
+```swift
+// EndlessCodeUITests/Helpers/ScreenshotCapture.swift
+
+/// 새 시나리오 스크린샷 캡처
+func test_capture_newScenario() throws {
+    // 1. 원하는 화면으로 네비게이션
+    // 2. saveScreenshot(named: "scenarioName") 호출
+}
+```
+
+그리고 `verify-ui.md`의 시나리오 매핑 테이블에 추가.
+
 ## Unit Test 규칙
 
 ### 파일 구조
