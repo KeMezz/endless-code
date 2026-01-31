@@ -100,6 +100,37 @@ final class DiffViewerViewModel {
         self.parser = parser
     }
 
+    /// UnifiedDiff로 직접 초기화
+    convenience init(diff: UnifiedDiff, parser: DiffParserProtocol = DiffParser()) {
+        self.init(parser: parser)
+        self.setDiff(diff)
+    }
+
+    /// UnifiedDiff 직접 설정
+    func setDiff(_ newDiff: UnifiedDiff) {
+        isLoading = false
+        errorMessage = nil
+        allFiles = newDiff.files
+
+        // 페이지네이션 계산
+        totalPages = max(1, (allFiles.count + Self.filesPerPage - 1) / Self.filesPerPage)
+        currentPage = 0
+
+        // 첫 페이지 파일로 diff 생성
+        let pageFiles = getPageFiles(page: 0)
+        self.diff = UnifiedDiff(
+            id: newDiff.id,
+            files: pageFiles,
+            isStaged: newDiff.isStaged,
+            generatedAt: newDiff.generatedAt
+        )
+
+        // 첫 번째 파일 선택
+        if let firstFile = pageFiles.first {
+            selectedFileId = firstFile.id
+        }
+    }
+
     // MARK: - Public Methods
 
     /// Diff 문자열 로드 및 파싱

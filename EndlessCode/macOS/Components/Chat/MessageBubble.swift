@@ -13,10 +13,16 @@ import SwiftUI
 struct MessageBubble: View {
     let message: ChatMessageItem
     let onCopyCode: ((String) -> Void)?
+    let onViewDiff: ((UnifiedDiff) -> Void)?
 
-    init(message: ChatMessageItem, onCopyCode: ((String) -> Void)? = nil) {
+    init(
+        message: ChatMessageItem,
+        onCopyCode: ((String) -> Void)? = nil,
+        onViewDiff: ((UnifiedDiff) -> Void)? = nil
+    ) {
         self.message = message
         self.onCopyCode = onCopyCode
+        self.onViewDiff = onViewDiff
     }
 
     var body: some View {
@@ -92,7 +98,7 @@ struct MessageBubble: View {
         case .toolInput(let input):
             ToolInputContent(input: input)
         case .toolOutput(let output):
-            ToolOutputContent(output: output)
+            ToolOutputContent(output: output, onViewDiff: onViewDiff)
         }
     }
 
@@ -283,13 +289,43 @@ struct ToolInputContent: View {
 /// 도구 출력 콘텐츠
 struct ToolOutputContent: View {
     let output: String
+    var onViewDiff: ((UnifiedDiff) -> Void)?
+
+    private let diffParser = DiffParser()
+
+    /// Diff가 포함되어 있는지 확인
+    private var containsDiff: Bool {
+        diffParser.containsDiff(output)
+    }
+
+    /// 파싱된 Diff (diff가 포함된 경우에만)
+    private var parsedDiff: UnifiedDiff? {
+        guard containsDiff else { return nil }
+        return try? diffParser.parse(output, isStaged: nil)
+    }
 
     var body: some View {
-        Text(output)
-            .font(.caption)
-            .foregroundStyle(.primary)
-            .lineLimit(5)
-            .textSelection(.enabled)
+        VStack(alignment: .leading, spacing: 8) {
+            Text(output)
+                .font(.caption)
+                .foregroundStyle(.primary)
+                .lineLimit(containsDiff ? 3 : 5)
+                .textSelection(.enabled)
+
+            if containsDiff, let diff = parsedDiff {
+                Button {
+                    onViewDiff?(diff)
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "doc.text.magnifyingglass")
+                        Text("Diff 뷰어에서 보기")
+                    }
+                    .font(.caption)
+                }
+                .buttonStyle(.link)
+                .accessibilityIdentifier("viewDiffButton")
+            }
+        }
     }
 }
 
