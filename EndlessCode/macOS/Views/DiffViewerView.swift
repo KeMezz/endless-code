@@ -65,6 +65,7 @@ struct DiffViewerView: View {
 
                 // Diff 콘텐츠
                 mainDiffContent
+                    .clipped()
             }
 
             // 페이지네이션 바 (필요 시)
@@ -84,7 +85,7 @@ struct DiffViewerView: View {
                 )
                 .padding()
             }
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             noFileSelectedView
         }
