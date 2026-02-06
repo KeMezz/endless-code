@@ -214,6 +214,7 @@ struct DiffFileListItem: View {
                             .foregroundStyle(.red)
                     }
                 }
+                .fixedSize()
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 6)

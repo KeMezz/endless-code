@@ -58,7 +58,7 @@ struct DiffViewerView: View {
                         selectedFileId: $viewModel.selectedFileId,
                         sortOption: viewModel.sortOption
                     )
-                    .frame(width: 250)
+                    .frame(minWidth: 250, idealWidth: 280, maxWidth: 400)
                 }
 
                 // Diff 콘텐츠
