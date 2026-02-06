@@ -50,7 +50,7 @@ struct DiffViewerView: View {
             }
 
             // 메인 콘텐츠
-            HSplitView {
+            HStack(spacing: 0) {
                 // 파일 목록 사이드바
                 if showFileList {
                     DiffFileList(
@@ -58,7 +58,9 @@ struct DiffViewerView: View {
                         selectedFileId: $viewModel.selectedFileId,
                         sortOption: viewModel.sortOption
                     )
-                    .frame(minWidth: 250, idealWidth: 280, maxWidth: 400)
+                    .frame(width: 280)
+
+                    Divider()
                 }
 
                 // Diff 콘텐츠
