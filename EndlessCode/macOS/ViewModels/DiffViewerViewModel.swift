@@ -267,10 +267,9 @@ final class DiffViewerViewModel {
     // MARK: - Private Methods
 
     private func getPageFiles(page: Int) -> [DiffFile] {
+        guard page >= 0 && page < totalPages else { return [] }
         let start = page * Self.filesPerPage
         let end = min(start + Self.filesPerPage, allFiles.count)
-
-        guard start < allFiles.count else { return [] }
         return Array(allFiles[start..<end])
     }
 

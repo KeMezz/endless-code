@@ -36,28 +36,40 @@ final class DiffParser: DiffParserProtocol, Sendable {
     private static let renameToPattern = #"^rename to (.+)$"#
 
     // 컴파일된 정규표현식 (재사용)
-    private let diffHeaderRegex: NSRegularExpression?
-    private let fileHeaderOldRegex: NSRegularExpression?
-    private let fileHeaderNewRegex: NSRegularExpression?
-    private let hunkHeaderRegex: NSRegularExpression?
-    private let binaryFileRegex: NSRegularExpression?
-    private let newFileRegex: NSRegularExpression?
-    private let deletedFileRegex: NSRegularExpression?
-    private let renameFromRegex: NSRegularExpression?
-    private let renameToRegex: NSRegularExpression?
+    private let diffHeaderRegex: NSRegularExpression
+    private let fileHeaderOldRegex: NSRegularExpression
+    private let fileHeaderNewRegex: NSRegularExpression
+    private let hunkHeaderRegex: NSRegularExpression
+    private let binaryFileRegex: NSRegularExpression
+    private let newFileRegex: NSRegularExpression
+    private let deletedFileRegex: NSRegularExpression
+    private let renameFromRegex: NSRegularExpression
+    private let renameToRegex: NSRegularExpression
 
     // MARK: - Initialization
 
     init() {
-        self.diffHeaderRegex = try? NSRegularExpression(pattern: Self.diffHeaderPattern, options: .anchorsMatchLines)
-        self.fileHeaderOldRegex = try? NSRegularExpression(pattern: Self.fileHeaderOldPattern, options: .anchorsMatchLines)
-        self.fileHeaderNewRegex = try? NSRegularExpression(pattern: Self.fileHeaderNewPattern, options: .anchorsMatchLines)
-        self.hunkHeaderRegex = try? NSRegularExpression(pattern: Self.hunkHeaderPattern, options: .anchorsMatchLines)
-        self.binaryFileRegex = try? NSRegularExpression(pattern: Self.binaryFilePattern)
-        self.newFileRegex = try? NSRegularExpression(pattern: Self.newFilePattern, options: .anchorsMatchLines)
-        self.deletedFileRegex = try? NSRegularExpression(pattern: Self.deletedFilePattern, options: .anchorsMatchLines)
-        self.renameFromRegex = try? NSRegularExpression(pattern: Self.renameFromPattern, options: .anchorsMatchLines)
-        self.renameToRegex = try? NSRegularExpression(pattern: Self.renameToPattern, options: .anchorsMatchLines)
+        guard let diffHeader = try? NSRegularExpression(pattern: Self.diffHeaderPattern, options: .anchorsMatchLines),
+              let fileHeaderOld = try? NSRegularExpression(pattern: Self.fileHeaderOldPattern, options: .anchorsMatchLines),
+              let fileHeaderNew = try? NSRegularExpression(pattern: Self.fileHeaderNewPattern, options: .anchorsMatchLines),
+              let hunkHeader = try? NSRegularExpression(pattern: Self.hunkHeaderPattern, options: .anchorsMatchLines),
+              let binaryFile = try? NSRegularExpression(pattern: Self.binaryFilePattern),
+              let newFile = try? NSRegularExpression(pattern: Self.newFilePattern, options: .anchorsMatchLines),
+              let deletedFile = try? NSRegularExpression(pattern: Self.deletedFilePattern, options: .anchorsMatchLines),
+              let renameFrom = try? NSRegularExpression(pattern: Self.renameFromPattern, options: .anchorsMatchLines),
+              let renameTo = try? NSRegularExpression(pattern: Self.renameToPattern, options: .anchorsMatchLines)
+        else {
+            fatalError("Failed to compile DiffParser regex patterns")
+        }
+        self.diffHeaderRegex = diffHeader
+        self.fileHeaderOldRegex = fileHeaderOld
+        self.fileHeaderNewRegex = fileHeaderNew
+        self.hunkHeaderRegex = hunkHeader
+        self.binaryFileRegex = binaryFile
+        self.newFileRegex = newFile
+        self.deletedFileRegex = deletedFile
+        self.renameFromRegex = renameFrom
+        self.renameToRegex = renameTo
     }
 
     // MARK: - Public Methods
@@ -216,9 +228,8 @@ final class DiffParser: DiffParserProtocol, Sendable {
     /// Diff 포함 여부 확인
     func containsDiff(_ text: String) -> Bool {
         // diff --git 또는 --- / +++ 패턴 확인
-        guard let regex = diffHeaderRegex else { return false }
         let range = NSRange(text.startIndex..., in: text)
-        if regex.firstMatch(in: text, range: range) != nil {
+        if diffHeaderRegex.firstMatch(in: text, range: range) != nil {
             return true
         }
 
@@ -228,46 +239,45 @@ final class DiffParser: DiffParserProtocol, Sendable {
         }
 
         // @@ 패턴 확인
-        guard let hunkRegex = hunkHeaderRegex else { return false }
-        return hunkRegex.firstMatch(in: text, range: range) != nil
+        return hunkHeaderRegex.firstMatch(in: text, range: range) != nil
     }
 
     // MARK: - Private Methods
 
     private func matchesDiffHeader(_ line: String) -> Bool {
-        guard let regex = diffHeaderRegex else { return false }
+        guard line.hasPrefix("diff ") else { return false }
         let range = NSRange(line.startIndex..., in: line)
-        return regex.firstMatch(in: line, range: range) != nil
+        return diffHeaderRegex.firstMatch(in: line, range: range) != nil
     }
 
     private func matchesNewFile(_ line: String) -> Bool {
-        guard let regex = newFileRegex else { return false }
+        guard line.hasPrefix("new ") else { return false }
         let range = NSRange(line.startIndex..., in: line)
-        return regex.firstMatch(in: line, range: range) != nil
+        return newFileRegex.firstMatch(in: line, range: range) != nil
     }
 
     private func matchesDeletedFile(_ line: String) -> Bool {
-        guard let regex = deletedFileRegex else { return false }
+        guard line.hasPrefix("deleted ") else { return false }
         let range = NSRange(line.startIndex..., in: line)
-        return regex.firstMatch(in: line, range: range) != nil
+        return deletedFileRegex.firstMatch(in: line, range: range) != nil
     }
 
     private func matchesBinaryFile(_ line: String) -> Bool {
-        guard let regex = binaryFileRegex else { return false }
+        guard line.hasPrefix("Binary ") else { return false }
         let range = NSRange(line.startIndex..., in: line)
-        return regex.firstMatch(in: line, range: range) != nil
+        return binaryFileRegex.firstMatch(in: line, range: range) != nil
     }
 
     private func matchesHunkHeader(_ line: String) -> Bool {
-        guard let regex = hunkHeaderRegex else { return false }
+        guard line.hasPrefix("@@") else { return false }
         let range = NSRange(line.startIndex..., in: line)
-        return regex.firstMatch(in: line, range: range) != nil
+        return hunkHeaderRegex.firstMatch(in: line, range: range) != nil
     }
 
     private func extractOldFilePath(_ line: String) -> String? {
-        guard let regex = fileHeaderOldRegex else { return nil }
+        guard line.hasPrefix("---") else { return nil }
         let range = NSRange(line.startIndex..., in: line)
-        guard let match = regex.firstMatch(in: line, range: range) else { return nil }
+        guard let match = fileHeaderOldRegex.firstMatch(in: line, range: range) else { return nil }
 
         // 그룹 2: 파일 경로
         if match.numberOfRanges > 2 {
@@ -281,9 +291,9 @@ final class DiffParser: DiffParserProtocol, Sendable {
     }
 
     private func extractNewFilePath(_ line: String) -> String? {
-        guard let regex = fileHeaderNewRegex else { return nil }
+        guard line.hasPrefix("+++") else { return nil }
         let range = NSRange(line.startIndex..., in: line)
-        guard let match = regex.firstMatch(in: line, range: range) else { return nil }
+        guard let match = fileHeaderNewRegex.firstMatch(in: line, range: range) else { return nil }
 
         // 그룹 2: 파일 경로
         if match.numberOfRanges > 2 {
@@ -297,8 +307,9 @@ final class DiffParser: DiffParserProtocol, Sendable {
     }
 
     private func extractRenamePath(_ line: String, isFrom: Bool) -> String? {
+        let prefix = isFrom ? "rename from" : "rename to"
+        guard line.hasPrefix(prefix) else { return nil }
         let regex = isFrom ? renameFromRegex : renameToRegex
-        guard let regex else { return nil }
         let range = NSRange(line.startIndex..., in: line)
         guard let match = regex.firstMatch(in: line, range: range),
               match.numberOfRanges > 1,
@@ -307,9 +318,9 @@ final class DiffParser: DiffParserProtocol, Sendable {
     }
 
     private func extractHunkInfo(_ line: String) -> (Int, Int, Int, Int, String?)? {
-        guard let regex = hunkHeaderRegex else { return nil }
+        guard line.hasPrefix("@@") else { return nil }
         let range = NSRange(line.startIndex..., in: line)
-        guard let match = regex.firstMatch(in: line, range: range) else { return nil }
+        guard let match = hunkHeaderRegex.firstMatch(in: line, range: range) else { return nil }
 
         // @@ -oldStart,oldCount +newStart,newCount @@ contextText
         var oldStart = 0

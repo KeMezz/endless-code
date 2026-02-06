@@ -300,11 +300,9 @@ struct ToolOutputContent: View {
     init(output: String, onViewDiff: ((UnifiedDiff) -> Void)? = nil) {
         self.output = output
         self.onViewDiff = onViewDiff
-
-        let parser = Self.diffParser
-        let detected = parser.containsDiff(output)
-        self.hasDiff = detected
-        self.parsedDiff = detected ? (try? parser.parse(output, isStaged: nil)) : nil
+        let parsed = try? Self.diffParser.parse(output, isStaged: nil)
+        self.parsedDiff = parsed
+        self.hasDiff = parsed != nil
     }
 
     var body: some View {
