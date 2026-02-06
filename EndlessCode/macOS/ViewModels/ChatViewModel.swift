@@ -132,7 +132,7 @@ struct ChatMessageItem: Identifiable, Equatable, Sendable {
         case assistant
         case toolUse(name: String, toolUseId: String)
         case toolResult(toolUseId: String, isError: Bool)
-        case askUser(toolUseId: String, question: String, options: [QuestionOption]?)
+        case askUser(toolUseId: String, question: String, options: [QuestionOption]?, multiSelect: Bool)
     }
 
     enum MessageContent: Equatable, Sendable {
@@ -215,6 +215,21 @@ extension ChatMessageItem {
         ),
         ChatMessageItem(
             id: "msg-7",
+            type: .askUser(
+                toolUseId: "tool-ask-1",
+                question: "어떤 프로그래밍 언어를 선호하시나요?",
+                options: [
+                    QuestionOption(label: "Swift", description: "Apple의 모던 언어"),
+                    QuestionOption(label: "Kotlin", description: "JVM 기반 언어"),
+                    QuestionOption(label: "TypeScript", description: "타입 안전한 JS")
+                ],
+                multiSelect: false
+            ),
+            content: .text(""),
+            timestamp: Date().addingTimeInterval(-45)
+        ),
+        ChatMessageItem(
+            id: "msg-8",
             type: .toolResult(toolUseId: "tool-2", isError: false),
             content: .toolOutput("""
                 diff --git a/Package.swift b/Package.swift

@@ -18,5 +18,24 @@ struct EndlessCodeApp: App {
                 .environment(appState)
                 .environment(appRouter)
         }
+
+        MenuBarExtra {
+            MenuBarView()
+                .environment(appState)
+        } label: {
+            Image(systemName: menuBarIconName)
+        }
+    }
+
+    /// 메뉴바 아이콘 이름
+    private var menuBarIconName: String {
+        switch appState.serverState {
+        case .running:
+            return "terminal.fill"
+        case .stopped:
+            return "terminal"
+        case .error:
+            return "exclamationmark.triangle.fill"
+        }
     }
 }

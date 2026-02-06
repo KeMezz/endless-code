@@ -39,6 +39,12 @@ final class AppState {
     /// 알림 메시지 (일시적)
     var toastMessage: String?
 
+    /// 서버 상태
+    var serverState: ServerState = .stopped
+
+    /// 연결된 클라이언트 수
+    var connectedClientCount: Int = 0
+
     // MARK: - Initialization
 
     init() {}
@@ -257,4 +263,13 @@ enum AlertDestination: Identifiable {
             return "error-\(message.hashValue)"
         }
     }
+}
+
+// MARK: - ServerState
+
+/// 서버 상태
+enum ServerState: Equatable {
+    case running
+    case stopped
+    case error(String)
 }

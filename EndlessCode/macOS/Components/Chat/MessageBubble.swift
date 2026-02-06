@@ -14,15 +14,18 @@ struct MessageBubble: View {
     let message: ChatMessageItem
     let onCopyCode: ((String) -> Void)?
     let onViewDiff: ((UnifiedDiff) -> Void)?
+    let onPromptResponse: ((PromptResponse) -> Void)?
 
     init(
         message: ChatMessageItem,
         onCopyCode: ((String) -> Void)? = nil,
-        onViewDiff: ((UnifiedDiff) -> Void)? = nil
+        onViewDiff: ((UnifiedDiff) -> Void)? = nil,
+        onPromptResponse: ((PromptResponse) -> Void)? = nil
     ) {
         self.message = message
         self.onCopyCode = onCopyCode
         self.onViewDiff = onViewDiff
+        self.onPromptResponse = onPromptResponse
     }
 
     var body: some View {
@@ -87,6 +90,26 @@ struct MessageBubble: View {
 
     @ViewBuilder
     private var bubbleContent: some View {
+        switch message.type {
+        case .askUser(let toolUseId, let question, let options, let multiSelect):
+            // 대화형 프롬프트 UI
+            let askUserQuestion = AskUserQuestion(
+                toolUseId: toolUseId,
+                question: question,
+                options: options,
+                multiSelect: multiSelect
+            )
+            PromptDialogView(prompt: askUserQuestion) { response in
+                onPromptResponse?(response)
+            }
+        default:
+            // 기존 콘텐츠 렌더링
+            regularContent
+        }
+    }
+
+    @ViewBuilder
+    private var regularContent: some View {
         switch message.content {
         case .text(let text):
             MessageTextContent(text: text, onCopyCode: onCopyCode)
@@ -160,89 +183,11 @@ extension ChatMessageItem.MessageType {
 
 /// 텍스트 메시지 콘텐츠
 struct MessageTextContent: View {
-    /// 코드 블록 파싱용 정규표현식 (캐싱)
-    private static let codeBlockRegex: NSRegularExpression? = {
-        try? NSRegularExpression(pattern: "```(\\w*)\\n([\\s\\S]*?)```")
-    }()
-
     let text: String
     let onCopyCode: ((String) -> Void)?
 
-    // 파싱 결과를 init에서 미리 계산 (성능 최적화)
-    private let parsedBlocks: [ContentBlock]
-
-    init(text: String, onCopyCode: ((String) -> Void)? = nil) {
-        self.text = text
-        self.onCopyCode = onCopyCode
-        self.parsedBlocks = Self.parseContent(text)
-    }
-
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            ForEach(Array(parsedBlocks.enumerated()), id: \.offset) { _, block in
-                switch block {
-                case .text(let content):
-                    Text(content)
-                        .font(.body)
-                        .foregroundStyle(.primary)
-                        .textSelection(.enabled)
-                case .code(let code, let language):
-                    CodeBlockView(
-                        code: code,
-                        language: language,
-                        onCopy: { onCopyCode?(code) }
-                    )
-                }
-            }
-        }
-    }
-
-    private static func parseContent(_ text: String) -> [ContentBlock] {
-        var blocks: [ContentBlock] = []
-
-        guard let regex = codeBlockRegex else {
-            return [.text(text)]
-        }
-
-        let nsText = text as NSString
-        var lastIndex = 0
-
-        let matches = regex.matches(in: text, range: NSRange(location: 0, length: nsText.length))
-
-        for match in matches {
-            // 코드 블록 이전 텍스트
-            if match.range.location > lastIndex {
-                let textRange = NSRange(location: lastIndex, length: match.range.location - lastIndex)
-                let textContent = nsText.substring(with: textRange).trimmingCharacters(in: .whitespacesAndNewlines)
-                if !textContent.isEmpty {
-                    blocks.append(.text(textContent))
-                }
-            }
-
-            // 코드 블록
-            let languageRange = match.range(at: 1)
-            let codeRange = match.range(at: 2)
-            let language = nsText.substring(with: languageRange)
-            let code = nsText.substring(with: codeRange)
-            blocks.append(.code(code, language.isEmpty ? nil : language))
-
-            lastIndex = match.range.location + match.range.length
-        }
-
-        // 마지막 텍스트
-        if lastIndex < nsText.length {
-            let textContent = nsText.substring(from: lastIndex).trimmingCharacters(in: .whitespacesAndNewlines)
-            if !textContent.isEmpty {
-                blocks.append(.text(textContent))
-            }
-        }
-
-        return blocks.isEmpty ? [.text(text)] : blocks
-    }
-
-    private enum ContentBlock {
-        case text(String)
-        case code(String, String?)
+        MarkdownContentView(text: text, onCopyCode: onCopyCode)
     }
 }
 

@@ -300,12 +300,10 @@ struct ProjectListView: View {
 
 // SessionListView는 SessionListView.swift에서 정의됨
 
-/// 설정 목록 뷰 (플레이스홀더)
+/// 설정 목록 뷰 - SettingsView 사용
 struct SettingsListView: View {
     var body: some View {
-        Text("Settings List")
-            .navigationTitle("Settings")
-            .accessibilityIdentifier("settingsList")
+        SettingsView()
     }
 }
 
