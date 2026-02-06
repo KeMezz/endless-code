@@ -56,6 +56,9 @@ struct MainView: View {
             ProjectSettingsSheet(project: project)
         case .connectionSettings:
             ConnectionSettingsSheet()
+        case .diffViewer(let diff):
+            DiffViewerView(viewModel: DiffViewerViewModel(diff: diff))
+                .frame(minWidth: 800, minHeight: 600)
         }
     }
 

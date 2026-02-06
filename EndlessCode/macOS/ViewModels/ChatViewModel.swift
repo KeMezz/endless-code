@@ -204,6 +204,109 @@ extension ChatMessageItem {
             type: .user,
             content: .text("That looks great! Can you also add error handling?"),
             timestamp: Date().addingTimeInterval(-60)
+        ),
+        ChatMessageItem(
+            id: "msg-6",
+            type: .toolUse(name: "Bash", toolUseId: "tool-2"),
+            content: .toolInput([
+                "command": .string("git diff")
+            ]),
+            timestamp: Date().addingTimeInterval(-50)
+        ),
+        ChatMessageItem(
+            id: "msg-7",
+            type: .toolResult(toolUseId: "tool-2", isError: false),
+            content: .toolOutput("""
+                diff --git a/Package.swift b/Package.swift
+                index 9876543..fedcba9 100644
+                --- a/Package.swift
+                +++ b/Package.swift
+                @@ -10,7 +10,8 @@ let package = Package(
+                     dependencies: [
+                         .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0"),
+                -        .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0")
+                +        .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
+                +        .package(url: "https://github.com/apple/swift-nio.git", from: "2.0.0")
+                     ],
+                     targets: [
+                         .target(
+                diff --git a/Sources/Helpers/OldHelper.swift b/Sources/Helpers/OldHelper.swift
+                deleted file mode 100644
+                index 2468ace..0000000
+                --- a/Sources/Helpers/OldHelper.swift
+                +++ /dev/null
+                @@ -1,8 +0,0 @@
+                -//
+                -//  OldHelper.swift
+                -//  EndlessCode
+                -//
+                -
+                -struct OldHelper {
+                -    static func deprecatedMethod() {}
+                -}
+                diff --git a/Sources/Models/UserModel.swift b/Sources/Models/UserModel.swift
+                index abc1234..def5678 100644
+                --- a/Sources/Models/UserModel.swift
+                +++ b/Sources/Models/UserModel.swift
+                @@ -5,8 +5,10 @@
+
+                 struct UserModel: Codable {
+                     let id: String
+                -    let name: String
+                +    let username: String
+                +    let email: String
+
+                     var displayName: String {
+                -        name
+                +        username
+                     }
+                 }
+                diff --git a/Sources/Views/ContentView.swift b/Sources/Views/ContentView.swift
+                index 1234567..abcdefg 100644
+                --- a/Sources/Views/ContentView.swift
+                +++ b/Sources/Views/ContentView.swift
+                @@ -1,5 +1,8 @@
+                 struct ContentView: View {
+                     @State private var items: [Item] = []
+                +    @State private var isLoading = false
+                +    @State private var errorMessage: String?
+
+                     var body: some View {
+                -        List(items) { item in
+                +        Group {
+                +            if let error = errorMessage {
+                +                Text(error)
+                +            } else {
+                +                List(items) { item in
+                +                    ItemRow(item: item)
+                +                }
+                +            }
+                +        }
+                     }
+                 }
+                diff --git a/Tests/ContentViewTests.swift b/Tests/ContentViewTests.swift
+                new file mode 100644
+                index 0000000..1a2b3c4
+                --- /dev/null
+                +++ b/Tests/ContentViewTests.swift
+                @@ -0,0 +1,15 @@
+                +//
+                +//  ContentViewTests.swift
+                +//  EndlessCodeTests
+                +//
+                +
+                +import Testing
+                +@testable import EndlessCode
+                +
+                +@Suite("ContentView Tests")
+                +struct ContentViewTests {
+                +    @Test("Error message is displayed when errorMessage is set")
+                +    func errorMessageDisplayed() {
+                +        // Test implementation
+                +    }
+                +}
+                """),
+            timestamp: Date().addingTimeInterval(-49)
         )
     ]
 }

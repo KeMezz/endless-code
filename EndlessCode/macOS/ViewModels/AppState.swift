@@ -223,6 +223,7 @@ enum SheetDestination: Identifiable {
     case newSession(Project)
     case projectSettings(Project)
     case connectionSettings
+    case diffViewer(UnifiedDiff)
 
     var id: String {
         switch self {
@@ -232,6 +233,8 @@ enum SheetDestination: Identifiable {
             return "project-settings-\(project.id)"
         case .connectionSettings:
             return "connection-settings"
+        case .diffViewer(let diff):
+            return "diff-viewer-\(diff.id)"
         }
     }
 }

@@ -13,10 +13,16 @@ import SwiftUI
 struct MessageBubble: View {
     let message: ChatMessageItem
     let onCopyCode: ((String) -> Void)?
+    let onViewDiff: ((UnifiedDiff) -> Void)?
 
-    init(message: ChatMessageItem, onCopyCode: ((String) -> Void)? = nil) {
+    init(
+        message: ChatMessageItem,
+        onCopyCode: ((String) -> Void)? = nil,
+        onViewDiff: ((UnifiedDiff) -> Void)? = nil
+    ) {
         self.message = message
         self.onCopyCode = onCopyCode
+        self.onViewDiff = onViewDiff
     }
 
     var body: some View {
@@ -92,7 +98,7 @@ struct MessageBubble: View {
         case .toolInput(let input):
             ToolInputContent(input: input)
         case .toolOutput(let output):
-            ToolOutputContent(output: output)
+            ToolOutputContent(output: output, onViewDiff: onViewDiff)
         }
     }
 
@@ -283,13 +289,44 @@ struct ToolInputContent: View {
 /// 도구 출력 콘텐츠
 struct ToolOutputContent: View {
     let output: String
+    var onViewDiff: ((UnifiedDiff) -> Void)?
+
+    private static let diffParser = DiffParser()
+
+    // init에서 미리 계산
+    private let hasDiff: Bool
+    private let parsedDiff: UnifiedDiff?
+
+    init(output: String, onViewDiff: ((UnifiedDiff) -> Void)? = nil) {
+        self.output = output
+        self.onViewDiff = onViewDiff
+        let parsed = try? Self.diffParser.parse(output, isStaged: nil)
+        self.parsedDiff = parsed
+        self.hasDiff = parsed != nil
+    }
 
     var body: some View {
-        Text(output)
-            .font(.caption)
-            .foregroundStyle(.primary)
-            .lineLimit(5)
-            .textSelection(.enabled)
+        VStack(alignment: .leading, spacing: 8) {
+            Text(output)
+                .font(.caption)
+                .foregroundStyle(.primary)
+                .lineLimit(hasDiff ? 3 : 5)
+                .textSelection(.enabled)
+
+            if let diff = parsedDiff {
+                Button {
+                    onViewDiff?(diff)
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "doc.text.magnifyingglass")
+                        Text("Diff 뷰어에서 보기")
+                    }
+                    .font(.caption)
+                }
+                .buttonStyle(.link)
+                .accessibilityIdentifier("viewDiffButton")
+            }
+        }
     }
 }
 

@@ -14,6 +14,7 @@ struct ChatView: View {
     let session: Session
 
     @Environment(AppState.self) private var appState
+    @Environment(AppRouter.self) private var router
     @State private var viewModel: ChatViewModel
 
     init(session: Session) {
@@ -130,6 +131,9 @@ struct ChatView: View {
                     isStreaming: viewModel.isStreaming,
                     onCopyCode: { code in
                         copyToClipboard(code)
+                    },
+                    onViewDiff: { diff in
+                        router.presentSheet(.diffViewer(diff))
                     }
                 )
             }
