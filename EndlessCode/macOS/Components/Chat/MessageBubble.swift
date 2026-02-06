@@ -291,17 +291,20 @@ struct ToolOutputContent: View {
     let output: String
     var onViewDiff: ((UnifiedDiff) -> Void)?
 
-    private let diffParser = DiffParser()
+    private static let diffParser = DiffParser()
 
-    /// Diff가 포함되어 있는지 확인
-    private var containsDiff: Bool {
-        diffParser.containsDiff(output)
-    }
+    // init에서 미리 계산
+    private let hasDiff: Bool
+    private let parsedDiff: UnifiedDiff?
 
-    /// 파싱된 Diff (diff가 포함된 경우에만)
-    private var parsedDiff: UnifiedDiff? {
-        guard containsDiff else { return nil }
-        return try? diffParser.parse(output, isStaged: nil)
+    init(output: String, onViewDiff: ((UnifiedDiff) -> Void)? = nil) {
+        self.output = output
+        self.onViewDiff = onViewDiff
+
+        let parser = Self.diffParser
+        let detected = parser.containsDiff(output)
+        self.hasDiff = detected
+        self.parsedDiff = detected ? (try? parser.parse(output, isStaged: nil)) : nil
     }
 
     var body: some View {
@@ -309,10 +312,10 @@ struct ToolOutputContent: View {
             Text(output)
                 .font(.caption)
                 .foregroundStyle(.primary)
-                .lineLimit(containsDiff ? 3 : 5)
+                .lineLimit(hasDiff ? 3 : 5)
                 .textSelection(.enabled)
 
-            if containsDiff, let diff = parsedDiff {
+            if let diff = parsedDiff {
                 Button {
                     onViewDiff?(diff)
                 } label: {

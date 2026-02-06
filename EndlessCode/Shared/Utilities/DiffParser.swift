@@ -357,7 +357,7 @@ final class DiffParser: DiffParserProtocol, Sendable {
         currentOldLine: inout Int,
         currentNewLine: inout Int
     ) -> DiffLine {
-        guard !line.isEmpty else {
+        guard let firstChar = line.first else {
             // 빈 줄은 컨텍스트로 처리
             let diffLine = DiffLine(
                 type: .context,
@@ -370,7 +370,6 @@ final class DiffParser: DiffParserProtocol, Sendable {
             return diffLine
         }
 
-        let firstChar = line.first!
         let content = String(line.dropFirst())
 
         switch firstChar {

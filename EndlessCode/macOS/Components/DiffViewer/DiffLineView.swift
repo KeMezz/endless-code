@@ -59,6 +59,24 @@ struct DiffLineView: View {
     // 캐싱된 하이라이팅 결과
     private let highlightedContent: AttributedString
 
+    // 언어별 SyntaxHighlighter 캐시 (정규표현식 컴파일 비용 절감)
+    private static let highlighterCache: NSCache<NSString, HighlighterWrapper> = {
+        let cache = NSCache<NSString, HighlighterWrapper>()
+        cache.countLimit = 30
+        return cache
+    }()
+
+    private static func cachedHighlighter(for ext: String) -> SyntaxHighlighter {
+        let key = ext as NSString
+        if let wrapper = highlighterCache.object(forKey: key) {
+            return wrapper.highlighter
+        }
+        let language = SupportedLanguage.from(extension: ext)
+        let highlighter = SyntaxHighlighter(language: language)
+        highlighterCache.setObject(HighlighterWrapper(highlighter), forKey: key)
+        return highlighter
+    }
+
     init(line: DiffLine, fileExtension: String? = nil, showSyntaxHighlighting: Bool = true) {
         self.line = line
         self.fileExtension = fileExtension
@@ -66,8 +84,7 @@ struct DiffLineView: View {
 
         // 신택스 하이라이팅 적용
         if showSyntaxHighlighting, let ext = fileExtension {
-            let language = SupportedLanguage.from(extension: ext)
-            let highlighter = SyntaxHighlighter(language: language)
+            let highlighter = Self.cachedHighlighter(for: ext)
             self.highlightedContent = highlighter.highlightLine(line.content)
         } else {
             self.highlightedContent = AttributedString(line.content)
@@ -272,6 +289,16 @@ struct DiffHunkView: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - HighlighterWrapper
+
+/// NSCache에 저장하기 위한 래퍼 (NSCache는 class만 값으로 허용)
+private final class HighlighterWrapper: @unchecked Sendable {
+    let highlighter: SyntaxHighlighter
+    init(_ highlighter: SyntaxHighlighter) {
+        self.highlighter = highlighter
     }
 }
 

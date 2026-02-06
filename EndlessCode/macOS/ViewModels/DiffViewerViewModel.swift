@@ -291,19 +291,3 @@ final class DiffViewerViewModel {
         }
     }
 }
-
-// MARK: - Navigation Extension
-
-extension DiffViewerViewModel {
-    /// 다음 Hunk로 이동 (선택된 파일 내)
-    func navigateToNextHunk() {
-        // 현재는 파일 내 자동 스크롤 미지원
-        // 향후 구현 시 Hunk 인덱스 추적 필요
-    }
-
-    /// 이전 Hunk로 이동 (선택된 파일 내)
-    func navigateToPreviousHunk() {
-        // 현재는 파일 내 자동 스크롤 미지원
-        // 향후 구현 시 Hunk 인덱스 추적 필요
-    }
-}
