@@ -204,6 +204,44 @@ extension ChatMessageItem {
             type: .user,
             content: .text("That looks great! Can you also add error handling?"),
             timestamp: Date().addingTimeInterval(-60)
+        ),
+        ChatMessageItem(
+            id: "msg-6",
+            type: .toolUse(name: "Bash", toolUseId: "tool-2"),
+            content: .toolInput([
+                "command": .string("git diff")
+            ]),
+            timestamp: Date().addingTimeInterval(-50)
+        ),
+        ChatMessageItem(
+            id: "msg-7",
+            type: .toolResult(toolUseId: "tool-2", isError: false),
+            content: .toolOutput("""
+                diff --git a/ContentView.swift b/ContentView.swift
+                index 1234567..abcdefg 100644
+                --- a/ContentView.swift
+                +++ b/ContentView.swift
+                @@ -1,5 +1,8 @@
+                 struct ContentView: View {
+                     @State private var items: [Item] = []
+                +    @State private var isLoading = false
+                +    @State private var errorMessage: String?
+
+                     var body: some View {
+                -        List(items) { item in
+                +        Group {
+                +            if let error = errorMessage {
+                +                Text(error)
+                +            } else {
+                +                List(items) { item in
+                +                    ItemRow(item: item)
+                +                }
+                +            }
+                +        }
+                     }
+                 }
+                """),
+            timestamp: Date().addingTimeInterval(-49)
         )
     ]
 }

@@ -22,6 +22,9 @@ final class Section2NavigationFlowTests: XCTestCase {
         app.launchArguments = ["--uitesting"]
         app.launch()
 
+        // 앱을 포그라운드로 활성화 (macOS에서 필수)
+        app.activate()
+
         sidebarPage = SidebarPage(app: app)
         projectBrowserPage = ProjectBrowserPage(app: app)
         sessionListPage = SessionListPage(app: app)
