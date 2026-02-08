@@ -23,6 +23,7 @@ final class NetworkViewModel {
     private(set) var showCellularWarning: Bool = false
 
     private var monitor: NetworkMonitor?
+    // deinit은 nonisolated이므로 Task 취소를 위해 nonisolated(unsafe) 필요
     nonisolated(unsafe) private var pathUpdateTask: Task<Void, Never>?
     private var lifecycleManager: AppLifecycleManager?
     nonisolated(unsafe) private var lifecycleEventTask: Task<Void, Never>?

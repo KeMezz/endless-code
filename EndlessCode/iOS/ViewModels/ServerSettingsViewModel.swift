@@ -25,12 +25,14 @@ final class ServerSettingsViewModel {
     }
 
     /// API 토큰
-    private var _isInitializing = true
-
     var apiToken: String = "" {
         didSet {
-            guard !_isInitializing, !apiToken.isEmpty else { return }
-            try? KeychainManager.saveToken(apiToken)
+            guard !apiToken.isEmpty else { return }
+            do {
+                try KeychainManager.saveToken(apiToken)
+            } catch {
+                lastTestMessage = "토큰 저장 실패: \(error.localizedDescription)"
+            }
         }
     }
 
@@ -71,8 +73,6 @@ final class ServerSettingsViewModel {
         if let token = try? KeychainManager.loadToken() {
             self.apiToken = token
         }
-
-        self._isInitializing = false
     }
 
     // MARK: - Public Methods
@@ -143,7 +143,11 @@ final class ServerSettingsViewModel {
     func saveSettings() {
         saveServerAddress()
         if !apiToken.isEmpty {
-            try? KeychainManager.saveToken(apiToken)
+            do {
+                try KeychainManager.saveToken(apiToken)
+            } catch {
+                lastTestMessage = "토큰 저장 실패: \(error.localizedDescription)"
+            }
         }
     }
 
@@ -151,7 +155,11 @@ final class ServerSettingsViewModel {
     func resetSettings() {
         serverAddress = "http://127.0.0.1:8080"
         apiToken = ""
-        try? KeychainManager.deleteToken()
+        do {
+            try KeychainManager.deleteToken()
+        } catch {
+            lastTestMessage = "토큰 삭제 실패: \(error.localizedDescription)"
+        }
         connectionState = .disconnected
         lastTestMessage = nil
     }
