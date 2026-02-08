@@ -6,6 +6,7 @@
 //  SwiftUI Color를 사용하는 플랫폼 특화 구현
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - Token Colors
@@ -308,3 +309,4 @@ extension SyntaxHighlighter {
         return highlighter.highlightLine(line)
     }
 }
+#endif

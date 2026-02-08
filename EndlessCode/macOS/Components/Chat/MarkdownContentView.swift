@@ -5,6 +5,7 @@
 //  마크다운 텍스트를 SwiftUI 뷰로 렌더링
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - MarkdownContentView
@@ -251,3 +252,4 @@ struct MarkdownContentView: View {
     .padding()
     .frame(width: 600)
 }
+#endif

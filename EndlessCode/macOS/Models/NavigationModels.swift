@@ -5,6 +5,7 @@
 //  Navigation 관련 모델 타입 (AppTab, NavigationDestination, SheetDestination, AlertDestination, ServerState)
 //
 
+#if os(macOS)
 import Foundation
 
 // MARK: - AppTab
@@ -110,3 +111,4 @@ enum ServerState: Equatable {
     case stopped
     case error(String)
 }
+#endif

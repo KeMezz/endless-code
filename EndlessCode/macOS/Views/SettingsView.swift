@@ -5,6 +5,7 @@
 //  설정 화면 - 서버, CLI, 세션, 인증, 로그 설정
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - SettingsView
@@ -205,3 +206,4 @@ struct SettingsView: View {
         SettingsView()
     }
 }
+#endif

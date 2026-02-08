@@ -5,6 +5,7 @@
 //  파일 내용 뷰 - 텍스트 표시, 라인 번호, 신택스 하이라이팅
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - FileContentView
@@ -318,3 +319,4 @@ struct LineNumbersView: View {
     return FileContentView(file: file)
         .frame(width: 600, height: 400)
 }
+#endif

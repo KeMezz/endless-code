@@ -5,6 +5,7 @@
 //  Diff 뷰어 ViewModel - Diff 데이터 관리 및 탐색
 //
 
+#if os(macOS)
 import Foundation
 import SwiftUI
 
@@ -290,3 +291,4 @@ final class DiffViewerViewModel {
         }
     }
 }
+#endif

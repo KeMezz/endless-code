@@ -5,6 +5,7 @@
 //  메인 뷰 - NavigationSplitView 기반 앱 구조
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - MainView
@@ -172,3 +173,4 @@ struct DetailView: View {
         .environment(AppState())
         .environment(AppRouter())
 }
+#endif

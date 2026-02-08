@@ -5,6 +5,7 @@
 //  메시지 입력 컴포넌트
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - MessageInputView
@@ -169,3 +170,4 @@ struct MessageInputView: View {
     }
     .frame(width: 600, height: 300)
 }
+#endif

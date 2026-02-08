@@ -5,6 +5,7 @@
 //  메뉴바 ViewModel
 //
 
+#if os(macOS)
 import Foundation
 import AppKit
 
@@ -172,3 +173,4 @@ final class MenuBarViewModel {
         return result == KERN_SUCCESS ? info.resident_size : 0
     }
 }
+#endif

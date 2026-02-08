@@ -5,6 +5,7 @@
 //  프로젝트 브라우저 뷰
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - ProjectBrowserView
@@ -74,3 +75,4 @@ struct ProjectBrowserView: View {
         .environment(AppState())
         .frame(width: 350, height: 500)
 }
+#endif

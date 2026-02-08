@@ -5,6 +5,7 @@
 //  Git 상태 조회 서비스
 //
 
+#if os(macOS)
 import Foundation
 
 // MARK: - GitServiceProtocol
@@ -138,3 +139,4 @@ enum GitError: Error, LocalizedError {
         }
     }
 }
+#endif

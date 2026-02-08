@@ -5,6 +5,7 @@
 //  메뉴바 뷰
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - MenuBarView
@@ -304,3 +305,4 @@ struct MenuBarView: View {
     MenuBarView()
         .environment(AppState())
 }
+#endif

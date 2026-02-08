@@ -5,6 +5,7 @@
 //  채팅 화면 뷰
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - ChatView
@@ -185,3 +186,4 @@ struct ChatView: View {
     .environment(AppState())
     .frame(width: 600, height: 500)
 }
+#endif

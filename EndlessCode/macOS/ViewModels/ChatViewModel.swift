@@ -5,6 +5,7 @@
 //  채팅 화면의 상태 관리
 //
 
+#if os(macOS)
 import Foundation
 
 // MARK: - ChatViewModel
@@ -80,3 +81,4 @@ final class ChatViewModel {
         error = nil
     }
 }
+#endif

@@ -5,6 +5,7 @@
 //  파일 트리 뷰 - OutlineGroup 기반 트리 구조
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - FileTreeView
@@ -302,3 +303,4 @@ struct DepthLimitWarning: View {
     return FileTreeView(viewModel: viewModel)
         .frame(width: 300, height: 500)
 }
+#endif

@@ -5,6 +5,7 @@
 //  래퍼 뷰들 - 프로젝트 목록, 설정, 프로젝트 상세, 빈 디테일
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - ProjectListView
@@ -61,3 +62,4 @@ struct EmptyDetailView: View {
         .accessibilityIdentifier("emptyDetailView")
     }
 }
+#endif

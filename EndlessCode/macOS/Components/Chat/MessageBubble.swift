@@ -5,6 +5,7 @@
 //  채팅 메시지 버블 컴포넌트
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - MessageBubble
@@ -347,3 +348,4 @@ struct TypingIndicator: View {
     ))
     .padding()
 }
+#endif

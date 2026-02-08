@@ -5,6 +5,7 @@
 //  파일 시스템 접근 서비스
 //
 
+#if os(macOS)
 import Foundation
 
 // MARK: - FileSystemServiceProtocol
@@ -147,3 +148,4 @@ final class FileSystemService: FileSystemServiceProtocol, Sendable {
         )
     }
 }
+#endif

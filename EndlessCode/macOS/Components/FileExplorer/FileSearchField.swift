@@ -5,6 +5,7 @@
 //  파일 검색 필드 - 검색어 입력, 디바운싱, 결과 하이라이팅
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - FileSearchField
@@ -292,3 +293,4 @@ struct SearchResultRow: View {
     )
     .padding()
 }
+#endif

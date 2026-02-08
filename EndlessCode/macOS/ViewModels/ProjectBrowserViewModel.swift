@@ -5,6 +5,7 @@
 //  프로젝트 브라우저 ViewModel
 //
 
+#if os(macOS)
 import Foundation
 
 // MARK: - ProjectBrowserViewModel
@@ -253,3 +254,4 @@ extension Project {
         }
     }
 }
+#endif

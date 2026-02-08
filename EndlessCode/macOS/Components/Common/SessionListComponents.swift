@@ -5,6 +5,7 @@
 //  세션 목록 보조 뷰 컴포넌트들
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - SessionSearchFilterBar
@@ -292,3 +293,4 @@ extension SessionState {
         }
     }
 }
+#endif

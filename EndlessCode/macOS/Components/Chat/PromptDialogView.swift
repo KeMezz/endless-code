@@ -5,6 +5,7 @@
 //  대화형 프롬프트 다이얼로그 UI
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - PromptDialogView
@@ -247,3 +248,4 @@ struct PromptDialogView: View {
     .frame(width: 500)
     .padding()
 }
+#endif

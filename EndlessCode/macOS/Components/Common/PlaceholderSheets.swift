@@ -5,6 +5,7 @@
 //  플레이스홀더 시트 뷰들 - 새 세션, 프로젝트 설정, 연결 설정
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - NewSessionSheet
@@ -37,3 +38,4 @@ struct ConnectionSettingsSheet: View {
         Text("Connection Settings")
     }
 }
+#endif

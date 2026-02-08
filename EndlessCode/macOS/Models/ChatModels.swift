@@ -5,6 +5,7 @@
 //  채팅 관련 모델 타입 (ChatMessageItem, ChatError)
 //
 
+#if os(macOS)
 import Foundation
 
 // MARK: - ChatMessageItem
@@ -228,3 +229,4 @@ This separates the row into its own component for better reusability. Check out 
         )
     ]
 }
+#endif

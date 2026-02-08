@@ -5,6 +5,7 @@
 //  대화형 프롬프트 다이얼로그의 상태 관리
 //
 
+#if os(macOS)
 import Foundation
 
 // MARK: - PromptDialogResponse
@@ -100,3 +101,4 @@ final class PromptDialogViewModel {
         )
     }
 }
+#endif
