@@ -168,9 +168,7 @@ struct ProjectCardCompact: View {
         guard let lastUsed = project.lastUsed else {
             return "Never"
         }
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .abbreviated
-        return formatter.localizedString(for: lastUsed, relativeTo: Date())
+        return RelativeTimestampFormatter.shared.string(from: lastUsed)
     }
 }
 

@@ -87,7 +87,7 @@ struct MenuBarView: View {
 
                 Text(serverStatusText)
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
         }
         .padding(.horizontal, 12)
@@ -100,7 +100,7 @@ struct MenuBarView: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Image(systemName: "bubble.left.and.bubble.right.fill")
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                 Text("활성 세션: \(appState.activeSessions.count)개")
                     .font(.subheadline)
             }
@@ -108,7 +108,7 @@ struct MenuBarView: View {
 
             HStack {
                 Image(systemName: "person.2.fill")
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                 Text("연결된 클라이언트: \(appState.connectedClientCount)개")
                     .font(.subheadline)
             }
@@ -124,7 +124,7 @@ struct MenuBarView: View {
                         HStack(spacing: 4) {
                             Image(systemName: "folder.fill")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                             Text(project.name)
                                 .font(.caption)
                                 .lineLimit(1)
@@ -135,7 +135,7 @@ struct MenuBarView: View {
                 if appState.activeSessions.count > 5 {
                     Text("외 \(appState.activeSessions.count - 5)개")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
             }
         }
@@ -234,7 +234,7 @@ struct MenuBarView: View {
 
                     Text("iOS 앱에서 스캔하세요")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
                 .padding()
             }
@@ -247,10 +247,10 @@ struct MenuBarView: View {
     private func errorSection(_ message: String) -> some View {
         HStack(spacing: 8) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundColor(.red)
+                .foregroundStyle(.red)
             Text(message)
                 .font(.caption)
-                .foregroundColor(.red)
+                .foregroundStyle(.red)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
@@ -261,10 +261,10 @@ struct MenuBarView: View {
     private var resourceWarningSection: some View {
         HStack(spacing: 8) {
             Image(systemName: "exclamationmark.circle.fill")
-                .foregroundColor(.orange)
+                .foregroundStyle(.orange)
             Text("리소스 사용량이 높습니다")
                 .font(.caption)
-                .foregroundColor(.orange)
+                .foregroundStyle(.orange)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
