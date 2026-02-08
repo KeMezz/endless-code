@@ -132,7 +132,7 @@ struct ChatMessageItem: Identifiable, Equatable, Sendable {
         case assistant
         case toolUse(name: String, toolUseId: String)
         case toolResult(toolUseId: String, isError: Bool)
-        case askUser(toolUseId: String, question: String, options: [QuestionOption]?)
+        case askUser(toolUseId: String, question: String, options: [QuestionOption]?, multiSelect: Bool)
     }
 
     enum MessageContent: Equatable, Sendable {
@@ -167,22 +167,36 @@ extension ChatMessageItem {
             id: "msg-2",
             type: .assistant,
             content: .text("""
-                Of course! I'd be happy to help you refactor your SwiftUI view. Here's a more modular approach:
+Of course! I'd be happy to help you refactor your SwiftUI view.
 
-                ```swift
-                struct ContentView: View {
-                    @State private var items: [Item] = []
+## Recommended Approach
 
-                    var body: some View {
-                        List(items) { item in
-                            ItemRow(item: item)
-                        }
-                    }
-                }
-                ```
+Here are the **key improvements** I suggest:
 
-                This separates the row into its own component for better reusability.
-                """),
+1. Extract the row into a *separate component*
+2. Use `@State` for local state management
+3. Add proper error handling
+
+### Code Example
+
+```swift
+struct ContentView: View {
+    @State private var items: [Item] = []
+
+    var body: some View {
+        List(items) { item in
+            ItemRow(item: item)
+        }
+    }
+}
+```
+
+This separates the row into its own component for better reusability. Check out [Apple's documentation](https://developer.apple.com/documentation/swiftui) for more details.
+
+- Use **MVVM** pattern for complex views
+- Keep views *small and focused*
+- Leverage `@Observable` for state management
+"""),
             timestamp: Date().addingTimeInterval(-240)
         ),
         ChatMessageItem(
@@ -215,6 +229,21 @@ extension ChatMessageItem {
         ),
         ChatMessageItem(
             id: "msg-7",
+            type: .askUser(
+                toolUseId: "tool-ask-1",
+                question: "어떤 프로그래밍 언어를 선호하시나요?",
+                options: [
+                    QuestionOption(label: "Swift", description: "Apple의 모던 언어"),
+                    QuestionOption(label: "Kotlin", description: "JVM 기반 언어"),
+                    QuestionOption(label: "TypeScript", description: "타입 안전한 JS")
+                ],
+                multiSelect: false
+            ),
+            content: .text(""),
+            timestamp: Date().addingTimeInterval(-45)
+        ),
+        ChatMessageItem(
+            id: "msg-8",
             type: .toolResult(toolUseId: "tool-2", isError: false),
             content: .toolOutput("""
                 diff --git a/Package.swift b/Package.swift

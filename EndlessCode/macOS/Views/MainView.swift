@@ -138,18 +138,26 @@ struct ContentColumnView: View {
 
 // MARK: - DetailView
 
-/// 디테일 뷰 - 선택된 항목에 따른 상세 표시
+/// 디테일 뷰 - 선택된 탭과 항목에 따른 상세 표시
 struct DetailView: View {
     @Environment(AppState.self) private var appState
 
     var body: some View {
-        // 각 뷰가 자체 accessibilityIdentifier를 가지므로
-        // Group에 identifier를 부여하지 않음 (내부 identifier override 방지)
-        if let session = appState.selectedSession {
-            ChatView(session: session)
-        } else if let project = appState.selectedProject {
-            ProjectDetailView(project: project)
-        } else {
+        // 현재 탭에 맞는 디테일만 표시
+        switch appState.selectedTab {
+        case .projects:
+            if let project = appState.selectedProject {
+                ProjectDetailView(project: project)
+            } else {
+                EmptyDetailView()
+            }
+        case .sessions:
+            if let session = appState.selectedSession {
+                ChatView(session: session)
+            } else {
+                EmptyDetailView()
+            }
+        case .settings:
             EmptyDetailView()
         }
     }
@@ -300,12 +308,10 @@ struct ProjectListView: View {
 
 // SessionListView는 SessionListView.swift에서 정의됨
 
-/// 설정 목록 뷰 (플레이스홀더)
+/// 설정 목록 뷰 - SettingsView 사용
 struct SettingsListView: View {
     var body: some View {
-        Text("Settings List")
-            .navigationTitle("Settings")
-            .accessibilityIdentifier("settingsList")
+        SettingsView()
     }
 }
 

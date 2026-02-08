@@ -5,6 +5,7 @@
 //  ChatViewModel 단위 테스트 (Swift Testing)
 //
 
+#if canImport(AppKit)
 import Foundation
 import Testing
 @testable import EndlessCode
@@ -241,3 +242,4 @@ struct ChatErrorTests {
         #expect(ChatError.connectionFailed != ChatError.sendFailed)
     }
 }
+#endif

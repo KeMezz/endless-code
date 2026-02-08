@@ -15,6 +15,7 @@ struct MessageList: View {
     let isStreaming: Bool
     let onCopyCode: ((String) -> Void)?
     let onViewDiff: ((UnifiedDiff) -> Void)?
+    let onPromptDialogResponse: ((PromptDialogResponse) -> Void)?
 
     @State private var scrollPosition: String?
     @State private var cachedGroups: [MessageGroup] = []
@@ -23,12 +24,14 @@ struct MessageList: View {
         messages: [ChatMessageItem],
         isStreaming: Bool = false,
         onCopyCode: ((String) -> Void)? = nil,
-        onViewDiff: ((UnifiedDiff) -> Void)? = nil
+        onViewDiff: ((UnifiedDiff) -> Void)? = nil,
+        onPromptDialogResponse: ((PromptDialogResponse) -> Void)? = nil
     ) {
         self.messages = messages
         self.isStreaming = isStreaming
         self.onCopyCode = onCopyCode
         self.onViewDiff = onViewDiff
+        self.onPromptDialogResponse = onPromptDialogResponse
     }
 
     var body: some View {
@@ -43,7 +46,8 @@ struct MessageList: View {
                             MessageBubble(
                                 message: message,
                                 onCopyCode: onCopyCode,
-                                onViewDiff: onViewDiff
+                                onViewDiff: onViewDiff,
+                                onPromptDialogResponse: onPromptDialogResponse
                             )
                             .id(message.id)
                         }
@@ -63,6 +67,7 @@ struct MessageList: View {
             .scrollPosition(id: $scrollPosition, anchor: .bottom)
             .onAppear {
                 cachedGroups = computeGroupedMessages(messages)
+                scrollToBottom(proxy: proxy)
             }
             .onChange(of: messages) { _, newMessages in
                 cachedGroups = computeGroupedMessages(newMessages)
