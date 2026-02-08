@@ -12,11 +12,11 @@ import SwiftUI
 /// 대화형 프롬프트 다이얼로그 뷰
 struct PromptDialogView: View {
     @State private var viewModel: PromptDialogViewModel
-    let onPromptResponse: (PromptResponse) -> Void
+    let onPromptDialogResponse: (PromptDialogResponse) -> Void
 
-    init(prompt: AskUserQuestion, onPromptResponse: @escaping (PromptResponse) -> Void) {
+    init(prompt: AskUserQuestion, onPromptDialogResponse: @escaping (PromptDialogResponse) -> Void) {
         self._viewModel = State(initialValue: PromptDialogViewModel(prompt: prompt))
-        self.onPromptResponse = onPromptResponse
+        self.onPromptDialogResponse = onPromptDialogResponse
     }
 
     var body: some View {
@@ -83,12 +83,12 @@ struct PromptDialogView: View {
                 if viewModel.prompt.multiSelect {
                     // 체크박스
                     Image(systemName: viewModel.isSelected(option.label) ? "checkmark.square.fill" : "square")
-                        .foregroundStyle(viewModel.isSelected(option.label) ? .accentColor : .secondary)
+                        .foregroundStyle(viewModel.isSelected(option.label) ? Color.accentColor : .secondary)
                         .font(.title3)
                 } else {
                     // 라디오 버튼
                     Image(systemName: viewModel.isSelected(option.label) ? "circle.inset.filled" : "circle")
-                        .foregroundStyle(viewModel.isSelected(option.label) ? .accentColor : .secondary)
+                        .foregroundStyle(viewModel.isSelected(option.label) ? Color.accentColor : .secondary)
                         .font(.title3)
                 }
 
@@ -204,7 +204,7 @@ struct PromptDialogView: View {
         guard viewModel.canSubmit && !viewModel.isSubmitted else { return }
 
         let response = viewModel.submit()
-        onPromptResponse(response)
+        onPromptDialogResponse(response)
     }
 }
 
@@ -222,7 +222,7 @@ struct PromptDialogView: View {
             ],
             multiSelect: false
         ),
-        onPromptResponse: { response in
+        onPromptDialogResponse: { response in
             print("Response: \(response)")
         }
     )
@@ -242,7 +242,7 @@ struct PromptDialogView: View {
             ],
             multiSelect: true
         ),
-        onPromptResponse: { response in
+        onPromptDialogResponse: { response in
             print("Response: \(response)")
         }
     )
@@ -258,7 +258,7 @@ struct PromptDialogView: View {
             options: nil,
             multiSelect: false
         ),
-        onPromptResponse: { response in
+        onPromptDialogResponse: { response in
             print("Response: \(response)")
         }
     )

@@ -14,18 +14,18 @@ struct MessageBubble: View {
     let message: ChatMessageItem
     let onCopyCode: ((String) -> Void)?
     let onViewDiff: ((UnifiedDiff) -> Void)?
-    let onPromptResponse: ((PromptResponse) -> Void)?
+    let onPromptDialogResponse: ((PromptDialogResponse) -> Void)?
 
     init(
         message: ChatMessageItem,
         onCopyCode: ((String) -> Void)? = nil,
         onViewDiff: ((UnifiedDiff) -> Void)? = nil,
-        onPromptResponse: ((PromptResponse) -> Void)? = nil
+        onPromptDialogResponse: ((PromptDialogResponse) -> Void)? = nil
     ) {
         self.message = message
         self.onCopyCode = onCopyCode
         self.onViewDiff = onViewDiff
-        self.onPromptResponse = onPromptResponse
+        self.onPromptDialogResponse = onPromptDialogResponse
     }
 
     var body: some View {
@@ -100,7 +100,7 @@ struct MessageBubble: View {
                 multiSelect: multiSelect
             )
             PromptDialogView(prompt: askUserQuestion) { response in
-                onPromptResponse?(response)
+                onPromptDialogResponse?(response)
             }
         default:
             // 기존 콘텐츠 렌더링

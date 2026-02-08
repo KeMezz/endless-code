@@ -7,10 +7,10 @@
 
 import Foundation
 
-// MARK: - PromptResponse
+// MARK: - PromptDialogResponse
 
-/// 프롬프트 응답 데이터
-struct PromptResponse: Sendable {
+/// 프롬프트 다이얼로그 응답 데이터
+struct PromptDialogResponse: Sendable {
     let toolUseId: String
     let selectedOptions: [String]
     let customInput: String?
@@ -75,9 +75,9 @@ final class PromptDialogViewModel {
     }
 
     /// 프롬프트 제출
-    func submit() -> PromptResponse {
+    func submit() -> PromptDialogResponse {
         guard canSubmit else {
-            return PromptResponse(
+            return PromptDialogResponse(
                 toolUseId: prompt.toolUseId,
                 selectedOptions: [],
                 customInput: nil
@@ -88,7 +88,7 @@ final class PromptDialogViewModel {
 
         let trimmedInput = customInput.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        return PromptResponse(
+        return PromptDialogResponse(
             toolUseId: prompt.toolUseId,
             selectedOptions: Array(selectedOptions),
             customInput: trimmedInput.isEmpty ? nil : trimmedInput
