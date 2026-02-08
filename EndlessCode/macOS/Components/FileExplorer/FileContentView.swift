@@ -103,7 +103,7 @@ struct FileContentView: View {
                 .foregroundStyle(.secondary)
 
             if let size = file.size {
-                Text("Size: \(formatFileSize(size))")
+                Text("Size: \(FileSizeFormatter.format(size))")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
             }
@@ -231,11 +231,6 @@ struct FileContentView: View {
         }
     }
 
-    private func formatFileSize(_ bytes: Int64) -> String {
-        let formatter = ByteCountFormatter()
-        formatter.countStyle = .file
-        return formatter.string(fromByteCount: bytes)
-    }
 }
 
 // MARK: - FileContentHeader
@@ -273,7 +268,7 @@ struct FileContentHeader: View {
 
             // 파일 크기
             if let size = file.size {
-                Text(formatFileSize(size))
+                Text(FileSizeFormatter.format(size))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -281,12 +276,6 @@ struct FileContentHeader: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .background(.bar)
-    }
-
-    private func formatFileSize(_ bytes: Int64) -> String {
-        let formatter = ByteCountFormatter()
-        formatter.countStyle = .file
-        return formatter.string(fromByteCount: bytes)
     }
 }
 

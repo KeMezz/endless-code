@@ -127,9 +127,7 @@ struct SessionCard: View {
     }
 
     private var relativeTimeText: String {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .abbreviated
-        return formatter.localizedString(for: session.lastActiveAt, relativeTo: Date())
+        RelativeTimestampFormatter.shared.string(from: session.lastActiveAt)
     }
 }
 
@@ -163,14 +161,7 @@ struct SessionStateIndicator: View {
     }
 
     private var iconColor: Color {
-        switch state {
-        case .active:
-            return .green
-        case .paused:
-            return .orange
-        case .terminated:
-            return .gray
-        }
+        state.color
     }
 
     private var backgroundColor: Color {
@@ -251,20 +242,11 @@ struct SessionCardCompact: View {
     }
 
     private var stateColor: Color {
-        switch session.state {
-        case .active:
-            return .green
-        case .paused:
-            return .orange
-        case .terminated:
-            return .gray
-        }
+        session.state.color
     }
 
     private var lastActiveText: String {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .abbreviated
-        return formatter.localizedString(for: session.lastActiveAt, relativeTo: Date())
+        RelativeTimestampFormatter.shared.string(from: session.lastActiveAt)
     }
 }
 

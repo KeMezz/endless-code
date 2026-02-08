@@ -103,7 +103,7 @@ struct ToolUseView: View {
                         .foregroundStyle(.secondary)
                         .frame(width: 80, alignment: .trailing)
 
-                    Text(formatValue(input[key]))
+                    Text(AnyCodableValueFormatter.format(input[key]))
                         .font(.system(.caption, design: .monospaced))
                         .foregroundStyle(.primary)
                         .textSelection(.enabled)
@@ -141,18 +141,6 @@ struct ToolUseView: View {
         return "\(input.count) parameters"
     }
 
-    private func formatValue(_ value: AnyCodableValue?) -> String {
-        guard let value = value else { return "nil" }
-        switch value {
-        case .string(let s): return s
-        case .int(let i): return String(i)
-        case .double(let d): return String(format: "%.2f", d)
-        case .bool(let b): return String(b)
-        case .array(let arr): return "[\(arr.count) items]"
-        case .dictionary(let dict): return "{\(dict.count) keys}"
-        case .null: return "null"
-        }
-    }
 }
 
 // MARK: - ToolResultView
