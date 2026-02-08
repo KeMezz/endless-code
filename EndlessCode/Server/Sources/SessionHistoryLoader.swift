@@ -5,6 +5,7 @@
 //  세션 히스토리 로더 - JSONL 파일 파싱, 페이지네이션, 손상 파일 복구
 //
 
+#if os(macOS)
 import Foundation
 
 // MARK: - SessionHistoryLoaderProtocol
@@ -254,3 +255,4 @@ extension SessionHistoryError: LocalizedError {
         }
     }
 }
+#endif

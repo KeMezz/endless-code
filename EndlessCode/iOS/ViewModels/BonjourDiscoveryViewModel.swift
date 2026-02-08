@@ -29,7 +29,7 @@ final class BonjourDiscoveryViewModel {
     // MARK: - Private Properties
 
     private let bonjourBrowser: BonjourBrowserProtocol
-    private var scanTask: Task<Void, Never>?
+    nonisolated(unsafe) private var scanTask: Task<Void, Never>?
 
     // MARK: - Initialization
 

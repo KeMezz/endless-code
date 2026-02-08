@@ -137,7 +137,7 @@ private struct FileContentView: View {
 // MARK: - Diff Content View
 
 private struct DiffContentView: View {
-    let diff: [DiffLine]
+    let diff: [MobileDiffLine]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -189,7 +189,7 @@ private struct DiffContentView: View {
 // MARK: - Diff Line View
 
 private struct DiffLineView: View {
-    let line: DiffLine
+    let line: MobileDiffLine
 
     var body: some View {
         HStack(spacing: 8) {
@@ -214,7 +214,7 @@ private struct DiffLineView: View {
 
 // MARK: - Diff Models
 
-private struct DiffLine: Identifiable {
+private struct MobileDiffLine: Identifiable {
     let id = UUID()
     let type: DiffLineType
     let content: String
@@ -285,15 +285,15 @@ struct ContentView: View {
 }
 """
 
-private let sampleDiff: [DiffLine] = [
-    DiffLine(type: .header, content: "@@ -10,7 +10,8 @@ let package = Package("),
-    DiffLine(type: .context, content: "    dependencies: ["),
-    DiffLine(type: .context, content: "        .package(url: \"https://github.com/vapor/vapor.git\", from: \"4.0.0\"),"),
-    DiffLine(type: .removed, content: "        .package(url: \"https://github.com/apple/swift-log.git\", from: \"1.0.0\")"),
-    DiffLine(type: .added, content: "        .package(url: \"https://github.com/apple/swift-log.git\", from: \"1.0.0\"),"),
-    DiffLine(type: .added, content: "        .package(url: \"https://github.com/apple/swift-nio.git\", from: \"2.0.0\")"),
-    DiffLine(type: .context, content: "    ],"),
-    DiffLine(type: .context, content: "    targets: ["),
+private let sampleDiff: [MobileDiffLine] = [
+    MobileDiffLine(type: .header, content: "@@ -10,7 +10,8 @@ let package = Package("),
+    MobileDiffLine(type: .context, content: "    dependencies: ["),
+    MobileDiffLine(type: .context, content: "        .package(url: \"https://github.com/vapor/vapor.git\", from: \"4.0.0\"),"),
+    MobileDiffLine(type: .removed, content: "        .package(url: \"https://github.com/apple/swift-log.git\", from: \"1.0.0\")"),
+    MobileDiffLine(type: .added, content: "        .package(url: \"https://github.com/apple/swift-log.git\", from: \"1.0.0\"),"),
+    MobileDiffLine(type: .added, content: "        .package(url: \"https://github.com/apple/swift-nio.git\", from: \"2.0.0\")"),
+    MobileDiffLine(type: .context, content: "    ],"),
+    MobileDiffLine(type: .context, content: "    targets: ["),
 ]
 
 // MARK: - Preview

@@ -43,7 +43,7 @@ struct MobileMessageBubble: View {
     private var messageContent: some View {
         switch message.content {
         case .text(let text), .streaming(let text):
-            MarkdownText(text)
+            MarkdownText(text: text)
                 .foregroundStyle(textColor)
 
         case .toolInput(let input):

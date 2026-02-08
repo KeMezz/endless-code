@@ -5,6 +5,7 @@
 //  Vapor 라우트 정의 - HTTP API 및 WebSocket 엔드포인트
 //
 
+#if os(macOS)
 import Vapor
 import NIOWebSocket
 
@@ -370,3 +371,4 @@ struct ServerStatisticsDTO: Content {
         self.pendingPrompts = stats.pendingPrompts
     }
 }
+#endif

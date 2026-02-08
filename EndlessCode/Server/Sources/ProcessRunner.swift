@@ -5,6 +5,7 @@
 //  기본 Process 래퍼 - CLI 프로세스 시작/종료/stdin/stdout 관리
 //
 
+#if os(macOS)
 import Foundation
 
 // MARK: - ProcessRunnerProtocol
@@ -298,3 +299,4 @@ extension ProcessRunner {
         )
     }
 }
+#endif

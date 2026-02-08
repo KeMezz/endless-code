@@ -23,9 +23,9 @@ final class NetworkViewModel {
     private(set) var showCellularWarning: Bool = false
 
     private var monitor: NetworkMonitor?
-    private var pathUpdateTask: Task<Void, Never>?
+    nonisolated(unsafe) private var pathUpdateTask: Task<Void, Never>?
     private var lifecycleManager: AppLifecycleManager?
-    private var lifecycleEventTask: Task<Void, Never>?
+    nonisolated(unsafe) private var lifecycleEventTask: Task<Void, Never>?
 
     // 재연결 콜백
     var onNetworkRestored: (() async -> Void)?

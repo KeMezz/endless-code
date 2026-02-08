@@ -5,6 +5,7 @@
 //  프로젝트 검색 - ~/.claude/projects 디렉토리 스캔, 메타데이터 추출
 //
 
+#if os(macOS)
 import Foundation
 
 // MARK: - ProjectDiscoveryProtocol
@@ -199,3 +200,4 @@ extension ProjectDiscoveryError: LocalizedError {
         }
     }
 }
+#endif
