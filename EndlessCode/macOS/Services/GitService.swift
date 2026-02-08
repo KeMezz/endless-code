@@ -113,6 +113,9 @@ final class GitService: GitServiceProtocol, Sendable {
         // 종료 코드 확인 - 0이 아니면 에러
         if process.terminationStatus != 0 {
             let errorMessage = String(data: stderrData, encoding: .utf8) ?? "Unknown error"
+            if errorMessage.contains("not a git repository") {
+                throw GitError.notAGitRepository
+            }
             throw GitError.commandFailed(errorMessage)
         }
 

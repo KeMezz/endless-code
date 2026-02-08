@@ -71,13 +71,12 @@ final class AppRouter {
         switch host {
         case "project":
             if let projectId = url.pathComponents.dropFirst().first {
-                // 프로젝트 딥링크: endlesscode://project/{projectId}
-                // 실제 구현에서는 프로젝트를 조회하여 navigate
+                // TODO: 프로젝트를 조회하여 실제 네비게이션 구현
                 print("Deep link to project: \(projectId)")
             }
         case "session":
             if let sessionId = url.pathComponents.dropFirst().first {
-                // 세션 딥링크: endlesscode://session/{sessionId}
+                // TODO: 세션을 조회하여 실제 네비게이션 구현
                 print("Deep link to session: \(sessionId)")
             }
         default:

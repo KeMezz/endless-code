@@ -18,9 +18,10 @@ protocol ChatServiceProtocol: Sendable {
 // MARK: - DefaultChatService
 
 /// 기본 채팅 서비스 (샘플 데이터 사용)
+/// - TODO: WebSocket 기반 실제 서버 연동으로 교체 필요
 struct DefaultChatService: ChatServiceProtocol {
     func loadMessages(for session: Session) async throws -> [ChatMessageItem] {
-        // 시뮬레이션 딜레이
+        // TODO: 실제 서버에서 메시지 로드로 교체
         try? await Task.sleep(for: .milliseconds(500))
         return ChatMessageItem.sampleMessages
     }
