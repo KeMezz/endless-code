@@ -206,7 +206,7 @@ struct ToolInputContent: View {
                         .fontWeight(.medium)
                         .foregroundStyle(.secondary)
 
-                    Text(formatValue(input[key]))
+                    Text(AnyCodableValueFormatter.format(input[key]))
                         .font(.caption)
                         .foregroundStyle(.primary)
                         .lineLimit(3)
@@ -215,18 +215,6 @@ struct ToolInputContent: View {
         }
     }
 
-    private func formatValue(_ value: AnyCodableValue?) -> String {
-        guard let value = value else { return "nil" }
-        switch value {
-        case .string(let s): return s
-        case .int(let i): return String(i)
-        case .double(let d): return String(d)
-        case .bool(let b): return String(b)
-        case .array(let arr): return "[\(arr.count) items]"
-        case .dictionary(let dict): return "{\(dict.count) keys}"
-        case .null: return "null"
-        }
-    }
 }
 
 // MARK: - ToolOutputContent
@@ -303,51 +291,6 @@ struct TypingIndicator: View {
         case 0: return 1.0
         case 1: return 0.6
         default: return 0.3
-        }
-    }
-}
-
-// MARK: - RelativeTimestampFormatter
-
-/// 상대 시간 포맷터 (스레드 안전)
-final class RelativeTimestampFormatter: @unchecked Sendable {
-    static let shared = RelativeTimestampFormatter()
-
-    private let lock = NSLock()
-    private let relativeFormatter: RelativeDateTimeFormatter
-    private let timeFormatter: DateFormatter
-    private let dateTimeFormatter: DateFormatter
-
-    private init() {
-        relativeFormatter = RelativeDateTimeFormatter()
-        relativeFormatter.unitsStyle = .short
-
-        timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "HH:mm"
-
-        dateTimeFormatter = DateFormatter()
-        dateTimeFormatter.dateFormat = "MMM d, HH:mm"
-    }
-
-    func string(from date: Date) -> String {
-        lock.lock()
-        defer { lock.unlock() }
-
-        let interval = Date().timeIntervalSince(date)
-
-        if interval < 60 {
-            return "Just now"
-        } else if interval < 3600 {
-            return relativeFormatter.localizedString(for: date, relativeTo: Date())
-        } else {
-            let calendar = Calendar.current
-            if calendar.isDateInToday(date) {
-                return "Today \(timeFormatter.string(from: date))"
-            } else if calendar.isDateInYesterday(date) {
-                return "Yesterday \(timeFormatter.string(from: date))"
-            } else {
-                return dateTimeFormatter.string(from: date)
-            }
         }
     }
 }

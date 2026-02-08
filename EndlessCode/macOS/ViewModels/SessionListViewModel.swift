@@ -164,25 +164,3 @@ final class SessionListViewModel {
         allSessions[index] = updatedSession
     }
 }
-
-// MARK: - SessionSortOrder
-
-/// 세션 정렬 순서
-enum SessionSortOrder: String, CaseIterable, Identifiable {
-    case recent = "Recent"
-    case project = "Project"
-    case messageCount = "Messages"
-
-    var id: String { rawValue }
-
-    var icon: String {
-        switch self {
-        case .recent:
-            return "clock"
-        case .project:
-            return "folder"
-        case .messageCount:
-            return "text.bubble"
-        }
-    }
-}

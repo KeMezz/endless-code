@@ -158,11 +158,7 @@ struct ChatView: View {
     // MARK: - Computed Properties
 
     private var stateColor: Color {
-        switch session.state {
-        case .active: return .green
-        case .paused: return .orange
-        case .terminated: return .gray
-        }
+        session.state.color
     }
 
     // MARK: - Helpers

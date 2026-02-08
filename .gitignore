@@ -67,3 +67,6 @@ logs/
 # Secrets (never commit)
 **/secrets/
 **/credentials/
+
+# omc
+**/.omc/

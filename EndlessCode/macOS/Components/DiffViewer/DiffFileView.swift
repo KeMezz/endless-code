@@ -160,18 +160,7 @@ struct DiffFileView: View {
     // MARK: - Computed Properties
 
     private var statusColor: Color {
-        switch file.fileStatus {
-        case .added:
-            return .green
-        case .deleted:
-            return .red
-        case .modified:
-            return .orange
-        case .renamed:
-            return .blue
-        case .copied:
-            return .purple
-        }
+        file.fileStatus.color
     }
 }
 
@@ -230,18 +219,7 @@ struct DiffFileListItem: View {
     }
 
     private var statusColor: Color {
-        switch file.fileStatus {
-        case .added:
-            return .green
-        case .deleted:
-            return .red
-        case .modified:
-            return .orange
-        case .renamed:
-            return .blue
-        case .copied:
-            return .purple
-        }
+        file.fileStatus.color
     }
 }
 
