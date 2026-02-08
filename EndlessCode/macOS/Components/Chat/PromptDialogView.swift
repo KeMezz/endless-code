@@ -32,10 +32,8 @@ struct PromptDialogView: View {
             // 직접 입력 필드
             customInputSection
 
-            // 제출 버튼 (다중 선택일 때만)
-            if viewModel.prompt.multiSelect {
-                submitButton
-            }
+            // 제출 버튼
+            submitButton
         }
         .padding(16)
         .background(Color(nsColor: .controlBackgroundColor))
@@ -138,29 +136,12 @@ struct PromptDialogView: View {
                     .textFieldStyle(.roundedBorder)
                     .disabled(viewModel.isSubmitted)
                     .onSubmit {
-                        if !viewModel.prompt.multiSelect && viewModel.canSubmit {
+                        if viewModel.canSubmit {
                             submitResponse()
                         }
                     }
                     .accessibilityIdentifier("promptCustomInput")
 
-                // 단일 선택일 때는 Enter 키 또는 버튼으로 제출
-                if !viewModel.prompt.multiSelect {
-                    Button {
-                        submitResponse()
-                    } label: {
-                        Image(systemName: "paperplane.fill")
-                            .foregroundStyle(.white)
-                            .frame(width: 32, height: 32)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(viewModel.canSubmit ? Color.accentColor : Color.secondary.opacity(0.3))
-                            )
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(!viewModel.canSubmit || viewModel.isSubmitted)
-                    .accessibilityIdentifier("promptSubmitButton")
-                }
             }
         }
     }
@@ -193,11 +174,6 @@ struct PromptDialogView: View {
 
     private func handleOptionSelection(_ label: String) {
         viewModel.toggleOption(label)
-
-        // 단일 선택이면 즉시 제출
-        if !viewModel.prompt.multiSelect {
-            submitResponse()
-        }
     }
 
     private func submitResponse() {
