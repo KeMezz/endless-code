@@ -34,38 +34,38 @@ struct MarkdownParser: Sendable {
     // MARK: - Regular Expressions
 
     /// 코드 블록 정규표현식
-    private static let codeBlockRegex: NSRegularExpression? = {
-        try? NSRegularExpression(pattern: "```(\\w*)\\n([\\s\\S]*?)```")
+    private static let codeBlockRegex: NSRegularExpression = {
+        try! NSRegularExpression(pattern: "```(\\w*)\\n([\\s\\S]*?)```")
     }()
 
     /// 헤딩 정규표현식
-    private static let headingRegex: NSRegularExpression? = {
-        try? NSRegularExpression(pattern: "^(#{1,6})\\s+(.+)$")
+    private static let headingRegex: NSRegularExpression = {
+        try! NSRegularExpression(pattern: "^(#{1,6})\\s+(.+)$")
     }()
 
     /// 리스트 아이템 정규표현식 (-, *, 1., 2. 등)
-    private static let listItemRegex: NSRegularExpression? = {
-        try? NSRegularExpression(pattern: "^([-*]|\\d+\\.)\\s+(.+)$")
+    private static let listItemRegex: NSRegularExpression = {
+        try! NSRegularExpression(pattern: "^([-*]|\\d+\\.)\\s+(.+)$")
     }()
 
     /// 볼드 정규표현식 (**text**)
-    private static let boldRegex: NSRegularExpression? = {
-        try? NSRegularExpression(pattern: "\\*\\*(.+?)\\*\\*")
+    private static let boldRegex: NSRegularExpression = {
+        try! NSRegularExpression(pattern: "\\*\\*(.+?)\\*\\*")
     }()
 
     /// 이탤릭 정규표현식 (*text* 또는 _text_)
-    private static let italicRegex: NSRegularExpression? = {
-        try? NSRegularExpression(pattern: "(?<!\\*)\\*(?!\\*)(.+?)(?<!\\*)\\*(?!\\*)|_(.+?)_")
+    private static let italicRegex: NSRegularExpression = {
+        try! NSRegularExpression(pattern: "(?<!\\*)\\*(?!\\*)(.+?)(?<!\\*)\\*(?!\\*)|_(.+?)_")
     }()
 
     /// 인라인 코드 정규표현식 (`code`)
-    private static let inlineCodeRegex: NSRegularExpression? = {
-        try? NSRegularExpression(pattern: "`([^`]+)`")
+    private static let inlineCodeRegex: NSRegularExpression = {
+        try! NSRegularExpression(pattern: "`([^`]+)`")
     }()
 
     /// 링크 정규표현식 ([text](url))
-    private static let linkRegex: NSRegularExpression? = {
-        try? NSRegularExpression(pattern: "\\[([^\\]]+)\\]\\(([^\\)]+)\\)")
+    private static let linkRegex: NSRegularExpression = {
+        try! NSRegularExpression(pattern: "\\[([^\\]]+)\\]\\(([^\\)]+)\\)")
     }()
 
     // MARK: - Public Methods
@@ -97,9 +97,7 @@ struct MarkdownParser: Sendable {
     private func extractCodeBlocks(from text: String) -> [Block] {
         var blocks: [Block] = []
 
-        guard let regex = Self.codeBlockRegex else {
-            return [.text(text)]
-        }
+        let regex = Self.codeBlockRegex
 
         let nsText = text as NSString
         var lastIndex = 0
@@ -200,7 +198,7 @@ struct MarkdownParser: Sendable {
 
     /// 헤딩 파싱
     private func parseHeading(_ line: String) -> MarkdownNode? {
-        guard let regex = Self.headingRegex else { return nil }
+        let regex = Self.headingRegex
 
         let nsLine = line as NSString
         guard let match = regex.firstMatch(in: line, range: NSRange(location: 0, length: nsLine.length)) else {
@@ -215,7 +213,7 @@ struct MarkdownParser: Sendable {
 
     /// 리스트 아이템 파싱
     private func parseListItem(_ line: String) -> MarkdownNode? {
-        guard let regex = Self.listItemRegex else { return nil }
+        let regex = Self.listItemRegex
 
         let nsLine = line as NSString
         guard let match = regex.firstMatch(in: line, range: NSRange(location: 0, length: nsLine.length)) else {
@@ -234,7 +232,7 @@ struct MarkdownParser: Sendable {
         var nodes: [InlineNode] = []
 
         // 우선순위: 링크 > 볼드 > 이탤릭 > 인라인 코드 > 일반 텍스트
-        let patterns: [(regex: NSRegularExpression?, handler: (NSTextCheckingResult, NSString) -> InlineNode?)] = [
+        let patterns: [(regex: NSRegularExpression, handler: (NSTextCheckingResult, NSString) -> InlineNode?)] = [
             (Self.linkRegex, { match, nsText in
                 let linkText = nsText.substring(with: match.range(at: 1))
                 let url = nsText.substring(with: match.range(at: 2))
@@ -270,7 +268,6 @@ struct MarkdownParser: Sendable {
         var allMatches: [Match] = []
 
         for (regex, handler) in patterns {
-            guard let regex = regex else { continue }
             let nsText = text as NSString
             let matches = regex.matches(in: text, range: NSRange(location: 0, length: nsText.length))
 

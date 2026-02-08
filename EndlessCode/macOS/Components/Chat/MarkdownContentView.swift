@@ -134,9 +134,15 @@ struct MarkdownContentView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 4))
 
             case .link(let linkText, let url):
-                Link(linkText, destination: URL(string: url) ?? URL(string: "about:blank")!)
-                    .foregroundStyle(.blue)
-                    .accessibilityIdentifier("markdownLink")
+                if let validURL = URL(string: url) {
+                    Link(linkText, destination: validURL)
+                        .foregroundStyle(.blue)
+                        .accessibilityIdentifier("markdownLink")
+                } else {
+                    Text(linkText)
+                        .foregroundStyle(.secondary)
+                        .accessibilityIdentifier("markdownLink")
+                }
             }
         }
     }
