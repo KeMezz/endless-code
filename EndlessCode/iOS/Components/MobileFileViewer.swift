@@ -112,6 +112,7 @@ private struct FileContentView: View {
                     .foregroundStyle(.blue)
                 Text("ContentView.swift")
                     .font(.headline)
+                    .foregroundStyle(.white)
                 Spacer()
             }
             .padding()
@@ -123,7 +124,7 @@ private struct FileContentView: View {
             ScrollView {
                 Text(content)
                     .font(.system(.body, design: .monospaced))
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(Color(white: 0.9))
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding()
@@ -147,6 +148,7 @@ private struct DiffContentView: View {
                     .foregroundStyle(.orange)
                 Text("Package.swift")
                     .font(.headline)
+                    .foregroundStyle(.white)
                 Spacer()
 
                 HStack(spacing: 12) {
@@ -202,7 +204,7 @@ private struct DiffLineView: View {
             // Line Content
             Text(line.content)
                 .font(.system(.body, design: .monospaced))
-                .foregroundStyle(.primary)
+                .foregroundStyle(Color(white: 0.9))
                 .textSelection(.enabled)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
