@@ -1,0 +1,27 @@
+schema: spec-driven
+
+context: |
+  # EndlessCode - macOS/iOS 네이티브 Claude Code 클라이언트
+
+  Claude Code CLI를 subprocess로 실행하여 stdin/stdout/stderr를 직접 제어하고,
+  JSONL 스트리밍으로 메시지를 파싱하여 SwiftUI 기반 GUI로 제공하는 앱.
+
+  ## Tech Stack
+  - Swift 6.2+ (Strict Concurrency), SwiftUI (iOS 26+, macOS 26+)
+  - Vapor 4 (서버), Tree-sitter (신택스 하이라이팅), MarkdownUI (마크다운 렌더링)
+  - Xcode 16+, Swift Package Manager
+
+  ## Architecture
+  Client Layer (SwiftUI) → WebSocket/HTTP → Server Layer (Vapor) → stdin/stdout/stderr → Claude Code CLI
+
+  모듈: Shared (공통), ClaudeCodeServer (CLI/세션/JSONL/API), macOS App (대시보드/메뉴바), iOS App (서버 연결)
+
+  ## Conventions
+  - Actor 기반 동시성, Protocol 기반 DI, Conventional Commits
+  - JSONL 포맷 메시지 스트리밍, 대화형 프롬프트 감지 및 응답 주입
+  - 세션: ~/.claude/projects/ 디렉토리 스캔, 프로젝트별 히스토리
+
+  ## Constraints
+  - iOS에서 Process() 실행 불가 → 외부 서버 필수
+  - JSONL 스키마는 비공식 → breaking change 가능
+  - 플랫폼: macOS 26.0+ (Tahoe, Apple Silicon), iOS 26.0+
