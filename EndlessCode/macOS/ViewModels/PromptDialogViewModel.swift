@@ -74,6 +74,11 @@ final class PromptDialogViewModel {
         }
     }
 
+    /// 선택된 옵션 초기화
+    func clearSelectedOptions() {
+        selectedOptions.removeAll()
+    }
+
     /// 프롬프트 제출
     func submit() -> PromptDialogResponse {
         guard canSubmit else {

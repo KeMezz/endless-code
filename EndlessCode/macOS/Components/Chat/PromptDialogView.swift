@@ -118,6 +118,7 @@ struct PromptDialogView: View {
                     )
             )
         }
+        .contentShape(Rectangle())
         .buttonStyle(.plain)
         .disabled(viewModel.isSubmitted)
         .accessibilityIdentifier("promptOption-\(option.label)")
@@ -141,6 +142,11 @@ struct PromptDialogView: View {
                         }
                     }
                     .accessibilityIdentifier("promptCustomInput")
+                    .onChange(of: viewModel.customInput) { _, newValue in
+                        if !newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            viewModel.clearSelectedOptions()
+                        }
+                    }
 
             }
         }

@@ -167,22 +167,36 @@ extension ChatMessageItem {
             id: "msg-2",
             type: .assistant,
             content: .text("""
-                Of course! I'd be happy to help you refactor your SwiftUI view. Here's a more modular approach:
+Of course! I'd be happy to help you refactor your SwiftUI view.
 
-                ```swift
-                struct ContentView: View {
-                    @State private var items: [Item] = []
+## Recommended Approach
 
-                    var body: some View {
-                        List(items) { item in
-                            ItemRow(item: item)
-                        }
-                    }
-                }
-                ```
+Here are the **key improvements** I suggest:
 
-                This separates the row into its own component for better reusability.
-                """),
+1. Extract the row into a *separate component*
+2. Use `@State` for local state management
+3. Add proper error handling
+
+### Code Example
+
+```swift
+struct ContentView: View {
+    @State private var items: [Item] = []
+
+    var body: some View {
+        List(items) { item in
+            ItemRow(item: item)
+        }
+    }
+}
+```
+
+This separates the row into its own component for better reusability. Check out [Apple's documentation](https://developer.apple.com/documentation/swiftui) for more details.
+
+- Use **MVVM** pattern for complex views
+- Keep views *small and focused*
+- Leverage `@Observable` for state management
+"""),
             timestamp: Date().addingTimeInterval(-240)
         ),
         ChatMessageItem(

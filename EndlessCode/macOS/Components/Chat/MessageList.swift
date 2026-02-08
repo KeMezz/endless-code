@@ -67,6 +67,7 @@ struct MessageList: View {
             .scrollPosition(id: $scrollPosition, anchor: .bottom)
             .onAppear {
                 cachedGroups = computeGroupedMessages(messages)
+                scrollToBottom(proxy: proxy)
             }
             .onChange(of: messages) { _, newMessages in
                 cachedGroups = computeGroupedMessages(newMessages)
