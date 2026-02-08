@@ -117,8 +117,8 @@ struct PromptDialogView: View {
                         lineWidth: 1
                     )
             )
+            .contentShape(Rectangle())
         }
-        .contentShape(Rectangle())
         .buttonStyle(.plain)
         .disabled(viewModel.isSubmitted)
         .accessibilityIdentifier("promptOption-\(option.label)")
