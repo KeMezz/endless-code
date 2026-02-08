@@ -37,6 +37,11 @@ let package = Package(
                 "Shared/Utilities",
                 "Server/Sources",
                 "Client/Sources",
+                "iOS/Models",
+                "iOS/ViewModels",
+                "iOS/Services",
+                "iOS/Views",
+                "iOS/Components",
             ]
         ),
         .testTarget(
@@ -46,7 +51,7 @@ let package = Package(
                 .product(name: "VaporTesting", package: "vapor"),
             ],
             path: "EndlessCodeTests",
-            sources: ["Server", "Client", "Shared", "DiffViewer"]
+            sources: ["Server", "Client", "Shared", "DiffViewer", "iOS"]
         ),
     ]
 )
