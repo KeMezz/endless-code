@@ -5,6 +5,7 @@
 //  서버 애플리케이션 엔트리포인트
 //
 
+#if os(macOS)
 import Foundation
 
 // MARK: - ServerApp
@@ -216,3 +217,4 @@ extension SessionManager {
         }
     }
 }
+#endif

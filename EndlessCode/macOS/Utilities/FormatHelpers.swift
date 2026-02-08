@@ -5,6 +5,7 @@
 //  공유 포맷팅 유틸리티 - 코드 중복 제거용
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - AnyCodableValue Formatter
@@ -108,3 +109,4 @@ final class RelativeTimestampFormatter: @unchecked Sendable {
         }
     }
 }
+#endif

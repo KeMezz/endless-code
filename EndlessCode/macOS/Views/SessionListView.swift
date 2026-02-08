@@ -5,6 +5,7 @@
 //  세션 목록 뷰
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - SessionListView
@@ -96,3 +97,4 @@ struct SessionListView: View {
         .environment(AppState())
         .frame(width: 400, height: 600)
 }
+#endif

@@ -5,6 +5,7 @@
 //  채팅 메시지 송수신 서비스
 //
 
+#if os(macOS)
 import Foundation
 
 // MARK: - ChatServiceProtocol
@@ -44,3 +45,4 @@ struct DefaultChatService: ChatServiceProtocol {
         }
     }
 }
+#endif

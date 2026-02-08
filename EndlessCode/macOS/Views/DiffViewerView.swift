@@ -8,6 +8,7 @@
 //  - Diff 콘텐츠 표시
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - DiffViewerView
@@ -375,3 +376,4 @@ struct DiffViewerView: View {
         }
         .frame(width: 600, height: 400)
 }
+#endif

@@ -8,6 +8,7 @@
 //  - 신택스 하이라이팅 지원
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - Constants
@@ -365,3 +366,4 @@ private final class HighlighterWrapper: @unchecked Sendable {
     )
     .frame(width: 600)
 }
+#endif

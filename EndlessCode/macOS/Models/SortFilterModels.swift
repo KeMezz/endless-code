@@ -5,6 +5,7 @@
 //  정렬/필터 관련 모델 타입 (ProjectSortOrder, SessionSortOrder)
 //
 
+#if os(macOS)
 import Foundation
 
 // MARK: - ProjectSortOrder
@@ -50,3 +51,4 @@ enum SessionSortOrder: String, CaseIterable, Identifiable {
         }
     }
 }
+#endif

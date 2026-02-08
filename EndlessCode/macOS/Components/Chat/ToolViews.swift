@@ -5,6 +5,7 @@
 //  도구 사용 및 결과 표시 컴포넌트
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - ToolUseView
@@ -336,3 +337,4 @@ struct ToolResultView: View {
     .frame(width: 400)
     .padding()
 }
+#endif

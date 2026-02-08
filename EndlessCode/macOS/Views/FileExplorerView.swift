@@ -5,6 +5,7 @@
 //  파일 탐색기 메인 뷰 - 검색, 필터, 트리, 뷰어 통합
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - FileExplorerView
@@ -268,3 +269,4 @@ struct FileExplorerView: View {
     }
     .frame(width: 1000, height: 700)
 }
+#endif

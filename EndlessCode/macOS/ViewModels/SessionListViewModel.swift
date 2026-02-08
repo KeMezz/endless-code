@@ -5,6 +5,7 @@
 //  세션 목록 ViewModel
 //
 
+#if os(macOS)
 import Foundation
 
 // MARK: - SessionListViewModel
@@ -164,3 +165,4 @@ final class SessionListViewModel {
         allSessions[index] = updatedSession
     }
 }
+#endif

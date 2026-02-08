@@ -5,6 +5,7 @@
 //  세션 관리자 - 세션 생명주기 관리, 프로젝트/세션 통합 관리
 //
 
+#if os(macOS)
 import Foundation
 
 // MARK: - SessionManagerProtocol
@@ -304,3 +305,4 @@ extension SessionManager {
         )
     }
 }
+#endif

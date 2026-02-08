@@ -5,6 +5,7 @@
 //  세션 카드 컴포넌트
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - SessionCard
@@ -334,3 +335,4 @@ extension SessionSummary {
     .padding()
     .frame(width: 280)
 }
+#endif

@@ -5,6 +5,7 @@
 //  파일 탐색기 ViewModel - 파일 트리, 검색, 필터 관리
 //
 
+#if os(macOS)
 import Foundation
 import SwiftUI
 
@@ -393,3 +394,4 @@ final class FileExplorerViewModel {
         return 0
     }
 }
+#endif

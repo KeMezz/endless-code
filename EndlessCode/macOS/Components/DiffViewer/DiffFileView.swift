@@ -5,6 +5,7 @@
 //  단일 파일 Diff 뷰 및 파일 목록 컴포넌트
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - DiffFileView
@@ -444,3 +445,4 @@ struct DiffStatisticsBar: View {
     DiffStatisticsBar(statistics: DiffStatistics(from: diff))
         .frame(width: 500)
 }
+#endif

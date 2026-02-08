@@ -5,6 +5,7 @@
 //  앱 전역 상태 관리 - @Observable 모델
 //
 
+#if os(macOS)
 import Foundation
 import SwiftUI
 
@@ -90,3 +91,4 @@ final class AppState {
         toastMessage = nil
     }
 }
+#endif

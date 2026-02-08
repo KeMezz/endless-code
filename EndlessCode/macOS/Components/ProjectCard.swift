@@ -5,6 +5,7 @@
 //  프로젝트 카드 컴포넌트
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - ProjectCard
@@ -204,3 +205,4 @@ struct ProjectCardCompact: View {
     .padding()
     .frame(width: 280)
 }
+#endif

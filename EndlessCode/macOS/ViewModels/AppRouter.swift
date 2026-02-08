@@ -5,6 +5,7 @@
 //  앱 라우터 - 화면 전환, 딥링크 처리
 //
 
+#if os(macOS)
 import Foundation
 
 // MARK: - AppRouter
@@ -84,3 +85,4 @@ final class AppRouter {
         }
     }
 }
+#endif

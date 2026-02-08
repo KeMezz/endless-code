@@ -5,6 +5,7 @@
 //  채팅 메시지 목록 컴포넌트
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - MessageList
@@ -262,3 +263,4 @@ struct EmptyMessageList: View {
     EmptyMessageList()
         .frame(width: 600, height: 500)
 }
+#endif

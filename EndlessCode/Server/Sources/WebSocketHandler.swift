@@ -5,6 +5,7 @@
 //  WebSocket 핸들러 - 연결 관리, 인증, 메시지 라우팅, 재연결 지원
 //
 
+#if os(macOS)
 import Foundation
 
 // MARK: - WebSocketConnection
@@ -435,3 +436,4 @@ extension WebSocketError: LocalizedError {
         }
     }
 }
+#endif

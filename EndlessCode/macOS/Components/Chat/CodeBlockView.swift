@@ -8,6 +8,7 @@
 //  - 라인 번호 및 복사 기능
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - Constants
@@ -329,3 +330,4 @@ struct CodeBlockView: View {
     .frame(width: 400)
     .padding()
 }
+#endif

@@ -5,6 +5,7 @@
 //  프로젝트 브라우저 보조 뷰 컴포넌트들
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - SearchFilterBar
@@ -150,3 +151,4 @@ struct EmptyProjectsView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
+#endif

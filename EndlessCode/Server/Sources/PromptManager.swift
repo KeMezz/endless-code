@@ -5,6 +5,7 @@
 //  대화형 프롬프트 관리 - AskUserQuestion 감지, 상태 관리, 응답 주입, 타임아웃
 //
 
+#if os(macOS)
 import Foundation
 
 // MARK: - PromptState
@@ -353,3 +354,4 @@ extension ParsedMessage {
         return nil
     }
 }
+#endif

@@ -5,6 +5,7 @@
 //  오버레이 뷰 컴포넌트들 - 연결 상태, 토스트, 에러 배너
 //
 
+#if os(macOS)
 import SwiftUI
 
 // MARK: - ConnectionStatusIndicator
@@ -115,3 +116,4 @@ struct ErrorBannerOverlay: View {
         }
     }
 }
+#endif

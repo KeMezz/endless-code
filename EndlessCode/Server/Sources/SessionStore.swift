@@ -5,6 +5,7 @@
 //  세션 저장소 - CRUD, 메모리 캐시, 상태 관리
 //
 
+#if os(macOS)
 import Foundation
 
 // MARK: - SessionStoreProtocol
@@ -208,3 +209,4 @@ extension SessionStoreError: LocalizedError {
         }
     }
 }
+#endif

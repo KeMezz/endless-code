@@ -5,6 +5,7 @@
 //  Claude CLI 프로세스 통합 관리 - 세션별 프로세스 관리, 에러 복구, 리소스 관리
 //
 
+#if os(macOS)
 import Foundation
 
 // MARK: - ClaudeCodeManagerProtocol
@@ -328,3 +329,4 @@ extension ClaudeCodeError: LocalizedError {
         }
     }
 }
+#endif

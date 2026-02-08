@@ -5,6 +5,7 @@
 //  JSONL 파싱 - 라인 버퍼링, 타입 분류, 방어적 파싱
 //
 
+#if os(macOS)
 import Foundation
 
 // MARK: - JSONLParserProtocol
@@ -334,3 +335,4 @@ actor LineBuffer {
         return remaining.isEmpty ? nil : remaining
     }
 }
+#endif
